@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__Claude_Preview__preview_start",
+      "Bash(npm install:*)",
+      "Bash(npx tsc:*)",
+      "Bash(xargs ls -la)",
+      "Bash(npx supabase --version)",
+      "Bash(npx supabase secrets set ANTHROPIC_API_KEY=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)",
+      "Bash(grep -l \"WalletSwitcher\\\\|TokenManager\\\\|ChainDropdown\" \"/Users/jianing.jiang/Downloads/agent wallet/src/components\"/*.tsx)",
+      "Bash(npx vite build)",
+      "Bash(npm run build)"
+    ]
+  }
+}
