@@ -51,7 +51,7 @@ export function AddressPicker({
     const ok = await copyToClipboard(addr.address);
     if (ok) {
       setCopiedId(addr.id);
-      toast.success('已复制', formatAddressShort(addr.address));
+      toast.success('已复制');
       setTimeout(() => setCopiedId(null), 2000);
     } else {
       toast.error('复制失败');

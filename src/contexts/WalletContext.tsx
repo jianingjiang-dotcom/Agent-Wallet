@@ -1330,6 +1330,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       email: 'sarah.chen@gmail.com',
       avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&h=200&fit=crop&crop=face',
       nickname: 'Sarah Chen',
+      uid: 'UID_8824563147',
     };
     setUserInfo(mockUserInfo);
     

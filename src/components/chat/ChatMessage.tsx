@@ -10,7 +10,7 @@ import { motion } from 'framer-motion';
 import type { ChatMessage as ChatMessageType } from '@/types/chat';
 import { cn, copyToClipboard } from '@/lib/utils';
 import { ChatCardRenderer } from './ChatCardRenderer';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import type { Components } from 'react-markdown';
 import { useStreamingText } from '@/hooks/useStreamingText';
 

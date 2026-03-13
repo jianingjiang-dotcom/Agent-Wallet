@@ -1,129 +1,105 @@
-import { toast as sonnerToast } from 'sonner';
+import { getDrawerContainer } from '@/components/layout/PhoneFrame';
 
-interface ToastOptions {
-  title: string;
-  description?: string;
+let activeToast: HTMLDivElement | null = null;
+let fadeTimer: ReturnType<typeof setTimeout> | null = null;
+let removeTimer: ReturnType<typeof setTimeout> | null = null;
+
+function showToast(message: string, duration = 2000) {
+  // Clean up any existing toast
+  if (activeToast) {
+    if (fadeTimer) clearTimeout(fadeTimer);
+    if (removeTimer) clearTimeout(removeTimer);
+    activeToast.remove();
+    activeToast = null;
+  }
+
+  const container = getDrawerContainer();
+  if (!container) return;
+
+  const el = document.createElement('div');
+  el.style.cssText = `
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 9999;
+    background: rgba(0, 0, 0, 0.90);
+    color: #fff;
+    font-size: 14px;
+    line-height: 20px;
+    padding: 8px 16px;
+    border-radius: 999px;
+    white-space: nowrap;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    opacity: 0;
+  `;
+  el.textContent = message;
+  container.appendChild(el);
+  activeToast = el;
+
+  // Fade in
+  requestAnimationFrame(() => {
+    el.style.opacity = '1';
+  });
+
+  // Fade out and remove
+  fadeTimer = setTimeout(() => {
+    el.style.opacity = '0';
+    removeTimer = setTimeout(() => {
+      el.remove();
+      if (activeToast === el) activeToast = null;
+    }, 300);
+  }, duration);
 }
 
-/**
- * Unified Toast API
- * 
- * This wraps the sonner toast library to provide a consistent
- * interface across the entire application.
- * 
- * Usage:
- *   import { toast } from '@/lib/toast';
- *   toast.show({ title: '成功', description: '操作已完成' });
- *   toast.success('保存成功');
- *   toast.error('操作失败', '请重试');
- */
 export const toast = {
-  /**
-   * Show a default toast notification
-   */
-  show: (options: ToastOptions) => {
-    sonnerToast(options.title, { description: options.description });
+  success: (title: string, _description?: string) => {
+    showToast(title);
   },
-
-  /**
-   * Show a success toast notification
-   */
-  success: (title: string, description?: string) => {
-    sonnerToast.success(title, { description });
+  error: (title: string, _description?: string) => {
+    showToast(title);
   },
-
-  /**
-   * Show an error toast notification
-   */
-  error: (title: string, description?: string) => {
-    sonnerToast.error(title, { description });
+  warning: (title: string, _description?: string) => {
+    showToast(title);
   },
-
-  /**
-   * Show a warning toast notification
-   */
-  warning: (title: string, description?: string) => {
-    sonnerToast.warning(title, { description });
+  info: (title: string, _description?: string) => {
+    showToast(title);
   },
-
-  /**
-   * Show an info toast notification
-   */
-  info: (title: string, description?: string) => {
-    sonnerToast.info(title, { description });
+  show: (options: { title: string; description?: string }) => {
+    showToast(options.title);
   },
-
-  /**
-   * Compatibility method for legacy code using variant: 'destructive'
-   */
-  destructive: (title: string, description?: string) => {
-    sonnerToast.error(title, { description });
+  destructive: (title: string, _description?: string) => {
+    showToast(title);
   },
-
-  /**
-   * Dismiss a specific toast or all toasts
-   */
-  dismiss: (toastId?: string | number) => {
-    sonnerToast.dismiss(toastId);
+  dismiss: (_toastId?: string | number) => {
+    if (activeToast) {
+      activeToast.remove();
+      activeToast = null;
+    }
   },
-
-  // ========== Fund Monitoring Toasts ==========
-
-  /**
-   * Show a fund incoming notification with appropriate styling
-   */
   fundIncoming: (options: {
     amount: number;
     symbol: string;
     level: 'safe' | 'pending' | 'risky';
     onViewDetails?: () => void;
   }) => {
-    const { amount, symbol, level, onViewDetails } = options;
+    const { amount, symbol, level } = options;
     const amountStr = `${amount.toLocaleString()} ${symbol}`;
-
     if (level === 'safe') {
-      sonnerToast.success('收款到账', {
-        description: `收到 ${amountStr}`,
-        duration: 3000,
-        action: onViewDetails ? {
-          label: '查看',
-          onClick: onViewDetails,
-        } : undefined,
-      });
+      showToast(`收款到账 ${amountStr}`, 3000);
     } else if (level === 'pending') {
-      sonnerToast.warning('待确认资金入账', {
-        description: `收到 ${amountStr}，需人工确认`,
-        duration: 5000,
-        action: onViewDetails ? {
-          label: '查看',
-          onClick: onViewDetails,
-        } : undefined,
-      });
+      showToast(`待确认资金 ${amountStr}`, 5000);
     } else {
-      // Risky - use error toast with longer duration
-      sonnerToast.error('⚠️ 高风险资金入账', {
-        description: `${amountStr} 已自动冻结`,
-        duration: 10000,
-        action: onViewDetails ? {
-          label: '立即处理',
-          onClick: onViewDetails,
-        } : undefined,
-      });
+      showToast(`高风险资金 ${amountStr}`, 10000);
     }
   },
-
-  /**
-   * Show a fund auto-frozen notification
-   */
   fundFrozen: (options: {
     amount: number;
     symbol: string;
     reason: string;
   }) => {
     const { amount, symbol, reason } = options;
-    sonnerToast.error('资金已自动冻结', {
-      description: `${amount.toLocaleString()} ${symbol} - ${reason}`,
-      duration: 10000,
-    });
+    showToast(`资金已冻结 ${amount.toLocaleString()} ${symbol}`, 10000);
   },
 };

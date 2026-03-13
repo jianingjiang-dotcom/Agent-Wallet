@@ -27,7 +27,7 @@ export function AddressDisplay({
     const ok = await copyToClipboard(address);
     if (ok) {
       setCopied(true);
-      toast.success('已复制', '地址已复制到剪贴板');
+      toast.success('已复制');
       setTimeout(() => setCopied(false), 2000);
     } else {
       toast.error('复制失败', '请手动复制地址');

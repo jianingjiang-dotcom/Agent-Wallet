@@ -3,7 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Eye, EyeOff, ChevronRight, Send, QrCode,
   TrendingDown, Wallet, Plus, Shield, AlertTriangle,
-  CheckCircle2, Sparkles, Lock, ChevronDown, Clock, Bell, Bot, ClipboardCheck
+  CheckCircle2, Sparkles, Lock, ChevronDown, Clock, Bell, Bot, ClipboardCheck,
+  AlignJustify
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -21,6 +22,7 @@ import { BalanceCardSkeleton, AssetListSkeleton, TransactionListSkeleton } from 
 import { EmptyState } from '@/components/EmptyState';
 import { AnimatedBalance } from '@/components/AnimatedNumber';
 import { WalletModeBadge } from '@/components/WalletModeBadge';
+import { ProfileSidebar } from '@/components/ProfileSidebar';
 
 import { AddressPicker } from '@/components/AddressPicker';
 import { ChainId, SUPPORTED_CHAINS, Transaction, isAgentLinked, AddressSelection, ADDRESS_SYSTEMS } from '@/types/wallet';
@@ -160,10 +162,11 @@ export default function HomePage() {
   const [showTokenSearch, setShowTokenSearch] = useState(false);
   const [showWalletSwitcher, setShowWalletSwitcher] = useState(false);
 
+  const [showProfileDrawer, setShowProfileDrawer] = useState(false);
   const [showAllAssets, setShowAllAssets] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
-  const { assets, transactions, currentWallet, walletStatus, userInfo, addToken, removeToken, unreadNotificationCount, getAgentTxByWallet } = useWallet();
+  const { assets, transactions, currentWallet, walletStatus, addToken, removeToken, unreadNotificationCount, getAgentTxByWallet } = useWallet();
 
   // Simulate initial loading
   useEffect(() => {
@@ -310,14 +313,12 @@ export default function HomePage() {
   }
 
   return (
-    <AppLayout>
+    <ProfileSidebar open={showProfileDrawer} onOpenChange={setShowProfileDrawer}>
+    <AppLayout showNav>
       <PullToRefresh onRefresh={handleRefresh}>
-        <div className="px-4 py-4 relative">
-        {/* Subtle mesh gradient background */}
-        <div className="fixed inset-0 bg-gradient-mesh pointer-events-none" />
-
+        <div className="px-4 relative">
         {/* Header - Wallet Selector */}
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between h-[54px] mb-2">
           <motion.button
             onClick={() => setShowWalletSwitcher(true)}
             className="flex items-center gap-3 rounded-xl p-1 -m-1 active:bg-muted/50 transition-colors"
@@ -326,7 +327,7 @@ export default function HomePage() {
           >
           <motion.div
             className={cn(
-              "w-10 h-10 rounded-full flex items-center justify-center",
+              "w-9 h-9 rounded-full flex items-center justify-center",
               isAgentLinked(currentWallet)
                 ? "bg-purple-100 dark:bg-purple-900/40"
                 : "gradient-primary"
@@ -360,24 +361,35 @@ export default function HomePage() {
           </div>
           </motion.button>
 
-          {/* Message Center Entry */}
-          <motion.button
-            className="relative p-2 rounded-full active:bg-muted/50 transition-colors"
-            onClick={() => navigate('/messages')}
-            whileTap={{ scale: 0.9 }}
-            transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-          >
-            <Bell className="w-5 h-5 text-foreground" />
-            {unreadNotificationCount > 0 && (
-              <motion.span
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                className="absolute -top-0.5 -right-0.5 min-w-4 h-4 px-1 bg-destructive text-destructive-foreground text-[10px] font-medium rounded-full flex items-center justify-center"
-              >
-                {unreadNotificationCount > 9 ? '9+' : unreadNotificationCount}
-              </motion.span>
-            )}
-          </motion.button>
+          <div className="flex items-center gap-3">
+            {/* Message Center Entry */}
+            <motion.button
+              className="relative flex items-center justify-center w-9 h-9 rounded-full bg-background card-elevated no-card-shadow"
+              onClick={() => navigate('/messages')}
+              whileTap={{ scale: 0.9 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+            >
+              <Bell className="w-5 h-5" strokeWidth={1.5} style={{ color: '#000000' }} />
+              {unreadNotificationCount > 0 && (
+                <motion.span
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  className="absolute -top-0.5 -right-0.5 min-w-4 h-4 px-1 bg-destructive text-destructive-foreground text-[10px] font-medium rounded-full flex items-center justify-center"
+                >
+                  {unreadNotificationCount > 9 ? '9+' : unreadNotificationCount}
+                </motion.span>
+              )}
+            </motion.button>
+            {/* Sidebar Entry */}
+            <motion.button
+              className="flex items-center justify-center w-9 h-9 rounded-full bg-background card-elevated no-card-shadow"
+              onClick={() => setShowProfileDrawer(true)}
+              whileTap={{ scale: 0.9 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+            >
+              <AlignJustify className="w-5 h-5" strokeWidth={1.5} style={{ color: '#000000' }} />
+            </motion.button>
+          </div>
         </div>
 
         {/* Balance Card with Light Gradient Overlay */}
@@ -756,5 +768,6 @@ export default function HomePage() {
       />
 
     </AppLayout>
+    </ProfileSidebar>
   );
 }

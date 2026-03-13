@@ -25,7 +25,7 @@ const SectionHeader = React.forwardRef<HTMLDivElement, SectionHeaderProps>(
         ref={ref}
         className={cn(
           "flex items-center justify-between",
-          size === "sm" ? "mb-2 px-1" : "mb-3 px-1",
+          size === "sm" ? "mb-2" : "mb-3",
           className
         )}
         {...props}
@@ -42,8 +42,8 @@ const SectionHeader = React.forwardRef<HTMLDivElement, SectionHeaderProps>(
           )}
           <h3
             className={cn(
-              "font-medium text-muted-foreground",
-              size === "sm" ? "text-xs" : "text-sm"
+              "font-normal text-muted-foreground",
+              size === "sm" ? "text-[12px] leading-[16px]" : "text-sm"
             )}
           >
             {title}

@@ -1,13 +1,38 @@
 import { motion } from 'framer-motion';
-import { 
-  Smartphone, Monitor, Tablet, MapPin, Shield
-} from 'lucide-react';
-import { AppLayout } from '@/components/layout/AppLayout';
-import { useWallet } from '@/contexts/WalletContext';
-import { cn } from '@/lib/utils';
+import { Smartphone, Monitor, Tablet } from 'lucide-react';
 import { format } from 'date-fns';
 import { zhCN } from 'date-fns/locale';
+import * as React from 'react';
+import { createPortal } from 'react-dom';
+import { cva, type VariantProps } from 'class-variance-authority';
+import { cn } from '@/lib/utils';
+import { AppLayout } from '@/components/layout/AppLayout';
+import { useNavigate } from 'react-router-dom';
+import { useWallet } from '@/contexts/WalletContext';
 
+// ---- StatusBadge ----
+const statusBadgeVariants = cva('inline-flex items-center gap-1 rounded-full font-medium', {
+  variants: {
+    variant: {
+      success: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400',
+    },
+    size: {
+      sm: 'text-[10px] px-1.5 py-0.5',
+    },
+  },
+  defaultVariants: { variant: 'success', size: 'sm' },
+});
+
+function StatusBadge({ className, variant, size, children, ...props }:
+  React.HTMLAttributes<HTMLSpanElement> & VariantProps<typeof statusBadgeVariants>) {
+  return (
+    <span className={cn(statusBadgeVariants({ variant, size }), className)} {...props}>
+      {children}
+    </span>
+  );
+}
+
+// ---- 数据类型 ----
 interface LoginRecord {
   id: string;
   deviceName: string;
@@ -15,208 +40,120 @@ interface LoginRecord {
   timestamp: Date;
   location: string;
   ipAddress: string;
-  browser?: string;
-  os?: string;
-  isSuccess: boolean;
 }
 
-// Mock login history data
+// ---- Mock 数据 ----
 const mockLoginHistory: LoginRecord[] = [
-  { 
-    id: '1', 
-    deviceName: 'iPhone 15 Pro', 
-    deviceModel: 'iPhone',
-    timestamp: new Date(), 
-    location: '上海, 中国',
-    ipAddress: '116.228.xxx.xxx',
-    os: 'iOS 17.2',
-    browser: 'Safari',
-    isSuccess: true
-  },
-  { 
-    id: '2', 
-    deviceName: 'MacBook Pro', 
-    deviceModel: 'MacBook',
-    timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000), 
-    location: '北京, 中国',
-    ipAddress: '223.104.xxx.xxx',
-    os: 'macOS Sonoma',
-    browser: 'Chrome 120',
-    isSuccess: true
-  },
-  { 
-    id: '3', 
-    deviceName: 'iPhone 15 Pro', 
-    deviceModel: 'iPhone',
-    timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000), 
-    location: '上海, 中国',
-    ipAddress: '116.228.xxx.xxx',
-    os: 'iOS 17.2',
-    browser: 'Safari',
-    isSuccess: true
-  },
-  { 
-    id: '4', 
-    deviceName: 'Windows PC', 
-    deviceModel: 'Windows',
-    timestamp: new Date(Date.now() - 48 * 60 * 60 * 1000), 
-    location: '杭州, 中国',
-    ipAddress: '115.236.xxx.xxx',
-    os: 'Windows 11',
-    browser: 'Edge 120',
-    isSuccess: false
-  },
-  { 
-    id: '5', 
-    deviceName: 'iPad Pro', 
-    deviceModel: 'iPad',
-    timestamp: new Date(Date.now() - 72 * 60 * 60 * 1000), 
-    location: '上海, 中国',
-    ipAddress: '116.228.xxx.xxx',
-    os: 'iPadOS 17.2',
-    browser: 'Safari',
-    isSuccess: true
-  },
-  { 
-    id: '6', 
-    deviceName: 'iPhone 15 Pro', 
-    deviceModel: 'iPhone',
-    timestamp: new Date(Date.now() - 96 * 60 * 60 * 1000), 
-    location: '深圳, 中国',
-    ipAddress: '120.229.xxx.xxx',
-    os: 'iOS 17.2',
-    browser: 'Safari',
-    isSuccess: true
-  },
+  { id: '1', deviceName: 'iPhone 15 Pro', deviceModel: 'iPhone',  timestamp: new Date(),                            location: '上海, 中国', ipAddress: '116.228.xxx.xxx' },
+  { id: '2', deviceName: 'iPhone 15 Pro', deviceModel: 'MacBook', timestamp: new Date(Date.now() - 2*3600*1000),   location: '北京, 中国', ipAddress: '223.104.xxx.xxx' },
+  { id: '3', deviceName: 'iPhone 15 Pro', deviceModel: 'iPhone',  timestamp: new Date(Date.now() - 24*3600*1000),  location: '上海, 中国', ipAddress: '116.228.xxx.xxx' },
+  { id: '4', deviceName: 'iPhone 15 Pro', deviceModel: 'iPad',    timestamp: new Date(Date.now() - 72*3600*1000),  location: '上海, 中国', ipAddress: '116.228.xxx.xxx' },
+  { id: '5', deviceName: 'iPhone 15 Pro', deviceModel: 'iPhone',  timestamp: new Date(Date.now() - 96*3600*1000),  location: '深圳, 中国', ipAddress: '120.229.xxx.xxx' },
 ];
 
+// ---- 工具函数 ----
+const getDeviceIcon = (model: string) => {
+  const m = model.toLowerCase();
+  if (m.includes('iphone') || m.includes('android')) return Smartphone;
+  if (m.includes('ipad')   || m.includes('tablet'))  return Tablet;
+  return Monitor;
+};
+
+const formatTime = (date: Date) => {
+  const now = new Date();
+  const isToday     = date.toDateString() === now.toDateString();
+  const isYesterday = new Date(now.getTime() - 86400000).toDateString() === date.toDateString();
+  if (isToday)     return `今天 ${format(date, 'HH:mm')}`;
+  if (isYesterday) return `昨天 ${format(date, 'HH:mm')}`;
+  return format(date, 'MM/dd HH:mm', { locale: zhCN });
+};
+
+// ---- 确认弹窗 ----
+function ConfirmDialog({ open, onConfirm, onCancel }: { open: boolean; onConfirm: () => void; onCancel: () => void }) {
+  if (!open) return null;
+  const container = document.getElementById('phone-frame-container');
+  if (!container) return null;
+  return createPortal(
+    <div className="absolute inset-0 z-50 flex items-center justify-center">
+      <div className="absolute inset-0 bg-black/40" onClick={onCancel} />
+      <div className="relative bg-card rounded-2xl w-[280px] overflow-hidden shadow-xl">
+        <div className="px-6 pt-6 pb-4 text-center">
+          <p className="text-[16px] font-semibold text-foreground">确认退出</p>
+          <p className="text-[14px] text-muted-foreground mt-2">确定要退出当前设备吗？</p>
+        </div>
+        <div className="flex border-t border-border/60">
+          <button onClick={onCancel} className="flex-1 py-3 text-[16px] text-foreground active:bg-muted/50 transition-colors">取消</button>
+          <div className="w-px bg-border/60" />
+          <button onClick={onConfirm} className="flex-1 py-3 text-[16px] text-destructive font-medium active:bg-muted/50 transition-colors">退出</button>
+        </div>
+      </div>
+    </div>,
+    container
+  );
+}
+
+// ---- 主页面 ----
 export default function DeviceManagementPage() {
-  const { devices } = useWallet();
-  
-  const currentDevice = devices.find(d => d.isCurrent);
-  
-  const getDeviceIcon = (model: string) => {
-    if (model.toLowerCase().includes('iphone') || model.toLowerCase().includes('android')) {
-      return Smartphone;
-    }
-    if (model.toLowerCase().includes('ipad') || model.toLowerCase().includes('tablet')) {
-      return Tablet;
-    }
-    return Monitor;
-  };
-
-  const formatRecordTime = (date: Date) => {
-    const now = new Date();
-    const isToday = date.toDateString() === now.toDateString();
-    const isYesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000).toDateString() === date.toDateString();
-    
-    if (isToday) {
-      return `今天 ${format(date, 'HH:mm')}`;
-    }
-    if (isYesterday) {
-      return `昨天 ${format(date, 'HH:mm')}`;
-    }
-    return format(date, 'MM/dd HH:mm', { locale: zhCN });
-  };
-
-  const CurrentDeviceIcon = currentDevice ? getDeviceIcon(currentDevice.model) : Smartphone;
+  const { logout } = useWallet();
+  const navigate = useNavigate();
+  const [confirmOpen, setConfirmOpen] = React.useState(false);
 
   return (
-    <AppLayout showNav={false} title="登录历史" showBack>
-      <div className="px-4 py-4 space-y-4">
-        {/* Current Device Info */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
-          <h3 className="text-xs font-medium text-muted-foreground mb-2 px-1">当前设备</h3>
-          <div className="card-elevated p-4">
-            <div className="flex items-start gap-3">
-              <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center">
-                <CurrentDeviceIcon className="w-6 h-6 text-accent" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <h4 className="font-medium text-foreground">
-                    {currentDevice?.name || 'iPhone 15 Pro'}
-                  </h4>
-                  <span className="text-[10px] px-1.5 py-0.5 bg-success/10 text-success rounded">
-                    在线
-                  </span>
-                </div>
-                <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
-                  <MapPin className="w-3 h-3" />
-                  <span>{currentDevice?.location || '上海, 中国'}</span>
-                </div>
-                <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
-                  <Shield className="w-3 h-3" />
-                  <span>单设备在线保护已启用</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </motion.div>
+    <AppLayout showNav={false} title="登录设备" showBack pageBg="bg-page">
+      <div className="px-4 pt-3 pb-[72px] space-y-3 no-card-shadow">
+        {/* 安全提示 */}
+        <p className="text-xs text-muted-foreground leading-relaxed">
+          为了账户安全，同一账户仅允许一台设备在线。在新设备登录时，当前设备将自动退出。
+        </p>
 
-        {/* Security Note - Neutral Info Style */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.05 }}
-          className="px-4 py-3 bg-muted/50 rounded-xl border border-border"
-        >
-          <p className="text-xs text-muted-foreground leading-relaxed">
-            为了账户安全，同一账户仅允许一台设备在线。在新设备登录时，当前设备将自动退出。
-          </p>
-        </motion.div>
-
-        {/* Login History */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-        >
-          <h3 className="text-xs font-medium text-muted-foreground mb-2 px-1">近期登录记录</h3>
-          <div className="card-elevated overflow-hidden">
+        {/* 设备列表 */}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+          <div className="space-y-3">
             {mockLoginHistory.map((record, index) => {
               const Icon = getDeviceIcon(record.deviceModel);
+              const isCurrent = index === 0;
               return (
-                <div 
-                  key={record.id}
-                  className={cn(
-                    'p-3 flex items-center gap-3',
-                    index !== mockLoginHistory.length - 1 && 'border-b border-border'
-                  )}
-                >
-                  <div className={cn(
-                    "w-8 h-8 rounded-full flex items-center justify-center",
-                    record.isSuccess ? "bg-muted" : "bg-destructive/10"
-                  )}>
-                    <Icon className={cn(
-                      "w-4 h-4",
-                      record.isSuccess ? "text-muted-foreground" : "text-destructive"
-                    )} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <p className="text-sm font-medium">{record.deviceName}</p>
-                      {!record.isSuccess && (
-                        <span className="text-[10px] px-1.5 py-0.5 bg-destructive/10 text-destructive rounded">
-                          失败
-                        </span>
-                      )}
+                <div key={record.id} className="card-elevated rounded-2xl py-3 px-4 flex items-start gap-3">
+                  {/* 设备图标 */}
+                  <div className="relative w-8 h-8 shrink-0 mt-0.5">
+                    <div className="w-8 h-8 rounded-full flex items-center justify-center bg-gray-100 dark:bg-gray-700">
+                      <Icon className="w-4 h-4 text-muted-foreground" />
                     </div>
-                    <p className="text-xs text-muted-foreground">{record.location}</p>
+                    {isCurrent && (
+                      <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-emerald-700 border-2 border-white dark:border-gray-800" />
+                    )}
                   </div>
-                  <span className="text-xs text-muted-foreground">
-                    {formatRecordTime(record.timestamp)}
-                  </span>
+                  {/* 设备信息 */}
+                  <div className="flex-1 min-w-0 space-y-1.5">
+                    <p className="text-base leading-6 font-medium">{record.deviceName}</p>
+                    <p className="text-xs text-muted-foreground">最近登录：{formatTime(record.timestamp)}</p>
+                    <p className="text-xs text-muted-foreground">登录地点：{record.location}</p>
+                    <p className="text-xs text-muted-foreground">IP 地址：{record.ipAddress}</p>
+                    {isCurrent && (
+                      <StatusBadge variant="success" size="sm" className="mt-1">当前设备</StatusBadge>
+                    )}
+                  </div>
+                  {/* 退出按钮 */}
+                  {isCurrent && (
+                    <button
+                      onClick={() => setConfirmOpen(true)}
+                      className="shrink-0 px-3 py-1.5 rounded-full bg-gray-100 dark:bg-gray-700 text-xs font-medium"
+                    >
+                      退出
+                    </button>
+                  )}
                 </div>
               );
             })}
           </div>
         </motion.div>
-      </div>
 
+        <ConfirmDialog
+          open={confirmOpen}
+          onCancel={() => setConfirmOpen(false)}
+          onConfirm={() => { setConfirmOpen(false); logout(); navigate('/'); }}
+        />
+      </div>
     </AppLayout>
   );
 }

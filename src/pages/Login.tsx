@@ -1059,13 +1059,13 @@ export default function LoginPage() {
       </AnimatePresence>
 
       {loginStep === 'input' && (
-        <div className="px-4 pb-4">
+        <div className="px-4 pb-[24px]">
           <p className="text-xs text-center text-muted-foreground">
-            继续即表示您同意我们的<button
-              className="text-primary hover:underline"
+            继续即表示您同意我们的 <button
+              className="text-[#000000] hover:underline"
               onClick={() => navigate('/terms')}
-            >服务条款</button>和<button
-              className="text-primary hover:underline"
+            > 服务条款 </button> 和 <button
+              className="text-[#000000] hover:underline"
               onClick={() => navigate('/privacy')}
             >隐私政策</button>
           </p>

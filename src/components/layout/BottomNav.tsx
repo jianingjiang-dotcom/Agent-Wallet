@@ -1,147 +1,67 @@
-import { motion } from 'framer-motion';
-import { Wallet, Sparkles, ArrowLeftRight, User } from 'lucide-react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { cn } from '@/lib/utils';
-import { useCallback, useState } from 'react';
-import { useWallet } from '@/contexts/WalletContext';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useTheme } from 'next-themes';
 
-const navItems = [
-  {
-    path: '/home',
-    icon: Wallet,
-    label: '钱包'
-  },
-  {
-    path: '/assistant',
-    icon: Sparkles,
-    label: 'AI 助手'
-  },
-  {
-    path: '/history',
-    icon: ArrowLeftRight,
-    label: '交易'
-  },
-  {
-    path: '/profile',
-    icon: User,
-    label: '我的'
-  },
+const ACTIVE_COLOR = '#5459DA';
+const LIGHT_INACTIVE = '#6B7281';
+const DARK_INACTIVE = '#8E8E9A';
+
+const iconData: string[][] = [
+  // 钱包
+  [
+    'M18.3329 9.14174V10.8584C18.3329 11.3167 17.9662 11.6917 17.4995 11.7084H15.8662C14.9662 11.7084 14.1412 11.0501 14.0662 10.1501C14.0162 9.62507 14.2162 9.13341 14.5662 8.79174C14.8745 8.47507 15.2995 8.29175 15.7662 8.29175H17.4995C17.9662 8.30841 18.3329 8.68341 18.3329 9.14174Z',
+    'M17.0577 12.9584H15.866C14.2827 12.9584 12.9493 11.7667 12.816 10.2501C12.741 9.38342 13.0577 8.51675 13.691 7.90008C14.2243 7.35008 14.966 7.04175 15.766 7.04175H17.0577C17.2993 7.04175 17.4993 6.84175 17.4743 6.60008C17.291 4.57508 15.9493 3.19175 13.9577 2.95841C13.7577 2.92508 13.5493 2.91675 13.3327 2.91675H5.83268C5.59935 2.91675 5.37435 2.93341 5.15768 2.96675C3.03268 3.23341 1.66602 4.81675 1.66602 7.08342V12.9167C1.66602 15.2167 3.53268 17.0834 5.83268 17.0834H13.3327C15.666 17.0834 17.2743 15.6251 17.4743 13.4001C17.4993 13.1584 17.2993 12.9584 17.0577 12.9584ZM10.8327 8.12508H5.83268C5.49102 8.12508 5.20768 7.84175 5.20768 7.50008C5.20768 7.15842 5.49102 6.87508 5.83268 6.87508H10.8327C11.1743 6.87508 11.4577 7.15842 11.4577 7.50008C11.4577 7.84175 11.1743 8.12508 10.8327 8.12508Z',
+  ],
+  // 助手
+  [
+    'M10.9427 5.25H5.87607C5.67023 5.25 5.47232 5.25792 5.28232 5.28167C3.15273 5.46375 2.08398 6.7225 2.08398 9.04208V12.2088C2.08398 15.3754 3.35065 16.0008 5.87607 16.0008H6.19273C6.3669 16.0008 6.59648 16.1196 6.6994 16.2542L7.6494 17.5208C8.06898 18.0829 8.74982 18.0829 9.1694 17.5208L10.1194 16.2542C10.2382 16.0958 10.4282 16.0008 10.6261 16.0008H10.9427C13.2623 16.0008 14.5211 14.94 14.7032 12.8025C14.7269 12.6125 14.7348 12.4146 14.7348 12.2088V9.04208C14.7348 6.51667 13.4682 5.25 10.9427 5.25ZM5.64648 11.5833C5.20315 11.5833 4.85482 11.2271 4.85482 10.7917C4.85482 10.3563 5.21107 10 5.64648 10C6.0819 10 6.43815 10.3563 6.43815 10.7917C6.43815 11.2271 6.0819 11.5833 5.64648 11.5833ZM8.4094 11.5833C7.96607 11.5833 7.61773 11.2271 7.61773 10.7917C7.61773 10.3563 7.97398 10 8.4094 10C8.84482 10 9.20107 10.3563 9.20107 10.7917C9.20107 11.2271 8.85273 11.5833 8.4094 11.5833ZM11.1802 11.5833C10.7369 11.5833 10.3886 11.2271 10.3886 10.7917C10.3886 10.3563 10.7448 10 11.1802 10C11.6157 10 11.9719 10.3563 11.9719 10.7917C11.9719 11.2271 11.6157 11.5833 11.1802 11.5833Z',
+    'M17.9012 5.87534V9.042C17.9012 10.6253 17.4104 11.702 16.4287 12.2958C16.1912 12.4383 15.9141 12.2483 15.9141 11.9712L15.9221 9.042C15.9221 5.87534 14.1091 4.06242 10.9425 4.06242L6.12119 4.07034C5.84411 4.07034 5.65411 3.79325 5.79661 3.55575C6.39036 2.57409 7.46702 2.08325 9.04247 2.08325H14.1091C16.6346 2.08325 17.9012 3.34992 17.9012 5.87534Z',
+  ],
+  // 交易
+  [
+    'M12.835 2.5H7.165C4.33 2.5 3.625 3.2575 3.625 6.28V14.725C3.625 16.72 4.72 17.1925 6.0475 15.7675L6.055 15.76C6.67 15.1075 7.6075 15.16 8.14 15.8725L8.8975 16.885C9.505 17.6875 10.4875 17.6875 11.095 16.885L11.8525 15.8725C12.3925 15.1525 13.33 15.1 13.945 15.76C15.28 17.185 16.3675 16.7125 16.3675 14.7175V6.28C16.375 3.2575 15.67 2.5 12.835 2.5ZM12.25 9.8125H7.75C7.4425 9.8125 7.1875 9.5575 7.1875 9.25C7.1875 8.9425 7.4425 8.6875 7.75 8.6875H12.25C12.5575 8.6875 12.8125 8.9425 12.8125 9.25C12.8125 9.5575 12.5575 9.8125 12.25 9.8125ZM13 6.8125H7C6.6925 6.8125 6.4375 6.5575 6.4375 6.25C6.4375 5.9425 6.6925 5.6875 7 5.6875H13C13.3075 5.6875 13.5625 5.9425 13.5625 6.25C13.5625 6.5575 13.3075 6.8125 13 6.8125Z',
+  ],
 ];
 
-// Ripple effect component
-function Ripple({ x, y }: { x: number; y: number }) {
-  return (
-    <motion.span
-      className="absolute bg-white/30 rounded-full pointer-events-none"
-      style={{ left: x, top: y, x: '-50%', y: '-50%' }}
-      initial={{ width: 0, height: 0, opacity: 0.5 }}
-      animate={{ width: 80, height: 80, opacity: 0 }}
-      transition={{ duration: 0.5, ease: 'easeOut' }}
-    />
-  );
-}
+const tabLabels = ['钱包', '助手', '交易'];
+const navPaths = ['/home', '/assistant', '/history'];
 
 export function BottomNav() {
-  const location = useLocation();
   const navigate = useNavigate();
-  const { unreadNotificationCount } = useWallet();
-  const [ripples, setRipples] = useState<{ id: number; x: number; y: number; path: string }[]>([]);
+  const location = useLocation();
+  const { resolvedTheme } = useTheme();
 
-  const handleClick = useCallback((e: React.MouseEvent<HTMLButtonElement>, path: string) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    const id = Date.now();
-
-    setRipples(prev => [...prev, { id, x, y, path }]);
-
-    if (navigator.vibrate) {
-      navigator.vibrate(10);
-    }
-
-    setTimeout(() => {
-      setRipples(prev => prev.filter(r => r.id !== id));
-    }, 500);
-
-    navigate(path);
-  }, [navigate]);
+  const activeIndex = Math.max(0, navPaths.findIndex(p => location.pathname.startsWith(p)));
+  const isDark = resolvedTheme === 'dark';
+  const INACTIVE_COLOR = isDark ? DARK_INACTIVE : LIGHT_INACTIVE;
 
   return (
-    <nav className="absolute bottom-5 left-4 right-4 z-40 drop-shadow-[0_12px_32px_rgba(0,0,0,0.18)]">
-      {/* Liquid Glass Container */}
-      <div className="relative rounded-full overflow-hidden">
-        {/* Glass background layers */}
-        <div className="absolute inset-0 backdrop-blur-2xl bg-[#FBFBFB]/95 dark:bg-card/90" />
-
-        {/* Gradient overlay for depth - dark mode only */}
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-transparent dark:from-white/5 dark:to-transparent" />
-
-        {/* Top highlight - liquid glass edge - dark mode only */}
-        <div className="absolute inset-x-0 top-0 h-[1px] bg-transparent dark:bg-gradient-to-r dark:from-transparent dark:via-white/20 dark:to-transparent" />
-
-        {/* Inner shadow for depth */}
-        <div className="absolute inset-0 rounded-full shadow-[inset_0_0.5px_0_rgba(255,255,255,0.9),inset_0_-0.5px_0_rgba(0,0,0,0.04)] dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.08),inset_0_-1px_1px_rgba(0,0,0,0.3)]" />
-
-        {/* Border */}
-        <div className="absolute inset-0 rounded-full border border-white dark:border-border/50" />
-
-                <div className="relative flex items-center justify-around h-14 px-4">
-          {navItems.map((item) => {
-            const isActive = location.pathname === item.path;
-            const Icon = item.icon;
-            const itemRipples = ripples.filter(r => r.path === item.path);
-
-            return (
-              <motion.button
-                key={item.path}
-                onClick={(e) => handleClick(e, item.path)}
-                className="relative flex items-center justify-center w-14 h-14 overflow-hidden rounded-2xl"
-                whileTap={{ scale: 0.92 }}
-                transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-              >
-                {/* Ripple effects */}
-                {itemRipples.map(ripple => (
-                  <Ripple key={ripple.id} x={ripple.x} y={ripple.y} />
-                ))}
-
-                <div className="relative flex items-center justify-center">
-                  {/* Active pill - simple light blue circle */}
-                  {isActive && (
-                    <motion.div
-                      layoutId="nav-active-pill"
-                      className="absolute w-10 h-10 rounded-full bg-accent/10"
-                      initial={false}
-                      transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                    />
-                  )}
-
-                  {/* Icon */}
-                  <motion.div
-                    animate={{
-                      scale: isActive ? 1.1 : 1,
-                      y: isActive ? -1 : 0,
-                    }}
-                    transition={{ type: 'spring', stiffness: 400, damping: 20 }}
-                  >
-                    <Icon
-                      className={cn(
-                        'w-[22px] h-[22px] relative z-10 transition-all duration-200',
-                        isActive
-                          ? 'text-accent'
-                          : 'text-foreground'
-                      )}
-                      strokeWidth={1.5}
-                    />
-                    {item.path === '/home' && unreadNotificationCount > 0 && (
-                      <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-destructive rounded-full z-20" />
-                    )}
-                  </motion.div>
-                </div>
-              </motion.button>
-            );
-          })}
-        </div>
-      </div>
+    <nav
+      className="shrink-0 flex h-[64px] border-t border-border/60 backdrop-blur-xl"
+      style={{ backgroundColor: 'rgba(245, 245, 245, 0.6)' }}
+    >
+      {tabLabels.map((label, i) => (
+        <button
+          key={i}
+          type="button"
+          onClick={() => navigate(navPaths[i])}
+          className="flex-1 flex items-center justify-center transition-all duration-200"
+          aria-label={label}
+        >
+          <div className="flex flex-col items-center gap-[2px]">
+            <svg width="26" height="26" viewBox="0 0 20 20" fill="none">
+              {iconData[i].map((d, j) => (
+                <path key={j} d={d} fill={i === activeIndex ? ACTIVE_COLOR : INACTIVE_COLOR} />
+              ))}
+            </svg>
+            <span
+              className="text-[10px] leading-3"
+              style={{ color: i === activeIndex ? ACTIVE_COLOR : INACTIVE_COLOR }}
+            >
+              {label}
+            </span>
+          </div>
+        </button>
+      ))}
     </nav>
   );
 }

@@ -26,6 +26,7 @@ import Notifications from "./pages/Notifications";
 import Help from "./pages/Help";
 import PersonalInfo from "./pages/PersonalInfo";
 import EditProfile from "./pages/EditProfile";
+import EditNickname from "./pages/EditNickname";
 import Contacts from "./pages/Contacts";
 import ContactForm from "./pages/ContactForm";
 import ContactDetail from "./pages/ContactDetail";
@@ -57,6 +58,8 @@ import LinkAgentWallet from "./pages/LinkAgentWallet";
 import RequestAgent from "./pages/RequestAgent";
 import WalletBackup from "./pages/WalletBackup";
 import AddressManagement from "./pages/AddressManagement";
+import GeneralSettings from "./pages/GeneralSettings";
+import AccountSecurity from "./pages/AccountSecurity";
 
 const queryClient = new QueryClient();
 
@@ -128,10 +131,13 @@ function AppRoutes() {
       <Route path="/assistant" element={<ProtectedRoute bypassAuth><AIAssistant /></ProtectedRoute>} />
       <Route path="/profile/info" element={<ProtectedRoute><PersonalInfo /></ProtectedRoute>} />
       <Route path="/profile/info/edit" element={<ProtectedRoute><EditProfile /></ProtectedRoute>} />
+      <Route path="/profile/info/edit/nickname" element={<ProtectedRoute><EditNickname /></ProtectedRoute>} />
       <Route path="/profile/wallets" element={<ProtectedRoute><WalletManagement /></ProtectedRoute>} />
       <Route path="/profile/security" element={<ProtectedRoute><Security /></ProtectedRoute>} />
       <Route path="/profile/security/tss-backup" element={<ProtectedRoute><TSSBackupManagement /></ProtectedRoute>} />
       <Route path="/profile/devices" element={<ProtectedRoute><DeviceManagement /></ProtectedRoute>} />
+      <Route path="/profile/general" element={<ProtectedRoute><GeneralSettings /></ProtectedRoute>} />
+      <Route path="/profile/account-security" element={<ProtectedRoute><AccountSecurity /></ProtectedRoute>} />
       <Route path="/profile/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
       <Route path="/profile/help" element={<ProtectedRoute><Help /></ProtectedRoute>} />
       <Route path="/profile/contacts" element={<ProtectedRoute><Contacts /></ProtectedRoute>} />

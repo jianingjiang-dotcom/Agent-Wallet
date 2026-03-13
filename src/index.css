@@ -60,10 +60,10 @@
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 11%;
     
-    /* Primary - Cobo Brand Blue #1F32D6 */
-    --primary: 233 75% 48%;
+    /* Primary - #5459DA (card-matched indigo-blue) */
+    --primary: 238 64% 59%;
     --primary-foreground: 0 0% 100%;
-    
+
     /* Secondary - Soft slate */
     --secondary: 220 14% 96%;
     --secondary-foreground: 0 0% 11%;
@@ -97,13 +97,13 @@
     /* Border/Stroke - Cobo Brand #EDEEF3 */
     --border: 228 18% 94%;
     --input: 228 18% 94%;
-    --ring: 233 75% 48%;
-    
+    --ring: 238 64% 59%;
+
     --radius: 0.75rem;
     
     /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(233 75% 48%) 0%, hsl(233 75% 38%) 100%);
-    --gradient-accent: linear-gradient(135deg, hsl(233 75% 48%) 0%, hsl(233 65% 40%) 100%);
+    --gradient-primary: linear-gradient(135deg, hsl(238 64% 52%) 0%, hsl(248 68% 45%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(238 64% 59%) 0%, hsl(248 68% 52%) 100%);
     --gradient-success: linear-gradient(135deg, hsl(158 64% 42%) 0%, hsl(152 69% 40%) 100%);
     --gradient-card: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(220 20% 98%) 100%);
     
@@ -120,27 +120,27 @@
       0 12px 24px hsl(0 0% 11% / 0.06);
 
     /* Colored glow shadows */
-    --shadow-glow-primary: 0 0 20px hsl(233 75% 48% / 0.15), 0 0 40px hsl(233 75% 48% / 0.05);
+    --shadow-glow-primary: 0 0 20px hsl(238 64% 59% / 0.15), 0 0 40px hsl(238 64% 59% / 0.05);
     --shadow-glow-success: 0 0 20px hsl(152 69% 40% / 0.15), 0 0 40px hsl(152 69% 40% / 0.05);
     --shadow-glow-warning: 0 0 20px hsl(38 92% 50% / 0.15), 0 0 40px hsl(38 92% 50% / 0.05);
     --shadow-glow-destructive: 0 0 20px hsl(0 84% 60% / 0.15), 0 0 40px hsl(0 84% 60% / 0.05);
 
     /* Balance card gradient */
-    --gradient-balance: linear-gradient(135deg, hsl(233 75% 48%) 0%, hsl(250 70% 55%) 40%, hsl(217 91% 60%) 100%);
+    --gradient-balance: linear-gradient(135deg, hsl(238 65% 52%) 0%, hsl(248 68% 60%) 40%, hsl(235 72% 68%) 100%);
 
     /* Mesh gradient for page backgrounds */
-    --gradient-mesh: radial-gradient(ellipse at 20% 0%, hsl(233 75% 48% / 0.06) 0%, transparent 50%),
+    --gradient-mesh: radial-gradient(ellipse at 20% 0%, hsl(238 64% 59% / 0.06) 0%, transparent 50%),
                      radial-gradient(ellipse at 80% 100%, hsl(152 69% 40% / 0.04) 0%, transparent 50%);
     
     /* Sidebar */
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 233 75% 48%;
+    --sidebar-primary: 238 64% 59%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 240 4.8% 95.9%;
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 228 18% 94%;
-    --sidebar-ring: 233 75% 48%;
+    --sidebar-ring: 238 64% 59%;
 
     /* System toast surface (bottom-center) */
     --toast-surface: 220 20% 96%;
@@ -157,10 +157,10 @@
     --popover: 222 47% 9%;
     --popover-foreground: 210 40% 98%;
     
-    /* Primary - Keep brand blue visible in dark mode */
-    --primary: 217 91% 60%;
+    /* Primary - #5459DA (card-matched indigo-blue) */
+    --primary: 238 64% 62%;
     --primary-foreground: 0 0% 100%;
-    
+
     --secondary: 222 30% 14%;
     --secondary-foreground: 210 40% 98%;
     
@@ -189,11 +189,11 @@
     
     --border: 222 30% 18%;
     --input: 222 30% 18%;
-    --ring: 217 91% 60%;
-    
-    /* Dark mode gradients - use visible colors */
-    --gradient-primary: linear-gradient(135deg, hsl(217 91% 55%) 0%, hsl(233 75% 50%) 100%);
-    --gradient-accent: linear-gradient(135deg, hsl(217 91% 55%) 0%, hsl(222 80% 45%) 100%);
+    --ring: 238 64% 62%;
+
+    /* Dark mode gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(238 64% 55%) 0%, hsl(248 68% 48%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(238 64% 62%) 0%, hsl(248 68% 55%) 100%);
     --gradient-success: linear-gradient(135deg, hsl(158 64% 45%) 0%, hsl(152 69% 45%) 100%);
     --gradient-card: linear-gradient(180deg, hsl(222 47% 9%) 0%, hsl(222 47% 7%) 100%);
     
@@ -207,19 +207,19 @@
       0 4px 8px hsl(0 0% 0% / 0.2),
       0 12px 24px hsl(0 0% 0% / 0.3);
 
-    --shadow-glow-primary: 0 0 20px hsl(217 91% 60% / 0.2), 0 0 40px hsl(217 91% 60% / 0.08);
+    --shadow-glow-primary: 0 0 20px hsl(238 64% 62% / 0.2), 0 0 40px hsl(238 64% 62% / 0.08);
     --shadow-glow-success: 0 0 20px hsl(152 69% 45% / 0.2), 0 0 40px hsl(152 69% 45% / 0.08);
     --shadow-glow-warning: 0 0 20px hsl(38 92% 55% / 0.2), 0 0 40px hsl(38 92% 55% / 0.08);
     --shadow-glow-destructive: 0 0 20px hsl(0 72% 51% / 0.2), 0 0 40px hsl(0 72% 51% / 0.08);
 
-    --gradient-balance: linear-gradient(135deg, hsl(233 75% 45%) 0%, hsl(260 65% 40%) 40%, hsl(217 91% 50%) 100%);
+    --gradient-balance: linear-gradient(135deg, hsl(238 65% 50%) 0%, hsl(248 68% 58%) 40%, hsl(235 72% 66%) 100%);
 
-    --gradient-mesh: radial-gradient(ellipse at 20% 0%, hsl(217 91% 60% / 0.08) 0%, transparent 50%),
+    --gradient-mesh: radial-gradient(ellipse at 20% 0%, hsl(238 64% 62% / 0.08) 0%, transparent 50%),
                      radial-gradient(ellipse at 80% 100%, hsl(152 69% 45% / 0.06) 0%, transparent 50%);
-    
+
     --sidebar-background: 222 47% 8%;
     --sidebar-foreground: 210 40% 90%;
-    --sidebar-primary: 217 91% 60%;
+    --sidebar-primary: 238 64% 62%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 222 30% 14%;
     --sidebar-accent-foreground: 210 40% 98%;
@@ -263,29 +263,13 @@
     margin: 0 !important;
   }
 
-  /* Custom scrollbar - minimal, modern style */
+  /* Hide scrollbars globally */
   ::-webkit-scrollbar {
-    width: 4px;
-    height: 4px;
+    display: none;
   }
 
-  ::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  ::-webkit-scrollbar-thumb {
-    background: hsl(var(--muted-foreground) / 0.2);
-    border-radius: 4px;
-  }
-
-  ::-webkit-scrollbar-thumb:hover {
-    background: hsl(var(--muted-foreground) / 0.3);
-  }
-
-  /* Firefox scrollbar */
   * {
-    scrollbar-width: thin;
-    scrollbar-color: hsl(var(--muted-foreground) / 0.2) transparent;
+    scrollbar-width: none;
   }
 }
 
@@ -344,9 +328,11 @@
 
   /* Suppress card shadow inside page containers */
   .no-card-shadow .card-elevated,
-  .no-card-shadow .card-glass {
+  .no-card-shadow .card-glass,
+  .no-card-shadow.card-elevated {
     box-shadow: 0 4px 40px rgba(0, 0, 0, 0.02) !important;
   }
+
 
   /* Status glow cards */
   .status-glow-danger {
@@ -386,47 +372,6 @@
     text-wrap: balance;
   }
 
-  /* Toast notification layout fix - ensure close button is on the right */
-  [data-sonner-toaster] [data-sonner-toast] {
-    display: flex !important;
-    flex-direction: row !important;
-    align-items: center !important;
-  }
-
-  [data-sonner-toaster] [data-sonner-toast] [data-icon] {
-    order: 1 !important;
-    flex-shrink: 0 !important;
-    margin: 0 !important;
-  }
-
-  [data-sonner-toaster] [data-sonner-toast] [data-content] {
-    order: 2 !important;
-    flex: 1 !important;
-    min-width: 0 !important;
-    margin-left: 12px !important;
-  }
-
-  [data-sonner-toaster] [data-sonner-toast] [data-close-button] {
-    order: 3 !important;
-    position: static !important;
-    transform: none !important;
-    flex-shrink: 0 !important;
-    margin-left: 12px !important;
-    background: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
-    padding: 0 !important;
-    width: 20px !important;
-    height: 20px !important;
-    left: unset !important;
-    right: unset !important;
-    top: unset !important;
-    color: #6b7280 !important;
-  }
-
-  [data-sonner-toaster] [data-sonner-toast] [data-close-button]:hover {
-    color: #374151 !important;
-  }
 }
 
 /* Gradient shift animation for premium cards */

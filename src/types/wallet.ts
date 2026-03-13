@@ -308,6 +308,7 @@ export interface UserInfo {
   email: string;
   avatar?: string;
   nickname?: string;
+  uid?: string;
 }
 
 // ============= Auth Types =============

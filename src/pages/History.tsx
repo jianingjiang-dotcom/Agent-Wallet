@@ -3,6 +3,8 @@ import { motion } from 'framer-motion';
 import { Send, TrendingDown, CheckCircle2, XCircle, ChevronRight, Clock, ChevronDown, Loader2, Bot } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
+import { HeaderActions } from '@/components/HeaderActions';
+import { ProfileSidebar } from '@/components/ProfileSidebar';
 import { Button } from '@/components/ui/button';
 import { SearchInput } from '@/components/ui/search-input';
 import { FilterPills, type FilterPillItem } from '@/components/ui/filter-pills';
@@ -24,6 +26,7 @@ type FilterType = 'all' | 'send' | 'receive';
 
 export default function HistoryPage() {
   const navigate = useNavigate();
+  const [showProfileDrawer, setShowProfileDrawer] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [sourceFilter, setSourceFilter] = useState<SourceFilter>('all');
   const [filter, setFilter] = useState<FilterType>('all');
@@ -162,7 +165,8 @@ export default function HistoryPage() {
         ? filteredTransactions.length
         : filteredTransactions.length + filteredAgentTransactions.length + filteredAgentRequests.length;
 
-  return <AppLayout title="交易" showNav pageBg="bg-page">
+  return <ProfileSidebar open={showProfileDrawer} onOpenChange={setShowProfileDrawer}>
+    <AppLayout title="交易记录" showNav pageBg="bg-page" rightAction={<HeaderActions onMenuClick={() => setShowProfileDrawer(true)} />}>
       <PullToRefresh onRefresh={handleRefresh}>
         <div className="px-4 py-4">
 
@@ -394,5 +398,6 @@ export default function HistoryPage() {
             </div>}
         </div>
       </PullToRefresh>
-    </AppLayout>;
+    </AppLayout>
+    </ProfileSidebar>;
 }

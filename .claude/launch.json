@@ -5,7 +5,9 @@
       "name": "dev",
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev"],
-      "port": 8080
+      "port": 8080,
+      "autoPort": true,
+      "viewport": { "width": 390, "height": 797 }
     },
     {
       "name": "preview",

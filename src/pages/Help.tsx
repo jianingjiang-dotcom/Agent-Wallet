@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { 
   Search, CreditCard, Send, Shield, Coins, Clock,
-  MessageCircle, Mail, Phone, FileText, Lock, Info, ChevronRight, X
+  MessageCircle, Mail, Phone, ChevronRight, X
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Input } from '@/components/ui/input';
@@ -104,11 +104,6 @@ const contactItems = [
   },
 ];
 
-const moreItems = [
-  { icon: FileText, label: '用户协议', path: '/terms' },
-  { icon: Lock, label: '隐私政策', path: '/privacy' },
-  { icon: Info, label: '关于我们', path: '/about' },
-];
 
 export default function HelpPage() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -211,35 +206,6 @@ export default function HelpPage() {
                     <p className="text-sm font-medium">{item.title}</p>
                     <p className="text-xs text-muted-foreground">{item.description}</p>
                   </div>
-                  <ChevronRight className="w-4 h-4 text-muted-foreground" />
-                </button>
-              );
-            })}
-          </div>
-        </motion.div>
-
-        {/* More */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.15 }}
-        >
-          <h3 className="text-xs font-medium text-muted-foreground mb-2 px-1">更多</h3>
-          <div className="card-elevated overflow-hidden">
-            {moreItems.map((item, index) => {
-              const Icon = item.icon;
-              return (
-                <button
-                  key={item.label}
-                  className={cn(
-                    'w-full p-3 flex items-center gap-3 hover:bg-muted/50 transition-colors',
-                    index !== moreItems.length - 1 && 'border-b border-border'
-                  )}
-                >
-                  <div className="w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center">
-                    <Icon className="w-4 h-4 text-accent" />
-                  </div>
-                  <span className="flex-1 text-left text-sm font-medium">{item.label}</span>
                   <ChevronRight className="w-4 h-4 text-muted-foreground" />
                 </button>
               );

@@ -88,7 +88,7 @@ const ListItem = React.forwardRef<HTMLElement, ListItemProps>(
         <div className="flex-1 min-w-0 text-left">
           <p
             className={cn(
-              "text-sm font-medium truncate",
+              "text-[14px] leading-5 font-normal truncate",
               destructive ? "text-destructive" : "text-foreground"
             )}
           >
@@ -102,26 +102,28 @@ const ListItem = React.forwardRef<HTMLElement, ListItemProps>(
         </div>
 
         {/* Right side */}
-        {value && (
-          <span
-            className={cn(
-              "text-xs text-muted-foreground shrink-0",
-              valueClassName
-            )}
-          >
-            {value}
-          </span>
-        )}
         {trailing}
-        {showChevron && (
-          <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" strokeWidth={1.5} />
-        )}
+        <div className="flex items-center gap-1 shrink-0">
+          {value && (
+            <span
+              className={cn(
+                "text-[14px] leading-5 text-muted-foreground",
+                valueClassName
+              )}
+            >
+              {value}
+            </span>
+          )}
+          {showChevron && (
+            <ChevronRight className="w-5 h-5 shrink-0" strokeWidth={1} style={{ color: '#000000' }} />
+          )}
+        </div>
       </>
     );
 
     const sharedClassName = cn(
-      "w-full flex items-center gap-3 p-3 transition-colors",
-      isClickable && "hover:bg-muted/50 active:bg-muted/50 cursor-pointer",
+      "w-full flex items-center gap-3 px-3 py-4 transition-colors",
+      isClickable && "cursor-pointer",
       showDivider && "border-b border-border",
       disabled && "opacity-50 pointer-events-none",
       className
@@ -147,7 +149,7 @@ const ListItem = React.forwardRef<HTMLElement, ListItemProps>(
         type="button"
         disabled={disabled}
         onClick={onClick}
-        whileTap={isClickable ? { scale: 0.98 } : undefined}
+        whileTap={undefined}
         transition={{ type: "spring", stiffness: 400, damping: 25 }}
         className={sharedClassName}
         {...(props as any)}

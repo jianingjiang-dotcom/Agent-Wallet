@@ -9,7 +9,12 @@
       "Bash(npx supabase secrets set ANTHROPIC_API_KEY=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)",
       "Bash(grep -l \"WalletSwitcher\\\\|TokenManager\\\\|ChainDropdown\" \"/Users/jianing.jiang/Downloads/agent wallet/src/components\"/*.tsx)",
       "Bash(npx vite build)",
-      "Bash(npm run build)"
+      "Bash(npm run build)",
+      "Bash(npm audit:*)",
+      "Bash(xattr -dr com.apple.quarantine \"/Users/jiayi.liu/Desktop/agent wallet/node_modules\")",
+      "Bash(xargs xattr:*)",
+      "Bash(ipconfig getifaddr:*)",
+      "Bash(open \"/Users/jiayi.liu/Desktop/agent wallet/src/assets/icon-wallet.svg\" \"/Users/jiayi.liu/Desktop/agent wallet/src/assets/icon-assistant.svg\" \"/Users/jiayi.liu/Desktop/agent wallet/src/assets/icon-history.svg\" \"/Users/jiayi.liu/Desktop/agent wallet/src/assets/icon-profile.svg\")"
     ]
   }
 }

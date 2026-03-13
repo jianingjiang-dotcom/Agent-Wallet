@@ -104,7 +104,7 @@ export default function SettlementDashboard() {
   );
 
   return (
-    <AppLayout title="结算对账" showNav showBack>
+    <AppLayout title="结算对账" showBack>
       <div className="px-4 py-4 space-y-4 pb-8">
         {/* Time range selector */}
         <motion.div

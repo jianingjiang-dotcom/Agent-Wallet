@@ -1,52 +1,32 @@
 import { useState } from 'react';
-import { Copy, Check, ChevronRight } from 'lucide-react';
+import { Copy, Check, ChevronRight, User, Hash } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import {
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-} from '@/components/ui/drawer';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 import { useWallet } from '@/contexts/WalletContext';
 import { toast } from '@/lib/toast';
 import { copyToClipboard } from '@/lib/utils';
 
 export default function EditProfile() {
+  const navigate = useNavigate();
   const { userInfo } = useWallet();
   const initialNickname = userInfo?.email?.split('@')[0] || '';
-  const [nickname, setNickname] = useState(initialNickname);
+  const [nickname] = useState(initialNickname);
   const avatar = userInfo?.avatar || '';
   const [copied, setCopied] = useState(false);
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const [editValue, setEditValue] = useState('');
 
-  const userId = 'UID-2024-XXXX-XXXX';
+  const uidNumber = '8824563147';
+  const userId = uidNumber;
 
   const handleCopyUid = async () => {
     const ok = await copyToClipboard(userId);
     if (ok) {
       setCopied(true);
-      toast.success('已复制', '用户ID已复制到剪贴板');
+      toast.success('已复制');
       setTimeout(() => setCopied(false), 2000);
     } else {
       toast.error('复制失败');
     }
-  };
-
-  const handleOpenDrawer = () => {
-    setEditValue(nickname);
-    setDrawerOpen(true);
-  };
-
-  const handleSaveNickname = () => {
-    if (editValue.trim()) {
-      setNickname(editValue.trim());
-    }
-    setDrawerOpen(false);
-    toast.success('保存成功');
   };
 
   return (
@@ -70,21 +50,23 @@ export default function EditProfile() {
         <div className="card-elevated overflow-hidden">
           {/* 用户名 */}
           <button
-            onClick={handleOpenDrawer}
-            className="w-full flex items-center gap-3 px-4 py-[17px] border-b border-border/50 active:bg-muted/50 transition-colors"
+            onClick={() => navigate('/profile/info/edit/nickname')}
+            className="w-full flex items-center gap-3 px-4 py-4 border-b border-border active:bg-muted/50 transition-colors"
           >
-            <span className="text-sm font-medium text-foreground w-16 shrink-0 text-left">用户名</span>
+            <User className="w-5 h-5 shrink-0" strokeWidth={1.5} style={{ color: '#000000' }} />
+            <span className="text-[16px] leading-6 font-normal text-foreground shrink-0 text-left">用户名</span>
             <div className="flex-1 flex items-center justify-end gap-1">
-              <span className="text-[14px] text-muted-foreground">{nickname || '未设置'}</span>
+              <span className="text-[16px] leading-6 font-normal text-muted-foreground">{nickname || '未设置'}</span>
               <ChevronRight className="w-5 h-5 text-muted-foreground shrink-0" strokeWidth={1} />
             </div>
           </button>
 
           {/* UID */}
-          <div className="flex items-center gap-3 px-4 py-[17px]">
-            <span className="text-sm font-medium text-foreground w-16 shrink-0 text-left">UID</span>
+          <div className="flex items-center gap-3 px-4 py-4">
+            <Hash className="w-5 h-5 shrink-0" strokeWidth={1.5} style={{ color: '#000000' }} />
+            <span className="text-[16px] leading-6 font-normal text-foreground shrink-0 text-left">UID</span>
             <div className="flex-1 flex items-center justify-end gap-1">
-              <span className="text-[14px] text-muted-foreground select-none">{userId}</span>
+              <span className="text-[16px] leading-6 font-normal text-muted-foreground select-none">{userId}</span>
               <button
                 onClick={handleCopyUid}
                 className="flex items-center justify-center w-5 h-5 rounded-full active:opacity-60 transition-opacity shrink-0"
@@ -99,27 +81,6 @@ export default function EditProfile() {
         </div>
 
       </div>
-
-      {/* Edit Nickname Drawer */}
-      <Drawer open={drawerOpen} onOpenChange={setDrawerOpen} snapPoints={[0.32]}>
-        <DrawerContent>
-          <DrawerHeader>
-            <DrawerTitle>修改用户名</DrawerTitle>
-          </DrawerHeader>
-          <div className="px-4 pb-6 flex flex-col gap-4">
-            <Input
-              value={editValue}
-              onChange={(e) => setEditValue(e.target.value)}
-              placeholder="请输入用户名"
-              autoFocus
-              maxLength={20}
-            />
-            <Button onClick={handleSaveNickname} className="w-full">
-              保存
-            </Button>
-          </div>
-        </DrawerContent>
-      </Drawer>
     </AppLayout>
   );
 }

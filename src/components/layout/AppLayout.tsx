@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, type LucideIcon } from 'lucide-react';
+import { ArrowLeft, type LucideIcon } from 'lucide-react';
 import { BottomNav } from './BottomNav';
 import { SecurityBanner } from '@/components/ui/SecurityBanner';
 import { Badge } from '@/components/ui/badge';
@@ -18,23 +18,25 @@ export interface AppLayoutProps {
   backIcon?: LucideIcon;
   onBack?: () => void;
   rightAction?: ReactNode;
+  leftAction?: ReactNode;
 }
 
 export function AppLayout({
   children,
-  showNav = true,
+  showNav = false,
   showSecurityBanner = true,
   pageBg,
   title,
   titleBadge,
   showBack = false,
-  backIcon: BackIcon = ChevronLeft,
+  backIcon: BackIcon = ArrowLeft,
   onBack,
   rightAction,
+  leftAction,
 }: AppLayoutProps) {
   const navigate = useNavigate();
   const showBanner = showNav && showSecurityBanner;
-  const hasHeader = title || showBack || rightAction;
+  const hasHeader = title || showBack || rightAction || leftAction;
 
   const handleBack = () => {
     if (onBack) {
@@ -45,46 +47,48 @@ export function AppLayout({
   };
 
   return (
-    <div className={cn("h-full flex flex-col relative overflow-hidden pt-7", pageBg ?? "bg-background")}>
-      {showBanner && <SecurityBanner />}
+    <div className={cn("h-full flex flex-col relative overflow-hidden", pageBg ?? (showNav ? "bg-page" : "bg-background"))}>
+{showBanner && <SecurityBanner />}
 
       {/* Page Header */}
       {hasHeader && (
         <header
           className={cn(
-            "flex items-center justify-between px-4 py-3 sticky top-0 z-10",
+            "flex items-center justify-between px-4 h-[54px] sticky top-0 z-10",
             !pageBg && "backdrop-blur-xl border-b border-border/30 bg-background/80",
             pageBg && pageBg
           )}
         >
-          <div className="w-10">
-            {showBack && (
+          <div className="flex items-center">
+            {leftAction ?? (showBack && (
               <button
                 onClick={handleBack}
-                className="flex items-center justify-center w-8 h-8 -ml-1"
+                className="flex items-center justify-center w-9 h-9 rounded-full bg-background card-elevated no-card-shadow"
               >
-                <BackIcon className="w-5 h-5 text-muted-foreground" strokeWidth={1} />
+                <BackIcon className="w-5 h-5" strokeWidth={1} style={{ color: '#000000' }} />
               </button>
-            )}
+            ))}
           </div>
 
-          <div className="flex items-center gap-2">
-            {title && (
-              <h1 className="text-base font-semibold text-foreground">
-                {title}
-              </h1>
-            )}
-            {titleBadge !== undefined && titleBadge > 0 && (
-              <Badge
-                variant="destructive"
-                className="h-5 min-w-5 px-1.5 text-xs font-medium"
-              >
-                {titleBadge > 99 ? '99+' : titleBadge}
-              </Badge>
-            )}
+          <div className="absolute inset-x-0 flex items-center justify-center pointer-events-none">
+            <div className="flex items-center gap-2">
+              {title && (
+                <h1 className="text-base font-semibold text-foreground">
+                  {title}
+                </h1>
+              )}
+              {titleBadge !== undefined && titleBadge > 0 && (
+                <Badge
+                  variant="destructive"
+                  className="h-5 min-w-5 px-1.5 text-xs font-medium"
+                >
+                  {titleBadge > 99 ? '99+' : titleBadge}
+                </Badge>
+              )}
+            </div>
           </div>
 
-          <div className="w-10 flex justify-end">
+          <div className="flex justify-end">
             {rightAction}
           </div>
         </header>
@@ -92,15 +96,14 @@ export function AppLayout({
 
       <main className="flex-1 flex flex-col overflow-auto">
         {children}
-        {showNav && <div className="shrink-0 h-[100px]" />}
+        {showNav && <div className="shrink-0 h-[80px]" />}
       </main>
 
-      {/* Gradient fade above bottom nav */}
       {showNav && (
-        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-background via-background/60 to-transparent pointer-events-none z-30" />
+        <div className="absolute bottom-0 left-0 right-0 z-20">
+          <BottomNav />
+        </div>
       )}
-
-      {showNav && <BottomNav />}
     </div>
   );
 }
