@@ -22,7 +22,7 @@ export function ContactCard({
       whileTap={{ scale: 0.98 }}
       onClick={onClick}
       className={cn(
-        "w-full p-4 rounded-2xl bg-card border border-border/50",
+        "w-full p-4 rounded-xl bg-card border border-border/50",
         "flex items-center gap-3 text-left",
         "hover:bg-muted/50 hover:shadow-lg transition-all",
         contact.isWhitelisted && "border-l-2 border-l-success/40",

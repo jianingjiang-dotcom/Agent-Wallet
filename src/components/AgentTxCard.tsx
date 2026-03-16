@@ -9,6 +9,7 @@ import { Progress } from '@/components/ui/progress';
 interface AgentTxCardProps {
   tx: AgentTransaction;
   onClick: () => void;
+  className?: string;
 }
 
 const statusConfig = {
@@ -37,7 +38,7 @@ function formatCountdown(expiresAt: Date): string {
   return `${hours}小时${mins % 60}分`;
 }
 
-export function AgentTxCard({ tx, onClick }: AgentTxCardProps) {
+export function AgentTxCard({ tx, onClick, className }: AgentTxCardProps) {
   const status = statusConfig[tx.status];
   const risk = riskConfig[tx.riskScore];
   const StatusIcon = status.icon;
@@ -47,7 +48,7 @@ export function AgentTxCard({ tx, onClick }: AgentTxCardProps) {
       onClick={onClick}
       className={cn(
         'w-full p-4 rounded-xl text-left transition-all active:scale-[0.98]',
-        status.bg
+        className || status.bg
       )}
       whileTap={{ scale: 0.98 }}
     >

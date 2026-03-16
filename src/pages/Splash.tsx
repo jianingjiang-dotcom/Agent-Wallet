@@ -65,7 +65,7 @@ const Splash = () => {
         <div className="relative">
           {/* Outer pulse ring - blue in light, white in dark */}
           <motion.div
-            className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/10 dark:from-white/25 dark:to-white/15"
+            className="absolute inset-0 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 dark:from-white/25 dark:to-white/15"
             style={{ 
               width: 120, 
               height: 120, 
@@ -85,7 +85,7 @@ const Splash = () => {
           />
           {/* Inner pulse ring */}
           <motion.div
-            className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary/25 to-primary/15 dark:from-white/35 dark:to-white/20"
+            className="absolute inset-0 rounded-xl bg-gradient-to-br from-primary/25 to-primary/15 dark:from-white/35 dark:to-white/20"
             style={{ 
               width: 120, 
               height: 120, 
@@ -107,7 +107,7 @@ const Splash = () => {
           
           {/* Logo container - white background with rounded edges */}
           <motion.div
-            className="w-[84px] h-[84px] rounded-2xl flex items-center justify-center shadow-xl relative overflow-hidden bg-white"
+            className="w-[84px] h-[84px] rounded-xl flex items-center justify-center shadow-xl relative overflow-hidden bg-white"
             style={{
               boxShadow: '0 20px 40px -10px hsl(0 0% 0% / 0.15), 0 10px 20px -5px hsl(0 0% 0% / 0.1)'
             }}

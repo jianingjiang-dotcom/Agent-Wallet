@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { Monitor, Globe, Bell, HelpCircle, Lock, FileText, Info, Shield } from 'lucide-react';
+import { Monitor, Globe, Bell, HelpCircle, Lock, FileText, Info, Shield, Layers } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from 'next-themes';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -18,7 +18,7 @@ function LogoutConfirmDialog({ open, onConfirm, onCancel }: { open: boolean; onC
   return createPortal(
     <div className="absolute inset-0 z-50 flex items-center justify-center">
       <div className="absolute inset-0 bg-black/40" onClick={onCancel} />
-      <div className="relative bg-card rounded-2xl w-[280px] overflow-hidden shadow-xl">
+      <div className="relative bg-card rounded-xl w-[280px] overflow-hidden shadow-xl">
         <div className="px-6 pt-6 pb-4 text-center">
           <p className="text-[16px] font-semibold text-foreground">确认退出</p>
           <p className="text-[14px] text-muted-foreground mt-2">确定要退出当前账户吗？</p>
@@ -161,6 +161,19 @@ export default function GeneralSettings() {
           open={appearanceDrawerOpen}
           onOpenChange={setAppearanceDrawerOpen}
         />
+        {/* 组件 Demo */}
+        <div className="mt-4 mb-0">
+          <div className="card-elevated overflow-hidden">
+            <ListItem
+              icon={<Layers className="w-5 h-5" strokeWidth={1.5} style={{ color: '#000000' }} />}
+              title="组件 Demo（仅Dev展示）"
+              showChevron
+              onClick={() => navigate('/component-demo')}
+              className="py-4 px-4"
+            />
+          </div>
+        </div>
+
         {/* 退出登录 */}
         <div className="mt-6">
           <button
@@ -180,9 +193,6 @@ export default function GeneralSettings() {
 
         {/* 版本号 */}
         <div className="flex-1" />
-        <div className="flex justify-center pb-[24px]">
-          <span className="text-[12px] leading-[16px] text-gray-400">v20260313.01</span>
-        </div>
       </div>
     </AppLayout>
   );

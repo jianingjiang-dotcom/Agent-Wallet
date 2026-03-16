@@ -396,7 +396,7 @@ export const AssistantView = forwardRef<AssistantViewHandle, { className?: strin
                 <div className="w-7 h-7 rounded-full bg-accent/10 flex items-center justify-center shrink-0 mr-2">
                   <MessageSquareText className="w-3.5 h-3.5 text-accent" />
                 </div>
-                <div className="bg-muted rounded-2xl rounded-bl-md">
+                <div className="bg-muted rounded-xl rounded-bl-md">
                   <TypingIndicator />
                 </div>
               </div>

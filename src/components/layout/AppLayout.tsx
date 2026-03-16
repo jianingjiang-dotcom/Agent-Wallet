@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, type LucideIcon } from 'lucide-react';
 import { BottomNav } from './BottomNav';
 import { SecurityBanner } from '@/components/ui/SecurityBanner';
@@ -13,6 +13,7 @@ export interface AppLayoutProps {
   pageBg?: string; // e.g. 'bg-page'
   // Header props
   title?: string;
+  titleSuffix?: ReactNode;
   titleBadge?: number; // Red notification count badge beside title
   showBack?: boolean;
   backIcon?: LucideIcon;
@@ -27,6 +28,7 @@ export function AppLayout({
   showSecurityBanner = true,
   pageBg,
   title,
+  titleSuffix,
   titleBadge,
   showBack = false,
   backIcon: BackIcon = ArrowLeft,
@@ -35,12 +37,15 @@ export function AppLayout({
   leftAction,
 }: AppLayoutProps) {
   const navigate = useNavigate();
+  const location = useLocation();
   const showBanner = showNav && showSecurityBanner;
   const hasHeader = title || showBack || rightAction || leftAction;
 
   const handleBack = () => {
     if (onBack) {
       onBack();
+    } else if ((location.state as { fromSidebar?: boolean })?.fromSidebar) {
+      navigate('/home', { state: { openSidebar: true } });
     } else {
       navigate(-1);
     }
@@ -71,7 +76,7 @@ export function AppLayout({
           </div>
 
           <div className="absolute inset-x-0 flex items-center justify-center pointer-events-none">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5">
               {title && (
                 <h1 className="text-base font-semibold text-foreground">
                   {title}
@@ -84,6 +89,9 @@ export function AppLayout({
                 >
                   {titleBadge > 99 ? '99+' : titleBadge}
                 </Badge>
+              )}
+              {titleSuffix && (
+                <div className="pointer-events-auto">{titleSuffix}</div>
               )}
             </div>
           </div>

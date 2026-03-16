@@ -92,7 +92,7 @@ export default function AuthorizeDevicePage() {
           animate={{ opacity: 1 }}
           className="flex flex-col items-center"
         >
-          <div className="w-48 h-48 rounded-2xl bg-muted/50 border-2 border-dashed border-accent flex items-center justify-center mb-6 relative overflow-hidden">
+          <div className="w-48 h-48 rounded-xl bg-muted/50 border-2 border-dashed border-accent flex items-center justify-center mb-6 relative overflow-hidden">
             <motion.div
               animate={{ y: [-100, 100] }}
               transition={{ duration: 1.5, repeat: Infinity, ease: 'linear' }}
@@ -107,7 +107,7 @@ export default function AuthorizeDevicePage() {
         </motion.div>
       ) : (
         <>
-          <div className="w-48 h-48 rounded-2xl bg-muted/30 border-2 border-dashed border-border flex items-center justify-center mb-6">
+          <div className="w-48 h-48 rounded-xl bg-muted/30 border-2 border-dashed border-border flex items-center justify-center mb-6">
             <QrCode className="w-16 h-16 text-muted-foreground" />
           </div>
           <Button onClick={handleStartScan}>

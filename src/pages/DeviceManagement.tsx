@@ -76,7 +76,7 @@ function ConfirmDialog({ open, onConfirm, onCancel }: { open: boolean; onConfirm
   return createPortal(
     <div className="absolute inset-0 z-50 flex items-center justify-center">
       <div className="absolute inset-0 bg-black/40" onClick={onCancel} />
-      <div className="relative bg-card rounded-2xl w-[280px] overflow-hidden shadow-xl">
+      <div className="relative bg-card rounded-xl w-[280px] overflow-hidden shadow-xl">
         <div className="px-6 pt-6 pb-4 text-center">
           <p className="text-[16px] font-semibold text-foreground">确认退出</p>
           <p className="text-[14px] text-muted-foreground mt-2">确定要退出当前设备吗？</p>
@@ -113,7 +113,7 @@ export default function DeviceManagementPage() {
               const Icon = getDeviceIcon(record.deviceModel);
               const isCurrent = index === 0;
               return (
-                <div key={record.id} className="card-elevated rounded-2xl py-3 px-4 flex items-start gap-3">
+                <div key={record.id} className="card-elevated rounded-xl py-3 px-4 flex items-start gap-3">
                   {/* 设备图标 */}
                   <div className="relative w-8 h-8 shrink-0 mt-0.5">
                     <div className="w-8 h-8 rounded-full flex items-center justify-center bg-gray-100 dark:bg-gray-700">
