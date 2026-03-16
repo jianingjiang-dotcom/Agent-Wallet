@@ -32,6 +32,7 @@ import ContactForm from "./pages/ContactForm";
 import ContactDetail from "./pages/ContactDetail";
 import AssetDetail from "./pages/AssetDetail";
 import MessageCenter from "./pages/MessageCenter";
+import MessageCategoryPage from "./pages/MessageCategoryPage";
 import WalletRecovery from "./pages/WalletRecovery";
 import ExportPrivateKey from "./pages/ExportPrivateKey";
 import AuthorizeDevice from "./pages/AuthorizeDevice";
@@ -60,6 +61,7 @@ import WalletBackup from "./pages/WalletBackup";
 import AddressManagement from "./pages/AddressManagement";
 import GeneralSettings from "./pages/GeneralSettings";
 import AccountSecurity from "./pages/AccountSecurity";
+import ComponentDemo from "./pages/ComponentDemo";
 
 const queryClient = new QueryClient();
 
@@ -138,6 +140,7 @@ function AppRoutes() {
       <Route path="/profile/devices" element={<ProtectedRoute><DeviceManagement /></ProtectedRoute>} />
       <Route path="/profile/general" element={<ProtectedRoute><GeneralSettings /></ProtectedRoute>} />
       <Route path="/profile/account-security" element={<ProtectedRoute><AccountSecurity /></ProtectedRoute>} />
+      <Route path="/component-demo" element={<ProtectedRoute><ComponentDemo /></ProtectedRoute>} />
       <Route path="/profile/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
       <Route path="/profile/help" element={<ProtectedRoute><Help /></ProtectedRoute>} />
       <Route path="/profile/contacts" element={<ProtectedRoute><Contacts /></ProtectedRoute>} />
@@ -154,6 +157,7 @@ function AppRoutes() {
       <Route path="/settlement-dashboard" element={<ProtectedRoute bypassAuth><SettlementDashboard /></ProtectedRoute>} />
       <Route path="/audit-log" element={<ProtectedRoute><AuditLog /></ProtectedRoute>} />
       <Route path="/messages" element={<ProtectedRoute bypassAuth><MessageCenter /></ProtectedRoute>} />
+      <Route path="/messages/:type" element={<ProtectedRoute bypassAuth><MessageCategoryPage /></ProtectedRoute>} />
       <Route path="/wallet/recovery" element={<WalletRecovery />} />
       <Route path="/wallet-backup/:id" element={<ProtectedRoute><WalletBackup /></ProtectedRoute>} />
       <Route path="/wallet/export-key/:id" element={<ProtectedRoute><ExportPrivateKey /></ProtectedRoute>} />

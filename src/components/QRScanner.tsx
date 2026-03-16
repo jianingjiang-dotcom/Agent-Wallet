@@ -161,7 +161,7 @@ export function QRScanner({ isOpen, onClose, onScan }: QRScannerProps) {
                 <div className="relative">
                   <div 
                     id="qr-reader" 
-                    className="w-[280px] h-[280px] overflow-hidden rounded-2xl"
+                    className="w-[280px] h-[280px] overflow-hidden rounded-xl"
                   />
                   
                   {/* Scanning frame overlay */}
@@ -189,7 +189,7 @@ export function QRScanner({ isOpen, onClose, onScan }: QRScannerProps) {
                   
                   {/* Loading indicator */}
                   {isInitializing && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-2xl">
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-xl">
                       <div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin" />
                     </div>
                   )}

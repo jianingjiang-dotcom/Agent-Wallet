@@ -60,7 +60,7 @@ export default function ModeSelection() {
                 whileTap={{ scale: 0.98 }}
                 onClick={() => navigate(mode.route)}
                 className={cn(
-                  'w-full p-5 rounded-2xl border-2 text-left transition-all',
+                  'w-full p-5 rounded-xl border-2 text-left transition-all',
                   mode.color
                 )}
               >

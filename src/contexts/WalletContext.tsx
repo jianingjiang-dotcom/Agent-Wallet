@@ -1060,10 +1060,94 @@ const mockNotifications: Notification[] = [
     priority: 'normal',
     title: '转账成功',
     content: '向 0x9876...4321 转账 200 USDT 已成功。',
-    timestamp: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000), // 5 days ago
+    timestamp: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
     isRead: true,
     action: { label: '查看交易', route: '/transaction/2' },
     metadata: { amount: 200, symbol: 'USDT', txId: '2', walletId: 'wallet-2' },
+  },
+  {
+    id: 'notif-tx-2',
+    type: 'transaction_in',
+    category: 'transaction',
+    priority: 'normal',
+    title: '收到 1,200 USDC',
+    content: '来自 0xA3c7...B821 的转账已确认到账。',
+    timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000),
+    isRead: false,
+    action: { label: '查看交易', route: '/transaction/10' },
+    metadata: { amount: 1200, symbol: 'USDC', txId: '10', walletId: 'wallet-2' },
+  },
+  {
+    id: 'notif-tx-3',
+    type: 'transaction_out',
+    category: 'transaction',
+    priority: 'normal',
+    title: '转账已发送',
+    content: '向 Binance 充值地址转账 500 USDT，等待链上确认。',
+    timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000),
+    isRead: false,
+    action: { label: '查看交易', route: '/transaction/11' },
+    metadata: { amount: 500, symbol: 'USDT', txId: '11', walletId: 'wallet-1' },
+  },
+  {
+    id: 'notif-tx-4',
+    type: 'large_amount',
+    category: 'transaction',
+    priority: 'high',
+    title: '大额转入提醒',
+    content: '收到来自 0xFe12...9aB3 的 50,000 USDT 大额转账，请注意核实来源。',
+    timestamp: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
+    isRead: false,
+    action: { label: '查看交易', route: '/transaction/12' },
+    metadata: { amount: 50000, symbol: 'USDT', txId: '12', walletId: 'wallet-1' },
+  },
+  {
+    id: 'notif-tx-5',
+    type: 'transaction_in',
+    category: 'transaction',
+    priority: 'normal',
+    title: '收到 0.8 ETH',
+    content: '来自 0x2B44...D19c 的 ETH 转账已完成确认，共 12 个区块。',
+    timestamp: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000 - 3 * 60 * 60 * 1000),
+    isRead: true,
+    action: { label: '查看交易', route: '/transaction/13' },
+    metadata: { amount: 0.8, symbol: 'ETH', txId: '13', walletId: 'wallet-3' },
+  },
+  {
+    id: 'notif-tx-6',
+    type: 'transaction_out',
+    category: 'transaction',
+    priority: 'normal',
+    title: '转账成功',
+    content: '向 OKX 提币地址成功转出 300 USDC。',
+    timestamp: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000),
+    isRead: true,
+    action: { label: '查看交易', route: '/transaction/14' },
+    metadata: { amount: 300, symbol: 'USDC', txId: '14', walletId: 'wallet-2' },
+  },
+  {
+    id: 'notif-tx-7',
+    type: 'transaction_in',
+    category: 'transaction',
+    priority: 'normal',
+    title: '收到 2.5 BNB',
+    content: '来自 0xC091...7E2f 的 BNB 已到账，当前价值约 $875。',
+    timestamp: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+    isRead: true,
+    action: { label: '查看交易', route: '/transaction/15' },
+    metadata: { amount: 2.5, symbol: 'BNB', txId: '15', walletId: 'wallet-1' },
+  },
+  {
+    id: 'notif-tx-8',
+    type: 'large_amount',
+    category: 'transaction',
+    priority: 'high',
+    title: '大额转出提醒',
+    content: '您发起的 25,000 USDT 转账已广播至链上，预计 2 分钟内确认。',
+    timestamp: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000),
+    isRead: true,
+    action: { label: '查看交易', route: '/transaction/16' },
+    metadata: { amount: 25000, symbol: 'USDT', txId: '16', walletId: 'wallet-2' },
   },
 ];
 export function aggregateAssets(assets: Asset[]): AggregatedAsset[] {
@@ -1306,9 +1390,9 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     return agentTransactions.filter(tx => tx.status === 'pending_approval').length;
   }, [agentTransactions]);
 
-  // Computed notification count
+  // Computed notification count (only transaction + system, exclude agent)
   const unreadNotificationCount = useMemo(() => {
-    return notifications.filter(n => !n.isRead).length;
+    return notifications.filter(n => !n.isRead && n.category !== 'agent').length;
   }, [notifications]);
 
   const markNotificationAsRead = useCallback((id: string) => {

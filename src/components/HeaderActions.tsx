@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { Bell, AlignJustify } from 'lucide-react';
+import { Bell, LayoutGrid } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useWallet } from '@/contexts/WalletContext';
 
@@ -38,7 +38,7 @@ export function HeaderActions({ onMenuClick }: { onMenuClick?: () => void }) {
         whileTap={{ scale: 0.9 }}
         transition={{ type: 'spring', stiffness: 400, damping: 25 }}
       >
-        <AlignJustify className="w-5 h-5" strokeWidth={1.5} style={{ color: '#000000' }} />
+        <LayoutGrid className="w-5 h-5" strokeWidth={1.5} style={{ color: '#000000' }} />
       </motion.button>
     </div>
   );

@@ -242,7 +242,7 @@ export function ChatMessage({
           <AlertTriangle className="w-3.5 h-3.5 text-destructive" />
         </div>
         <div className="flex flex-col items-start max-w-[85%]">
-          <div className="px-4 py-3 text-sm bg-destructive/5 border border-destructive/20 rounded-2xl rounded-bl-md">
+          <div className="px-4 py-3 text-sm bg-destructive/5 border border-destructive/20 rounded-xl rounded-bl-md">
             <p className="text-destructive font-medium text-xs mb-1">发送失败</p>
             <p className="text-muted-foreground text-xs">{message.content || '网络错误，请稍后重试'}</p>
           </div>
@@ -280,8 +280,8 @@ export function ChatMessage({
           className={cn(
             'px-4 py-2.5 text-sm leading-relaxed overflow-hidden max-w-full',
             isUser
-              ? 'bg-accent text-accent-foreground rounded-2xl rounded-br-md'
-              : 'bg-muted text-foreground rounded-2xl rounded-bl-md'
+              ? 'bg-accent text-accent-foreground rounded-xl rounded-br-md'
+              : 'bg-muted text-foreground rounded-xl rounded-bl-md'
           )}
         >
           {isUser ? (

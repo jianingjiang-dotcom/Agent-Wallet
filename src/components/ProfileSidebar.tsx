@@ -2,7 +2,7 @@ import { ReactNode, useState, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Settings, X, ChevronRight, Bot, Settings2, BarChart3, FileText,
-  Wallet, BookUser, Shield
+  Wallet, BookUser, Shield, ClipboardCheck
 } from 'lucide-react';
 import { useWallet } from '@/contexts/WalletContext';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -21,8 +21,7 @@ export function ProfileSidebar({ children, open, onOpenChange }: ProfileSidebarP
 
   const sidebarNavigate = useCallback((path: string) => {
     onOpenChange(false);
-    // Small delay to let animation finish before navigating
-    setTimeout(() => navigate(path), 200);
+    setTimeout(() => navigate(path, { state: { fromSidebar: true } }), 200);
   }, [navigate, onOpenChange]);
 
   return (
@@ -88,6 +87,7 @@ export function ProfileSidebar({ children, open, onOpenChange }: ProfileSidebarP
                 {[
                   { icon: Bot, label: 'Agent 授权管理', path: '/agent-management' },
                   { icon: Settings2, label: 'Agent 风控管理', path: '/agent-settings' },
+                  { icon: ClipboardCheck, label: 'Agent 审核管理', path: '/agent-review' },
                   { icon: BarChart3, label: '结算对账', path: '/settlement-dashboard' },
                   { icon: FileText, label: '审计日志', path: '/audit-log' },
                 ].map((item, index, arr) => (

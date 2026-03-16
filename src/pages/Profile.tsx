@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import {
   Settings2, BarChart3, Bot, FileText,
-  Wallet, BookUser, Shield, Settings
+  Wallet, BookUser, Shield, Settings, ClipboardCheck
 } from 'lucide-react';
 
 import { useNavigate } from 'react-router-dom';
@@ -20,6 +20,7 @@ const menuGroups = [
     items: [
       { icon: Bot, label: 'Agent 授权管理', path: '/agent-management' },
       { icon: Settings2, label: 'Agent 风控管理', path: '/agent-settings' },
+      { icon: ClipboardCheck, label: 'Agent 审核管理', path: '/agent-review' },
       { icon: BarChart3, label: '结算对账', path: '/settlement-dashboard' },
       { icon: FileText, label: '审计日志', path: '/audit-log' },
     ],

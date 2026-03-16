@@ -278,7 +278,7 @@ export default function WalletRecoveryPage() {
             </p>
           </div>
 
-          <div className="p-4 bg-white rounded-2xl mb-6">
+          <div className="p-4 bg-white rounded-xl mb-6">
             <QRCodeSVG value={qrCode} size={200} level="H" />
           </div>
 

@@ -104,7 +104,7 @@ export default function ContactDetailPage() {
 
           {/* Address Card */}
           <div className="px-4 mb-4">
-            <div className="p-4 rounded-2xl bg-card border border-border/50">
+            <div className="p-4 rounded-xl bg-card border border-border/50">
               <div className="flex items-center gap-2 mb-3">
                 <ChainIcon chainId={contact.network as ChainId} size="sm" />
                 <span className="text-sm font-medium">{getChainName(contact.network as ChainId)}</span>
@@ -138,7 +138,7 @@ export default function ContactDetailPage() {
                 }
               }}
               className={cn(
-                'w-full p-4 rounded-2xl border flex items-center gap-3 transition-all active:scale-[0.98]',
+                'w-full p-4 rounded-xl border flex items-center gap-3 transition-all active:scale-[0.98]',
                 contact.isWhitelisted
                   ? 'bg-emerald-50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-800/40'
                   : 'bg-card border-border/50'
@@ -175,7 +175,7 @@ export default function ContactDetailPage() {
           {contact.notes && (
             <div className="px-4 mb-4">
               <h3 className="text-sm font-medium text-muted-foreground mb-2">备注</h3>
-              <div className="p-4 rounded-2xl bg-card border border-border/50">
+              <div className="p-4 rounded-xl bg-card border border-border/50">
                 <p className="text-sm">{contact.notes}</p>
               </div>
             </div>
@@ -185,7 +185,7 @@ export default function ContactDetailPage() {
           {contactTransactions.length > 0 && (
             <div className="px-4 mb-4">
               <h3 className="text-sm font-medium text-muted-foreground mb-2">交易记录</h3>
-              <div className="rounded-2xl bg-card border border-border/50 overflow-hidden">
+              <div className="rounded-xl bg-card border border-border/50 overflow-hidden">
                 {contactTransactions.map((tx, index) => (
                   <div
                     key={tx.id}

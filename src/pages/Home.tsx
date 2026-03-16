@@ -1,12 +1,12 @@
-import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Eye, EyeOff, ChevronRight, Send, QrCode,
   TrendingDown, Wallet, Plus, Shield, AlertTriangle,
   CheckCircle2, Sparkles, Lock, ChevronDown, Clock, Bell, Bot, ClipboardCheck,
-  AlignJustify
+  LayoutGrid
 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
 import { useWallet, aggregateByChain } from '@/contexts/WalletContext';
@@ -48,7 +48,7 @@ function EmptyWalletState() {
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 0.4 }}
-            className="w-20 h-20 mx-auto mb-6 rounded-2xl gradient-primary flex items-center justify-center shadow-xl"
+            className="w-20 h-20 mx-auto mb-6 rounded-xl gradient-primary flex items-center justify-center shadow-xl"
           >
             <Wallet className="w-10 h-10 text-primary-foreground" />
           </motion.div>
@@ -166,6 +166,18 @@ export default function HomePage() {
   const [showAllAssets, setShowAllAssets] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
+  const location = useLocation();
+  const handledSidebarOpen = useRef(false);
+
+  // Re-open sidebar when returning from a sidebar-originated navigation
+  useEffect(() => {
+    if ((location.state as { openSidebar?: boolean })?.openSidebar && !handledSidebarOpen.current) {
+      handledSidebarOpen.current = true;
+      setShowProfileDrawer(true);
+    } else if (!(location.state as { openSidebar?: boolean })?.openSidebar) {
+      handledSidebarOpen.current = false;
+    }
+  }, [location.state]);
   const { assets, transactions, currentWallet, walletStatus, addToken, removeToken, unreadNotificationCount, getAgentTxByWallet } = useWallet();
 
   // Simulate initial loading
@@ -387,7 +399,7 @@ export default function HomePage() {
               whileTap={{ scale: 0.9 }}
               transition={{ type: 'spring', stiffness: 400, damping: 25 }}
             >
-              <AlignJustify className="w-5 h-5" strokeWidth={1.5} style={{ color: '#000000' }} />
+              <LayoutGrid className="w-5 h-5" strokeWidth={1.5} style={{ color: '#000000' }} />
             </motion.button>
           </div>
         </div>

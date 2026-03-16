@@ -995,10 +995,10 @@ export default function LoginPage() {
                       <motion.div
                         animate={{ scale: [1, 1.3, 1], opacity: [0.4, 0, 0.4] }}
                         transition={{ duration: 2, repeat: Infinity, ease: 'easeOut' }}
-                        className={`absolute inset-0 rounded-2xl ${colorThemes[index].pulseColor}`}
+                        className={`absolute inset-0 rounded-xl ${colorThemes[index].pulseColor}`}
                       />
                       
-                      <div className={`relative w-24 h-24 rounded-2xl ${slide.iconBg} flex items-center justify-center shadow-2xl`}>
+                      <div className={`relative w-24 h-24 rounded-xl ${slide.iconBg} flex items-center justify-center shadow-2xl`}>
                         <motion.div
                           animate={{ rotate: [0, 4, -4, 0] }}
                           transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}

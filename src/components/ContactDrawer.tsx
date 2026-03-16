@@ -129,7 +129,7 @@ export function ContactDrawer({
                     transition={{ delay: index * 0.03 }}
                     onClick={() => handleSelect(contact)}
                     className={cn(
-                      "w-full p-4 rounded-2xl bg-card border border-border/50",
+                      "w-full p-4 rounded-xl bg-card border border-border/50",
                       "flex flex-col gap-1 text-left",
                       "hover:bg-muted/50 transition-colors"
                     )}
