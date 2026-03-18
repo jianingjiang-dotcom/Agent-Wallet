@@ -36,7 +36,7 @@ export function BottomNav() {
 
   return (
     <nav
-      className="shrink-0 flex h-[64px] border-t border-border/60 backdrop-blur-xl"
+      className="shrink-0 flex h-[64px] backdrop-blur-xl"
       style={{ backgroundColor: 'rgba(245, 245, 245, 0.6)' }}
     >
       {tabLabels.map((label, i) => (
