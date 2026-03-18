@@ -1,7 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { Send, Square, Mic, Plus, X, Camera, ImageIcon, FileIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Button } from '@/components/ui/button';
 import { useSpeechRecognition } from '@/hooks/useSpeechRecognition';
 import { cn } from '@/lib/utils';
 
@@ -23,7 +22,9 @@ export function ChatInput({ onSend, onStop, disabled, isLoading }: ChatInputProp
   const [attachment, setAttachment] = useState<File | null>(null);
   const [attachPreviewUrl, setAttachPreviewUrl] = useState<string | null>(null);
   const [showAttachPanel, setShowAttachPanel] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -31,6 +32,7 @@ export function ChatInput({ onSend, onStop, disabled, isLoading }: ChatInputProp
   const { isListening, interimTranscript, start: startListening, stop: stopListening, isSupported: voiceSupported } = useSpeechRecognition();
 
   const hasText = text.trim().length > 0 || attachment !== null;
+  const isExpanded = isFocused || hasText || isListening;
 
   const handleSend = useCallback(() => {
     const trimmed = text.trim();
@@ -41,7 +43,6 @@ export function ChatInput({ onSend, onStop, disabled, isLoading }: ChatInputProp
     setAttachment(null);
     setAttachPreviewUrl(null);
     setShowAttachPanel(false);
-    // Reset textarea height after clearing text
     if (inputRef.current) {
       inputRef.current.style.height = 'auto';
     }
@@ -55,7 +56,6 @@ export function ChatInput({ onSend, onStop, disabled, isLoading }: ChatInputProp
     }
   };
 
-  // Voice input handlers
   const handleVoiceDown = useCallback(() => {
     if (!voiceSupported || isLoading || disabled) return;
     startListening();
@@ -69,30 +69,22 @@ export function ChatInput({ onSend, onStop, disabled, isLoading }: ChatInputProp
     }
   }, [isListening, stopListening]);
 
-  // Attachment handlers
   const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
     setAttachment(file);
     setShowAttachPanel(false);
-
-    // Generate preview for images
     if (file.type.startsWith('image/')) {
       const url = URL.createObjectURL(file);
       setAttachPreviewUrl(url);
     } else {
       setAttachPreviewUrl(null);
     }
-
-    // Reset input so the same file can be selected again
     e.target.value = '';
   }, []);
 
   const removeAttachment = useCallback(() => {
-    if (attachPreviewUrl) {
-      URL.revokeObjectURL(attachPreviewUrl);
-    }
+    if (attachPreviewUrl) URL.revokeObjectURL(attachPreviewUrl);
     setAttachment(null);
     setAttachPreviewUrl(null);
   }, [attachPreviewUrl]);
@@ -101,19 +93,31 @@ export function ChatInput({ onSend, onStop, disabled, isLoading }: ChatInputProp
     setShowAttachPanel(prev => !prev);
   }, []);
 
-  // Display text: show interim transcript while listening
   const displayText = isListening ? (text + interimTranscript) : text;
 
-  // Auto-resize textarea height based on content
+  // Auto-resize textarea
   useEffect(() => {
     const el = inputRef.current;
     if (!el) return;
     el.style.height = 'auto';
-    el.style.height = `${el.scrollHeight}px`;
+    const newHeight = Math.min(el.scrollHeight, 84);
+    el.style.height = `${newHeight}px`;
   }, [displayText]);
 
+  // Click outside to collapse
+  useEffect(() => {
+    if (!isExpanded) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setIsFocused(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isExpanded]);
+
   return (
-    <div className="border-t border-border bg-background">
+    <div className="bg-page" ref={containerRef}>
       {/* Attachment preview */}
       <AnimatePresence>
         {attachment && (
@@ -126,11 +130,7 @@ export function ChatInput({ onSend, onStop, disabled, isLoading }: ChatInputProp
           >
             <div className="flex items-center gap-3 px-4 pt-2 pb-1">
               {attachPreviewUrl ? (
-                <img
-                  src={attachPreviewUrl}
-                  alt="preview"
-                  className="w-14 h-14 rounded-lg object-cover border border-border"
-                />
+                <img src={attachPreviewUrl} alt="preview" className="w-14 h-14 rounded-lg object-cover border border-border" />
               ) : (
                 <div className="w-14 h-14 rounded-lg bg-muted flex items-center justify-center border border-border">
                   <FileIcon className="w-6 h-6 text-muted-foreground" />
@@ -140,10 +140,7 @@ export function ChatInput({ onSend, onStop, disabled, isLoading }: ChatInputProp
                 <p className="text-xs font-medium truncate">{attachment.name}</p>
                 <p className="text-[10px] text-muted-foreground">{formatFileSize(attachment.size)}</p>
               </div>
-              <button
-                onClick={removeAttachment}
-                className="p-1 rounded-full hover:bg-muted transition-colors"
-              >
+              <button onClick={removeAttachment} className="p-1 rounded-full hover:bg-muted transition-colors">
                 <X className="w-4 h-4 text-muted-foreground" />
               </button>
             </div>
@@ -162,28 +159,19 @@ export function ChatInput({ onSend, onStop, disabled, isLoading }: ChatInputProp
             className="overflow-hidden"
           >
             <div className="flex items-center justify-center gap-6 px-4 py-3">
-              <button
-                onClick={() => cameraInputRef.current?.click()}
-                className="flex flex-col items-center gap-1.5"
-              >
+              <button onClick={() => cameraInputRef.current?.click()} className="flex flex-col items-center gap-1.5">
                 <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center hover:bg-accent/20 transition-colors">
                   <Camera className="w-5 h-5 text-accent" />
                 </div>
                 <span className="text-[10px] text-muted-foreground">相机</span>
               </button>
-              <button
-                onClick={() => galleryInputRef.current?.click()}
-                className="flex flex-col items-center gap-1.5"
-              >
+              <button onClick={() => galleryInputRef.current?.click()} className="flex flex-col items-center gap-1.5">
                 <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center hover:bg-accent/20 transition-colors">
                   <ImageIcon className="w-5 h-5 text-accent" />
                 </div>
                 <span className="text-[10px] text-muted-foreground">图库</span>
               </button>
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                className="flex flex-col items-center gap-1.5"
-              >
+              <button onClick={() => fileInputRef.current?.click()} className="flex flex-col items-center gap-1.5">
                 <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center hover:bg-accent/20 transition-colors">
                   <FileIcon className="w-5 h-5 text-accent" />
                 </div>
@@ -195,110 +183,142 @@ export function ChatInput({ onSend, onStop, disabled, isLoading }: ChatInputProp
       </AnimatePresence>
 
       {/* Hidden file inputs */}
-      <input
-        ref={cameraInputRef}
-        type="file"
-        accept="image/*"
-        capture="environment"
-        onChange={handleFileSelect}
-        className="hidden"
-      />
-      <input
-        ref={galleryInputRef}
-        type="file"
-        accept="image/*"
-        onChange={handleFileSelect}
-        className="hidden"
-      />
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="*/*"
-        onChange={handleFileSelect}
-        className="hidden"
-      />
+      <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" onChange={handleFileSelect} className="hidden" />
+      <input ref={galleryInputRef} type="file" accept="image/*" onChange={handleFileSelect} className="hidden" />
+      <input ref={fileInputRef} type="file" accept="*/*" onChange={handleFileSelect} className="hidden" />
 
-      {/* Main input row */}
-      <div className="flex items-end gap-1.5 px-3 pt-2 pb-1">
-        {/* Attach / Close button */}
-        <motion.button
-          whileTap={{ scale: 0.85 }}
-          onClick={toggleAttachPanel}
+      {/* Main input container */}
+      <div className="px-4 py-2">
+        <div
           className={cn(
-            'h-9 w-9 shrink-0 rounded-full flex items-center justify-center transition-colors mb-0.5',
-            showAttachPanel
-              ? 'bg-muted text-foreground'
-              : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+            'bg-card rounded-2xl border border-border/60 transition-all',
+            isListening && 'ring-2 ring-destructive/50'
           )}
-        >
-          <motion.div
-            animate={{ rotate: showAttachPanel ? 45 : 0 }}
-            transition={{ duration: 0.2 }}
-          >
-            <Plus className="w-5 h-5" />
-          </motion.div>
-        </motion.button>
-
-        {/* Textarea */}
-        <textarea
-          ref={inputRef}
-          value={displayText}
-          onChange={e => {
-            if (!isListening) {
-              setText(e.target.value);
+          style={{ boxShadow: '0 4px 40px rgba(0, 0, 0, 0.02)' }}
+          onClick={() => {
+            if (!isExpanded) {
+              setIsFocused(true);
+              inputRef.current?.focus();
             }
           }}
-          onKeyDown={handleKeyDown}
-          placeholder={isListening ? '正在聆听...' : '输入消息...'}
-          rows={1}
-          disabled={disabled || isLoading || isListening}
-          className={cn(
-            'flex-1 resize-none rounded-xl border bg-muted/50 px-4 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50 max-h-[84px] overflow-y-auto',
-            isListening && 'ring-2 ring-destructive/50 animate-pulse border-destructive/30'
-          )}
-        />
+        >
+          {isExpanded ? (
+            /* ── Expanded: text on top, actions on bottom ── */
+            <div className="flex flex-col">
+              {/* Text area */}
+              <div className="px-4 pt-3">
+                <textarea
+                  ref={inputRef}
+                  value={displayText}
+                  onChange={e => { if (!isListening) setText(e.target.value); }}
+                  onKeyDown={handleKeyDown}
+                  onFocus={() => setIsFocused(true)}
+                  placeholder={isListening ? '正在聆听...' : '输入消息...'}
+                  rows={1}
+                  disabled={disabled || isLoading || isListening}
+                  className="w-full resize-none bg-transparent text-sm placeholder:text-muted-foreground focus:outline-none disabled:opacity-50 overflow-y-auto leading-5"
+                  style={{ maxHeight: '84px', minHeight: '20px' }}
+                  autoFocus
+                />
+              </div>
 
-        {/* Right action button */}
-        <motion.div whileTap={{ scale: 0.85 }} transition={{ duration: 0.1 }} className="mb-0.5">
-          {isLoading ? (
-            /* Stop button */
-            <Button
-              size="icon"
-              variant="destructive"
-              onClick={onStop}
-              className="h-9 w-9 rounded-full shrink-0"
-            >
-              <Square className="w-3.5 h-3.5 fill-current" />
-            </Button>
-          ) : hasText && !isListening ? (
-            /* Send button */
-            <Button
-              size="icon"
-              onClick={handleSend}
-              disabled={(!text.trim() && !attachment) || disabled}
-              className="h-9 w-9 rounded-full shrink-0"
-            >
-              <Send className="w-4 h-4" />
-            </Button>
+              {/* Bottom action row */}
+              <div className="flex items-center justify-between px-3 py-2">
+                {/* Left: attach */}
+                <motion.button
+                  whileTap={{ scale: 0.85 }}
+                  onClick={toggleAttachPanel}
+                  className={cn(
+                    'shrink-0 flex items-center justify-center w-6 h-6 transition-colors',
+                    showAttachPanel ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
+                  )}
+                >
+                  <motion.div animate={{ rotate: showAttachPanel ? 45 : 0 }} transition={{ duration: 0.2 }}>
+                    <Plus className="w-5 h-5" />
+                  </motion.div>
+                </motion.button>
+
+                {/* Right: action buttons */}
+                <div className="flex items-center gap-2">
+                  {isLoading ? (
+                    <motion.button whileTap={{ scale: 0.85 }}
+                      onClick={onStop}
+                      className="w-8 h-8 rounded-full bg-destructive flex items-center justify-center"
+                    >
+                      <Square className="w-3 h-3 fill-white text-white" />
+                    </motion.button>
+                  ) : (
+                    <>
+                      {/* Send button */}
+                      {hasText && !isListening && (
+                        <motion.button
+                          whileTap={{ scale: 0.85 }}
+                          onClick={handleSend}
+                          disabled={(!text.trim() && !attachment) || disabled}
+                          className="w-8 h-8 rounded-full bg-accent flex items-center justify-center disabled:opacity-50"
+                        >
+                          <Send className="w-4 h-4 text-white" />
+                        </motion.button>
+                      )}
+                      {/* Voice wave / send when no text */}
+                      {!hasText && !isListening && (
+                        <button
+                          onPointerDown={handleVoiceDown}
+                          onPointerUp={handleVoiceUp}
+                          onPointerLeave={handleVoiceUp}
+                          disabled={!voiceSupported || disabled}
+                          className={cn(
+                            'flex items-center justify-center w-8 h-8 rounded-full transition-colors bg-accent',
+                            (!voiceSupported || disabled) && 'opacity-50'
+                          )}
+                        >
+                          <Mic className="w-4 h-4 text-white" />
+                        </button>
+                      )}
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
           ) : (
-            /* Mic button */
-            <Button
-              size="icon"
-              variant={isListening ? 'destructive' : 'ghost'}
-              onPointerDown={handleVoiceDown}
-              onPointerUp={handleVoiceUp}
-              onPointerLeave={handleVoiceUp}
-              disabled={!voiceSupported || disabled}
-              className={cn(
-                'h-9 w-9 rounded-full shrink-0',
-                isListening && 'animate-pulse',
-                !isListening && 'text-muted-foreground hover:text-foreground'
-              )}
-            >
-              <Mic className="w-4 h-4" />
-            </Button>
+            /* ── Collapsed: single row ── */
+            <div className="flex items-center pl-3 pr-1 gap-2" style={{ minHeight: '40px' }}>
+              {/* Attach button */}
+              <motion.button
+                whileTap={{ scale: 0.85 }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleAttachPanel();
+                }}
+                className="shrink-0 flex items-center justify-center w-6 h-6 text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <Plus className="w-5 h-5" />
+              </motion.button>
+
+              {/* Placeholder text */}
+              <span className="flex-1 text-sm text-muted-foreground select-none">
+                {isListening ? '正在聆听...' : '输入消息...'}
+              </span>
+
+              {/* Mic button */}
+              <motion.div whileTap={{ scale: 0.85 }} transition={{ duration: 0.1 }} className="shrink-0">
+                <button
+                  onPointerDown={handleVoiceDown}
+                  onPointerUp={handleVoiceUp}
+                  onPointerLeave={handleVoiceUp}
+                  disabled={!voiceSupported || disabled}
+                  className={cn(
+                    'flex items-center justify-center w-8 h-8 rounded-full transition-colors',
+                    isListening ? 'bg-destructive animate-pulse' : 'bg-accent',
+                    (!voiceSupported || disabled) && 'opacity-50'
+                  )}
+                >
+                  <Mic className="w-4 h-4 text-white" />
+                </button>
+              </motion.div>
+            </div>
           )}
-        </motion.div>
+        </div>
       </div>
     </div>
   );

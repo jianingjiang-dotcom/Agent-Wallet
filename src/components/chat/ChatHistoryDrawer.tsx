@@ -1,11 +1,12 @@
+import { ReactNode } from 'react';
 import { format, isToday, isYesterday, subDays, isAfter } from 'date-fns';
 import { Trash2, MessageSquareText } from 'lucide-react';
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import type { ChatSession } from '@/types/chat';
 import { cn } from '@/lib/utils';
 
 interface ChatHistoryDrawerProps {
+  children: ReactNode;
   open: boolean;
   onOpenChange: (v: boolean) => void;
   sessions: ChatSession[];
@@ -40,6 +41,7 @@ function groupSessions(sessions: ChatSession[]) {
 }
 
 export function ChatHistoryDrawer({
+  children,
   open,
   onOpenChange,
   sessions,
@@ -50,62 +52,88 @@ export function ChatHistoryDrawer({
   const groups = groupSessions(sessions);
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="left" className="w-[300px] p-0 flex flex-col [&>button.absolute]:hidden">
-        <SheetHeader className="p-4 border-b border-border">
-          <SheetTitle className="text-base">聊天记录</SheetTitle>
-        </SheetHeader>
+    <div className="h-full relative overflow-hidden">
+      {/* Push container: sidebar + main content side by side */}
+      <div
+        className="flex h-full transition-transform duration-300 ease-in-out"
+        style={{ transform: open ? 'translateX(0)' : 'translateX(-70%)' }}
+      >
+        {/* Sidebar panel - 70% width */}
+        <div className="w-[70%] h-full shrink-0 bg-background flex flex-col">
+          <div className="flex items-center h-[54px] px-4 border-b border-border shrink-0">
+            <h2 className="text-base font-semibold">聊天记录</h2>
+          </div>
 
-        <ScrollArea className="flex-1">
-          {groups.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
-              <MessageSquareText className="w-10 h-10 mb-3 opacity-30" />
-              <p className="text-sm">暂无聊天记录</p>
-            </div>
-          ) : (
-            <div className="p-3 space-y-4">
-              {groups.map(g => (
-                <div key={g.label}>
-                  <p className="text-xs font-medium text-muted-foreground mb-1.5 px-1">{g.label}</p>
-                  <div className="space-y-1">
-                    {g.items.map(s => (
-                      <div
-                        key={s.id}
-                        className={cn(
-                          'group flex items-center gap-2 px-3 py-2.5 rounded-lg cursor-pointer transition-colors',
-                          s.id === currentSessionId
-                            ? 'bg-accent/10 text-accent'
-                            : 'hover:bg-muted'
-                        )}
-                        onClick={() => {
-                          onSelectSession(s.id);
-                          onOpenChange(false);
-                        }}
-                      >
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium truncate">{s.title}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {format(new Date(s.updatedAt), 'HH:mm')}
-                          </p>
-                        </div>
-                        <button
-                          onClick={e => {
-                            e.stopPropagation();
-                            onDeleteSession(s.id);
+          <ScrollArea className="flex-1">
+            {groups.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
+                <MessageSquareText className="w-10 h-10 mb-3 opacity-30" />
+                <p className="text-sm">暂无聊天记录</p>
+              </div>
+            ) : (
+              <div className="p-3 space-y-4">
+                {groups.map(g => (
+                  <div key={g.label}>
+                    <p className="text-xs font-medium text-muted-foreground mb-1.5 px-1">{g.label}</p>
+                    <div className="space-y-1">
+                      {g.items.map(s => (
+                        <div
+                          key={s.id}
+                          className={cn(
+                            'group flex items-center gap-2 px-3 py-2.5 rounded-lg cursor-pointer transition-colors',
+                            s.id === currentSessionId
+                              ? 'bg-accent/10 text-accent'
+                              : 'hover:bg-muted'
+                          )}
+                          onClick={() => {
+                            onSelectSession(s.id);
+                            onOpenChange(false);
                           }}
-                          className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-destructive/10 transition-all"
                         >
-                          <Trash2 className="w-3.5 h-3.5 text-destructive" />
-                        </button>
-                      </div>
-                    ))}
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium truncate">{s.title}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {format(new Date(s.updatedAt), 'HH:mm')}
+                            </p>
+                          </div>
+                          <button
+                            onClick={e => {
+                              e.stopPropagation();
+                              onDeleteSession(s.id);
+                            }}
+                            className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-destructive/10 transition-all"
+                          >
+                            <Trash2 className="w-3.5 h-3.5 text-destructive" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </ScrollArea>
-      </SheetContent>
-    </Sheet>
+                ))}
+              </div>
+            )}
+          </ScrollArea>
+        </div>
+
+        {/* Main content area - full width */}
+        <div className="w-full h-full shrink-0 relative">
+          {/* Overlay - fades in as sidebar opens */}
+          <div
+            className="absolute inset-0 z-30 bg-black pointer-events-none transition-opacity duration-300 ease-in-out"
+            style={{ opacity: open ? 0.5 : 0 }}
+          />
+          {children}
+        </div>
+      </div>
+
+      {/* Tap overlay to close - covers the visible 30% of main content on the right */}
+      {open && (
+        <div
+          className="absolute inset-y-0 right-0 z-40"
+          style={{ width: '30%' }}
+          onClick={() => onOpenChange(false)}
+        />
+      )}
+    </div>
   );
 }

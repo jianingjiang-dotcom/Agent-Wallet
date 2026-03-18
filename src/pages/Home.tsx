@@ -178,7 +178,7 @@ export default function HomePage() {
       handledSidebarOpen.current = false;
     }
   }, [location.state]);
-  const { assets, transactions, currentWallet, walletStatus, addToken, removeToken, unreadNotificationCount, getAgentTxByWallet } = useWallet();
+  const { assets, transactions, currentWallet, walletStatus, addToken, removeToken, unreadNotificationCount, getAgentTxByWallet, agentTransactions } = useWallet();
 
   // Simulate initial loading
   useEffect(() => {
@@ -312,10 +312,8 @@ export default function HomePage() {
 
   // Pending agent transactions for current wallet
   const walletPendingCount = useMemo(() => {
-    if (!currentWallet) return 0;
-    return getAgentTxByWallet(currentWallet.id)
-      .filter(tx => tx.status === 'pending_approval').length;
-  }, [currentWallet, getAgentTxByWallet]);
+    return agentTransactions.filter(tx => tx.status === 'pending_approval').length;
+  }, [agentTransactions]);
 
   const balanceParts = formatBalanceParts(totalBalance);
 
@@ -576,7 +574,7 @@ export default function HomePage() {
               }}
             />
           ) : (
-            <div className="space-y-1.5">
+            <div className="space-y-1.5 no-card-shadow">
               <AnimatePresence mode="popLayout">
                 {(showAllAssets ? displayAssets : displayAssets.slice(0, INITIAL_ASSETS_COUNT)).map((asset, index) => (
                   <motion.button
@@ -667,7 +665,7 @@ export default function HomePage() {
                   <p className="text-xs text-muted-foreground mb-1.5 px-1">
                     {group.dateLabel}
                   </p>
-                  <div className="space-y-1.5">
+                  <div className="space-y-1.5 no-card-shadow">
                     {group.transactions.map((tx, index) => (
                       <motion.button
                         key={tx.id}

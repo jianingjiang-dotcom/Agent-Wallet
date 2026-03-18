@@ -5,12 +5,11 @@ import { ChatMessage } from '@/components/chat/ChatMessage';
 import { ChatInput } from '@/components/chat/ChatInput';
 import { QuickActions } from '@/components/chat/QuickActions';
 import { TypingIndicator } from '@/components/chat/TypingIndicator';
-import { ChatHistoryDrawer } from '@/components/chat/ChatHistoryDrawer';
-import { useChatHistory } from '@/hooks/useChatHistory';
 import { streamChat } from '@/lib/chat-stream';
 import { useWallet } from '@/contexts/WalletContext';
 import { cn } from '@/lib/utils';
 import type { ChatMessage as ChatMessageType, ChatCard } from '@/types/chat';
+import type { useChatHistory } from '@/hooks/useChatHistory';
 
 const PAGE_MAP: Record<string, { label: string; path: string }> = {
   send: { label: '转账', path: '/send' },
@@ -24,22 +23,25 @@ const PAGE_MAP: Record<string, { label: string; path: string }> = {
 
 export interface AssistantViewHandle {
   startNewSession: () => void;
-  openHistory: () => void;
 }
 
-export const AssistantView = forwardRef<AssistantViewHandle, { className?: string }>(
-  function AssistantView({ className }, ref) {
+interface AssistantViewProps {
+  className?: string;
+  chatHistory: ReturnType<typeof useChatHistory>;
+}
+
+export const AssistantView = forwardRef<AssistantViewHandle, AssistantViewProps>(
+  function AssistantView({ className, chatHistory }, ref) {
     const {
-      sessions, currentSession, currentSessionId,
-      startNewSession, switchSession, addMessage,
+      currentSession, currentSessionId,
+      startNewSession, addMessage,
       updateLastAssistantMessage, persistCurrent,
-      deleteSession, setCardOnLastAssistant,
+      setCardOnLastAssistant,
       removeLastAssistantMessage, setMessageFeedback,
-    } = useChatHistory();
+    } = chatHistory;
 
     const { currentWallet, assets, transactions } = useWallet();
     const [isLoading, setIsLoading] = useState(false);
-    const [historyOpen, setHistoryOpen] = useState(false);
     const [showScrollBtn, setShowScrollBtn] = useState(false);
     const scrollRef = useRef<HTMLDivElement>(null);
     const abortRef = useRef<AbortController | null>(null);
@@ -49,7 +51,6 @@ export const AssistantView = forwardRef<AssistantViewHandle, { className?: strin
     // Expose actions to parent via ref
     useImperativeHandle(ref, () => ({
       startNewSession,
-      openHistory: () => setHistoryOpen(true),
     }));
 
     // Smooth scroll to bottom
@@ -422,15 +423,6 @@ export const AssistantView = forwardRef<AssistantViewHandle, { className?: strin
           isLoading={isLoading}
         />
 
-        {/* History Drawer */}
-        <ChatHistoryDrawer
-          open={historyOpen}
-          onOpenChange={setHistoryOpen}
-          sessions={sessions}
-          currentSessionId={currentSessionId}
-          onSelectSession={switchSession}
-          onDeleteSession={deleteSession}
-        />
       </div>
     );
   }

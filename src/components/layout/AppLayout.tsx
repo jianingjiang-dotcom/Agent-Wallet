@@ -104,7 +104,7 @@ export function AppLayout({
 
       <main className="flex-1 flex flex-col overflow-auto">
         {children}
-        {showNav && <div className="shrink-0 h-[80px]" />}
+        {showNav && <div className="shrink-0 h-[64px]" />}
       </main>
 
       {showNav && (
