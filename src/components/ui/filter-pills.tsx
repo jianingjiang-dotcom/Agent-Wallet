@@ -39,7 +39,7 @@ function FilterPillsInner<T extends string = string>(
       <div
         ref={ref}
         className={cn(
-          "flex bg-muted/50 rounded-lg p-1",
+          "flex border-b border-border",
           className
         )}
         {...props}
@@ -52,9 +52,9 @@ function FilterPillsInner<T extends string = string>(
               type="button"
               onClick={() => onChange(item.id)}
               className={cn(
-                "flex-1 py-2 text-sm font-medium rounded-lg transition-all flex items-center justify-center gap-1.5",
+                "flex-1 h-11 text-sm font-medium transition-colors flex items-center justify-center gap-1.5 relative",
                 isActive
-                  ? "bg-background text-foreground shadow-sm"
+                  ? "text-accent"
                   : "text-muted-foreground hover:text-foreground"
               )}
             >
@@ -64,6 +64,9 @@ function FilterPillsInner<T extends string = string>(
                 <span className="min-w-4 h-4 px-1 bg-accent/20 text-accent text-[10px] rounded-full inline-flex items-center justify-center font-semibold">
                   {item.badge}
                 </span>
+              )}
+              {isActive && (
+                <span className="absolute bottom-0 left-0 w-full h-0.5 bg-accent rounded-full" />
               )}
             </button>
           );
