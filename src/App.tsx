@@ -62,6 +62,7 @@ import AddressManagement from "./pages/AddressManagement";
 import GeneralSettings from "./pages/GeneralSettings";
 import AccountSecurity from "./pages/AccountSecurity";
 import ComponentDemo from "./pages/ComponentDemo";
+import Mine from "./pages/Mine";
 
 const queryClient = new QueryClient();
 
@@ -81,7 +82,7 @@ function ProtectedRoute({ children, bypassAuth = false }: { children: React.Reac
   return <>{children}</>;
 }
 
-const TAB_PATHS = ['/home', '/assistant', '/history', '/profile'];
+const TAB_PATHS = ['/home', '/assistant', '/history', '/mine', '/profile'];
 type NavMode = 'tab' | 'push' | 'pop';
 
 const slideTransition = { type: 'tween', duration: 0.28, ease: [0.25, 0.46, 0.45, 0.94] };
@@ -128,6 +129,7 @@ function AppRoutes() {
       <Route path="/receive" element={<ProtectedRoute><Receive /></ProtectedRoute>} />
       <Route path="/asset/:symbol" element={<ProtectedRoute><AssetDetail /></ProtectedRoute>} />
       <Route path="/history" element={<ProtectedRoute><History /></ProtectedRoute>} />
+      <Route path="/mine" element={<ProtectedRoute><Mine /></ProtectedRoute>} />
       <Route path="/transaction/:id" element={<ProtectedRoute><TransactionDetail /></ProtectedRoute>} />
       <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
       <Route path="/assistant" element={<ProtectedRoute bypassAuth><AIAssistant /></ProtectedRoute>} />

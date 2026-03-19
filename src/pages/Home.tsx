@@ -323,7 +323,6 @@ export default function HomePage() {
   }
 
   return (
-    <ProfileSidebar open={showProfileDrawer} onOpenChange={setShowProfileDrawer}>
     <AppLayout showNav>
       <PullToRefresh onRefresh={handleRefresh}>
         <div className="px-4 relative">
@@ -389,15 +388,6 @@ export default function HomePage() {
                   {unreadNotificationCount > 9 ? '9+' : unreadNotificationCount}
                 </motion.span>
               )}
-            </motion.button>
-            {/* Sidebar Entry */}
-            <motion.button
-              className="flex items-center justify-center w-9 h-9 rounded-full bg-background card-elevated no-card-shadow"
-              onClick={() => setShowProfileDrawer(true)}
-              whileTap={{ scale: 0.9 }}
-              transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-            >
-              <LayoutGrid className="w-5 h-5" strokeWidth={1.5} style={{ color: '#000000' }} />
             </motion.button>
           </div>
         </div>
@@ -778,6 +768,5 @@ export default function HomePage() {
       />
 
     </AppLayout>
-    </ProfileSidebar>
   );
 }
