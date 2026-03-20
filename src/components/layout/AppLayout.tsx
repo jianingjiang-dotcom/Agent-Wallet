@@ -59,7 +59,7 @@ export function AppLayout({
       {hasHeader && (
         <header
           className={cn(
-            "flex items-center justify-between px-4 h-[54px] sticky top-0 z-10",
+            "flex items-center justify-between px-4 h-[44px] sticky top-0 z-10",
             !pageBg && "backdrop-blur-xl border-b border-border/30 bg-background/80",
             pageBg && pageBg
           )}
@@ -68,7 +68,7 @@ export function AppLayout({
             {leftAction ?? (showBack && (
               <button
                 onClick={handleBack}
-                className="flex items-center justify-center w-9 h-9 rounded-full bg-background card-elevated no-card-shadow"
+                className="flex items-center justify-center w-9 h-9 rounded-full"
               >
                 <BackIcon className="w-5 h-5" strokeWidth={1} style={{ color: '#000000' }} />
               </button>
@@ -104,7 +104,7 @@ export function AppLayout({
 
       <main className="flex-1 flex flex-col overflow-auto">
         {children}
-        {showNav && <div className="shrink-0 h-[64px]" />}
+        {showNav && <div className="shrink-0 h-[83px]" />}
       </main>
 
       {showNav && (

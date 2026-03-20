@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState, useCallback, forwardRef, useImperativeHandle } from 'react';
-import { MessageSquareText, ChevronDown } from 'lucide-react';
+import { MessageSquareText, ChevronDown, Bot } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { ChatMessage } from '@/components/chat/ChatMessage';
 import { ChatInput } from '@/components/chat/ChatInput';
@@ -353,26 +353,14 @@ export const AssistantView = forwardRef<AssistantViewHandle, AssistantViewProps>
         {/* Messages area */}
         <div ref={scrollRef} className="flex-1 overflow-y-auto scroll-smooth">
           {showWelcome && (
-            <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4 }}
-              className="px-4 pt-6 pb-2"
-            >
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center">
-                  <MessageSquareText className="w-5 h-5 text-accent" />
-                </div>
-                <div>
-                  <h2 className="text-base font-semibold">你好！我是你的交易助手</h2>
-                  <p className="text-xs text-muted-foreground">你可以用自然语言查询资产、了解产品功能</p>
-                </div>
+            <div className="flex flex-col items-center justify-center h-full gap-[16px]">
+              <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center">
+                <Bot className="w-6 h-6 text-accent" />
               </div>
-              <QuickActions onAction={sendMessage} />
-            </motion.div>
+              <span className="text-[24px] leading-[32px] font-bold text-foreground">有什么可以帮您？</span>
+            </div>
           )}
-
-          <div className="py-2 space-y-1">
+          {!showWelcome && <div className="py-4 space-y-[16px]">
             {messages.map((msg, idx) => {
               const next = messages[idx + 1];
               const showTs = !next || next.role !== msg.role ||
@@ -394,22 +382,19 @@ export const AssistantView = forwardRef<AssistantViewHandle, AssistantViewProps>
             })}
             {isLoading && messages[messages.length - 1]?.role !== 'assistant' && (
               <div className="flex justify-start px-4">
-                <div className="w-7 h-7 rounded-full bg-accent/10 flex items-center justify-center shrink-0 mr-2">
-                  <MessageSquareText className="w-3.5 h-3.5 text-accent" />
-                </div>
                 <div className="bg-muted rounded-xl rounded-bl-md">
                   <TypingIndicator />
                 </div>
               </div>
             )}
-          </div>
+          </div>}
         </div>
 
         {/* Scroll to bottom button */}
-        {showScrollBtn && (
+        {showScrollBtn && !showWelcome && (
           <button
             onClick={() => scrollToBottom()}
-            className="absolute bottom-16 right-4 w-8 h-8 rounded-full bg-card border shadow-md flex items-center justify-center z-10 hover:bg-muted transition-colors"
+            className="absolute bottom-16 left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-card border shadow-md flex items-center justify-center z-10 hover:bg-muted transition-colors"
           >
             <ChevronDown className="w-4 h-4" />
           </button>

@@ -45,9 +45,9 @@ interface LoginRecord {
 // ---- Mock 数据 ----
 const mockLoginHistory: LoginRecord[] = [
   { id: '1', deviceName: 'iPhone 15 Pro', deviceModel: 'iPhone',  timestamp: new Date(),                            location: '上海, 中国', ipAddress: '116.228.xxx.xxx' },
-  { id: '2', deviceName: 'iPhone 15 Pro', deviceModel: 'MacBook', timestamp: new Date(Date.now() - 2*3600*1000),   location: '北京, 中国', ipAddress: '223.104.xxx.xxx' },
+  { id: '2', deviceName: 'iPhone 15 Pro', deviceModel: 'iPhone', timestamp: new Date(Date.now() - 2*3600*1000),   location: '北京, 中国', ipAddress: '223.104.xxx.xxx' },
   { id: '3', deviceName: 'iPhone 15 Pro', deviceModel: 'iPhone',  timestamp: new Date(Date.now() - 24*3600*1000),  location: '上海, 中国', ipAddress: '116.228.xxx.xxx' },
-  { id: '4', deviceName: 'iPhone 15 Pro', deviceModel: 'iPad',    timestamp: new Date(Date.now() - 72*3600*1000),  location: '上海, 中国', ipAddress: '116.228.xxx.xxx' },
+  { id: '4', deviceName: 'iPhone 15 Pro', deviceModel: 'iPhone',  timestamp: new Date(Date.now() - 72*3600*1000),  location: '上海, 中国', ipAddress: '116.228.xxx.xxx' },
   { id: '5', deviceName: 'iPhone 15 Pro', deviceModel: 'iPhone',  timestamp: new Date(Date.now() - 96*3600*1000),  location: '深圳, 中国', ipAddress: '120.229.xxx.xxx' },
 ];
 
@@ -100,23 +100,23 @@ export default function DeviceManagementPage() {
 
   return (
     <AppLayout showNav={false} title="登录设备" showBack pageBg="bg-page">
-      <div className="px-4 pt-3 pb-[72px] space-y-3 no-card-shadow">
+      <div className="px-4 pt-2 pb-[72px] space-y-4 no-card-shadow">
         {/* 安全提示 */}
         <p className="text-xs text-muted-foreground leading-relaxed">
           为了账户安全，同一账户仅允许一台设备在线。在新设备登录时，当前设备将自动退出。
         </p>
 
         {/* 设备列表 */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-          <div className="space-y-3">
+        <div>
+          <div className="space-y-4">
             {mockLoginHistory.map((record, index) => {
               const Icon = getDeviceIcon(record.deviceModel);
               const isCurrent = index === 0;
               return (
-                <div key={record.id} className="card-elevated rounded-xl py-3 px-4 flex items-start gap-3">
+                <div key={record.id} className="flex items-start gap-3">
                   {/* 设备图标 */}
                   <div className="relative w-8 h-8 shrink-0 mt-0.5">
-                    <div className="w-8 h-8 rounded-full flex items-center justify-center bg-gray-100 dark:bg-gray-700">
+                    <div className="w-8 h-8 rounded-full flex items-center justify-center bg-[#F7F8FA]">
                       <Icon className="w-4 h-4 text-muted-foreground" />
                     </div>
                     {isCurrent && (
@@ -137,7 +137,7 @@ export default function DeviceManagementPage() {
                   {isCurrent && (
                     <button
                       onClick={() => setConfirmOpen(true)}
-                      className="shrink-0 px-3 py-1.5 rounded-full bg-gray-100 dark:bg-gray-700 text-xs font-medium"
+                      className="shrink-0 px-3 py-1.5 rounded-full bg-[#F7F8FA] text-xs font-medium"
                     >
                       退出
                     </button>
@@ -146,7 +146,7 @@ export default function DeviceManagementPage() {
               );
             })}
           </div>
-        </motion.div>
+        </div>
 
         <ConfirmDialog
           open={confirmOpen}

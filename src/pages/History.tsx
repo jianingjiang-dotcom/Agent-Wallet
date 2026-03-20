@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Send, TrendingDown, CheckCircle2, XCircle, ChevronRight, Clock, Loader2, Bot, Search, Filter } from 'lucide-react';
+import { Send, TrendingDown, CheckCircle2, XCircle, ChevronRight, Clock, Loader2, Bot, Search, ListFilter } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { ProfileSidebar } from '@/components/ProfileSidebar';
@@ -183,11 +183,11 @@ export default function HistoryPage() {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <motion.button
-                className="relative flex items-center justify-center w-9 h-9 rounded-full bg-background card-elevated no-card-shadow"
+                className="relative flex items-center justify-center w-9 h-9"
                 whileTap={{ scale: 0.9 }}
                 transition={{ type: 'spring', stiffness: 400, damping: 25 }}
               >
-                <Filter className="w-5 h-5" strokeWidth={1.5} style={{ color: '#000000' }} />
+                <ListFilter className="w-5 h-5" strokeWidth={1.5} style={{ color: '#000000' }} />
                 {(sourceFilter !== 'all' || filter !== 'all' || chainFilter !== 'all' || timeFilter !== 'all') && (
                   <span className="absolute top-0.5 right-0.5 w-2 h-2 rounded-full bg-accent" />
                 )}
@@ -233,19 +233,19 @@ export default function HistoryPage() {
 
           {isLoading ? <TransactionListSkeleton count={5} showSearchBar showTabs /> : <>
               {/* Search bar */}
-              <div className="pt-2 pb-6">
+              <div className="sticky top-0 z-10 pt-2 pb-2 bg-page">
                 <SearchInput
                   placeholder="搜索交易..."
                   value={searchQuery}
                   onChange={setSearchQuery}
-                  className="h-10"
+                  className="h-10 bg-[#F7F8FA] border border-[#EDEEF3] rounded-full"
                   wrapperClassName="w-full"
                 />
               </div>
             </>}
 
           {/* Transactions List */}
-          {!isLoading && <div className="space-y-6">
+          {!isLoading && <div className="space-y-6 pt-2">
               {/* Manual transactions (shown in 'all' and 'manual' modes) */}
               {sourceFilter !== 'agent' && Object.entries(groupedTransactions).map(([date, txs]) => <motion.div key={`m-${date}`} initial={{
             opacity: 0,

@@ -215,7 +215,7 @@ export default function MessageCenter() {
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={cn(
-                "flex-1 pb-2 pt-2 text-[14px] leading-[20px] font-medium transition-colors relative text-center",
+                "flex-1 h-[44px] text-[14px] leading-[20px] font-medium transition-colors relative text-center flex items-center justify-center",
                 activeTab === tab ? "text-primary" : "text-muted-foreground"
               )}
             >
@@ -270,28 +270,27 @@ export default function MessageCenter() {
 
         {activeTab === 'messages' ? (
           <>
-          {/* 二级 sub-tab: 交易通知 / 系统通知 */}
-          <div className="flex items-center px-4 py-4 gap-3">
-            {(['all', 'transaction', 'system'] as const).map(tab => (
-              <button
-                key={tab}
-                onClick={() => setMessageSubTab(tab)}
-                className={cn(
-                  "flex-1 h-8 text-[12px] leading-[16px] rounded-full transition-colors",
-                  messageSubTab === tab
-                    ? "bg-primary text-primary-foreground font-medium"
-                    : "bg-background text-[#000000]"
-                )}
-              >
-                {tab === 'all' ? '全部' : tab === 'transaction' ? '交易通知' : '系统通知'}
-              </button>
-            ))}
-          </div>
-
           {isLoading ? (
             <MessageListSkeleton count={5} showTabs />
           ) : (
             <div className="flex-1 overflow-y-auto">
+              {/* 二级 sub-tab: 交易通知 / 系统通知 */}
+              <div className="flex items-center px-4 py-4 gap-3">
+                {(['all', 'transaction', 'system'] as const).map(tab => (
+                  <button
+                    key={tab}
+                    onClick={() => setMessageSubTab(tab)}
+                    className={cn(
+                      "flex-1 h-8 text-[12px] leading-[16px] rounded-full transition-colors",
+                      messageSubTab === tab
+                        ? "bg-primary text-primary-foreground font-medium"
+                        : "bg-[#F7F8FA] text-[#000000]"
+                    )}
+                  >
+                    {tab === 'all' ? '全部' : tab === 'transaction' ? '交易通知' : '系统通知'}
+                  </button>
+                ))}
+              </div>
               <div className="px-4 pt-0 pb-[72px] no-card-shadow space-y-3">
                 {(() => {
                   const displayList = messageSubTab === 'all' ? allMessageNotifications : messageSubTab === 'transaction' ? filteredNotifications : systemNotifications;

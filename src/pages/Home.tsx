@@ -373,7 +373,7 @@ export default function HomePage() {
           <div className="flex items-center gap-3">
             {/* Message Center Entry */}
             <motion.button
-              className="relative flex items-center justify-center w-9 h-9 rounded-full bg-background card-elevated no-card-shadow"
+              className="relative flex items-center justify-center w-9 h-9 rounded-full"
               onClick={() => navigate('/messages')}
               whileTap={{ scale: 0.9 }}
               transition={{ type: 'spring', stiffness: 400, damping: 25 }}

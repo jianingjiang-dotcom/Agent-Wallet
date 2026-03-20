@@ -34,6 +34,7 @@ export function ChatInput({ onSend, onStop, disabled, isLoading }: ChatInputProp
   const hasText = text.trim().length > 0 || attachment !== null;
   const isExpanded = isFocused || hasText || isListening;
 
+
   const handleSend = useCallback(() => {
     const trimmed = text.trim();
     if (!trimmed && !attachment) return;
@@ -100,8 +101,8 @@ export function ChatInput({ onSend, onStop, disabled, isLoading }: ChatInputProp
     const el = inputRef.current;
     if (!el) return;
     el.style.height = 'auto';
-    const newHeight = Math.min(el.scrollHeight, 84);
-    el.style.height = `${newHeight}px`;
+    const newHeight = Math.max(el.scrollHeight, 40);
+    el.style.height = `${Math.min(newHeight, 84)}px`;
   }, [displayText]);
 
   // Click outside to collapse
@@ -191,10 +192,10 @@ export function ChatInput({ onSend, onStop, disabled, isLoading }: ChatInputProp
       <div className="px-4 py-2">
         <div
           className={cn(
-            'bg-card rounded-2xl border border-border/60 transition-all',
+            'bg-[#F7F8FA] rounded-[22px] border transition-all',
+            isExpanded ? 'border-accent' : 'border-[#EDEEF3]',
             isListening && 'ring-2 ring-destructive/50'
           )}
-          style={{ boxShadow: '0 4px 40px rgba(0, 0, 0, 0.02)' }}
           onClick={() => {
             if (!isExpanded) {
               setIsFocused(true);
@@ -206,7 +207,7 @@ export function ChatInput({ onSend, onStop, disabled, isLoading }: ChatInputProp
             /* ── Expanded: text on top, actions on bottom ── */
             <div className="flex flex-col">
               {/* Text area */}
-              <div className="px-4 pt-3">
+              <div className="px-3 pt-3">
                 <textarea
                   ref={inputRef}
                   value={displayText}
@@ -216,21 +217,20 @@ export function ChatInput({ onSend, onStop, disabled, isLoading }: ChatInputProp
                   placeholder={isListening ? '正在聆听...' : '输入消息...'}
                   rows={1}
                   disabled={disabled || isLoading || isListening}
-                  className="w-full resize-none bg-transparent text-sm placeholder:text-muted-foreground focus:outline-none disabled:opacity-50 overflow-y-auto leading-5"
-                  style={{ maxHeight: '84px', minHeight: '20px' }}
+                  className="w-full resize-none bg-transparent text-sm placeholder:text-text-placeholder focus:outline-none disabled:opacity-50 overflow-y-auto leading-5"
+                  style={{ maxHeight: '84px', minHeight: '40px' }}
                   autoFocus
                 />
               </div>
 
               {/* Bottom action row */}
-              <div className="flex items-center justify-between px-3 py-2">
+              <div className="flex items-center justify-between pl-1.5 pr-1.5 pt-1 pb-1.5">
                 {/* Left: attach */}
                 <motion.button
                   whileTap={{ scale: 0.85 }}
                   onClick={toggleAttachPanel}
                   className={cn(
-                    'shrink-0 flex items-center justify-center w-6 h-6 transition-colors',
-                    showAttachPanel ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
+                    'shrink-0 flex items-center justify-center w-8 h-8 rounded-full transition-colors text-foreground'
                   )}
                 >
                   <motion.div animate={{ rotate: showAttachPanel ? 45 : 0 }} transition={{ duration: 0.2 }}>
@@ -257,7 +257,7 @@ export function ChatInput({ onSend, onStop, disabled, isLoading }: ChatInputProp
                           disabled={(!text.trim() && !attachment) || disabled}
                           className="w-8 h-8 rounded-full bg-accent flex items-center justify-center disabled:opacity-50"
                         >
-                          <Send className="w-4 h-4 text-white" />
+                          <Send className="w-5 h-5 text-white" />
                         </motion.button>
                       )}
                       {/* Voice wave / send when no text */}
@@ -272,7 +272,7 @@ export function ChatInput({ onSend, onStop, disabled, isLoading }: ChatInputProp
                             (!voiceSupported || disabled) && 'opacity-50'
                           )}
                         >
-                          <Mic className="w-4 h-4 text-white" />
+                          <Mic className="w-5 h-5 text-white" />
                         </button>
                       )}
                     </>
@@ -282,7 +282,7 @@ export function ChatInput({ onSend, onStop, disabled, isLoading }: ChatInputProp
             </div>
           ) : (
             /* ── Collapsed: single row ── */
-            <div className="flex items-center pl-3 pr-1 gap-2" style={{ minHeight: '40px' }}>
+            <div className="flex items-center pl-1.5 pr-1.5 gap-2" style={{ minHeight: '44px' }}>
               {/* Attach button */}
               <motion.button
                 whileTap={{ scale: 0.85 }}
@@ -290,13 +290,13 @@ export function ChatInput({ onSend, onStop, disabled, isLoading }: ChatInputProp
                   e.stopPropagation();
                   toggleAttachPanel();
                 }}
-                className="shrink-0 flex items-center justify-center w-6 h-6 text-muted-foreground hover:text-foreground transition-colors"
+                className="shrink-0 flex items-center justify-center w-8 h-8 rounded-full text-foreground transition-colors"
               >
                 <Plus className="w-5 h-5" />
               </motion.button>
 
               {/* Placeholder text */}
-              <span className="flex-1 text-sm text-muted-foreground select-none">
+              <span className="flex-1 text-sm text-text-placeholder select-none">
                 {isListening ? '正在聆听...' : '输入消息...'}
               </span>
 
@@ -313,7 +313,7 @@ export function ChatInput({ onSend, onStop, disabled, isLoading }: ChatInputProp
                     (!voiceSupported || disabled) && 'opacity-50'
                   )}
                 >
-                  <Mic className="w-4 h-4 text-white" />
+                  <Mic className="w-5 h-5 text-white" />
                 </button>
               </motion.div>
             </div>
