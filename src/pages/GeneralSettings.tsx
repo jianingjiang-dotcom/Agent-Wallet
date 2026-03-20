@@ -55,8 +55,8 @@ export default function GeneralSettings() {
       <div className="px-4 pt-2 no-card-shadow flex flex-col min-h-full">
 
         {/* 账户安全 */}
-        <div className="mb-4">
-          <div className="card-elevated overflow-hidden">
+        <div className="mb-[16px]">
+          <div className="bg-[#F7F8FA] rounded-xl overflow-hidden">
             <ListItem
               icon={
                 <Shield className="w-5 h-5" strokeWidth={1.5} style={{ color: '#000000' }} />
@@ -70,16 +70,14 @@ export default function GeneralSettings() {
         </div>
 
         {/* 偏好设置 */}
-        <div className="mb-4">
-          <SectionHeader title="偏好设置" />
-          <div className="card-elevated overflow-hidden">
+        <div className="mb-[16px]">
+          <div className="bg-[#F7F8FA] rounded-xl overflow-hidden">
             <ListItem
               icon={
                 <Bell className="w-5 h-5" strokeWidth={1.5} style={{ color: '#000000' }} />
               }
               title="通知"
               showChevron
-              showDivider
               onClick={() => navigate('/profile/notifications')}
               className="py-4 px-4"
             />
@@ -90,7 +88,6 @@ export default function GeneralSettings() {
               title="语言"
               value={getLabel(language)}
               showChevron
-              showDivider
               onClick={() => setLanguageDrawerOpen(true)}
               className="py-4 px-4"
             />
@@ -108,16 +105,14 @@ export default function GeneralSettings() {
         </div>
 
         {/* 帮助与关于 */}
-        <div className="mb-0">
-          <SectionHeader title="帮助与关于" />
-          <div className="card-elevated overflow-hidden">
+        <div className="mb-[16px]">
+          <div className="bg-[#F7F8FA] rounded-xl overflow-hidden">
             <ListItem
               icon={
                 <HelpCircle className="w-5 h-5" strokeWidth={1.5} style={{ color: '#000000' }} />
               }
               title="帮助与支持"
               showChevron
-              showDivider
               onClick={() => navigate('/profile/help')}
               className="py-4 px-4"
             />
@@ -127,7 +122,6 @@ export default function GeneralSettings() {
               }
               title="用户协议"
               showChevron
-              showDivider
               onClick={() => navigate('/terms')}
               className="py-4 px-4"
             />
@@ -137,7 +131,6 @@ export default function GeneralSettings() {
               }
               title="隐私政策"
               showChevron
-              showDivider
               onClick={() => navigate('/privacy')}
               className="py-4 px-4"
             />
@@ -162,8 +155,8 @@ export default function GeneralSettings() {
           onOpenChange={setAppearanceDrawerOpen}
         />
         {/* 组件 Demo */}
-        <div className="mt-4 mb-0">
-          <div className="card-elevated overflow-hidden">
+        <div className="mb-0">
+          <div className="bg-[#F7F8FA] rounded-xl overflow-hidden">
             <ListItem
               icon={<Layers className="w-5 h-5" strokeWidth={1.5} style={{ color: '#000000' }} />}
               title="组件 Demo（仅Dev展示）"
@@ -175,10 +168,10 @@ export default function GeneralSettings() {
         </div>
 
         {/* 退出登录 */}
-        <div className="mt-6">
+        <div className="mt-[16px]">
           <button
             onClick={() => setLogoutDialogOpen(true)}
-            className="w-full card-elevated p-4 flex items-center justify-center"
+            className="w-full bg-[#F7F8FA] rounded-xl p-4 flex items-center justify-center"
             style={{ color: '#000000' }}
           >
             <span className="text-[14px] leading-5 font-normal">退出登录</span>

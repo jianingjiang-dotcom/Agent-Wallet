@@ -232,15 +232,12 @@ export function ChatMessage({
   if (isError) {
     return (
       <motion.div
-        className="flex w-full px-4 py-1 justify-start"
+        className="flex w-full px-4 justify-start"
         variants={bubbleVariants}
         initial="hidden"
         animate="visible"
         transition={{ duration: 0.25, ease: 'easeOut' }}
       >
-        <div className="w-7 h-7 rounded-full bg-destructive/10 flex items-center justify-center shrink-0 mt-0.5 mr-2">
-          <AlertTriangle className="w-3.5 h-3.5 text-destructive" />
-        </div>
         <div className="flex flex-col items-start max-w-[85%]">
           <div className="px-4 py-3 text-sm bg-destructive/5 border border-destructive/20 rounded-xl rounded-bl-md">
             <p className="text-destructive font-medium text-xs mb-1">发送失败</p>
@@ -262,32 +259,25 @@ export function ChatMessage({
 
   return (
     <motion.div
-      className={cn('flex w-full px-4 py-1', isUser ? 'justify-end' : 'justify-start')}
+      className={cn('flex w-full px-6', isUser ? 'justify-end' : 'justify-start')}
       variants={bubbleVariants}
       initial="hidden"
       animate="visible"
       transition={{ duration: 0.25, ease: 'easeOut' }}
     >
-      {/* AI Avatar */}
-      {!isUser && (
-        <div className="w-7 h-7 rounded-full bg-accent/10 flex items-center justify-center shrink-0 mt-0.5 mr-2">
-          <MessageSquareText className="w-3.5 h-3.5 text-accent" />
-        </div>
-      )}
-
-      <div className={cn('flex flex-col', isUser ? 'items-end' : 'items-start', 'max-w-[85%]')}>
+      <div className={cn('flex flex-col', isUser ? 'items-end max-w-[85%]' : 'items-start w-full')}>
         <div
           className={cn(
-            'px-4 py-2.5 text-sm leading-relaxed overflow-hidden max-w-full',
+            'text-[14px] leading-[20px] overflow-hidden max-w-full',
             isUser
-              ? 'bg-accent text-accent-foreground rounded-xl rounded-br-md'
-              : 'bg-muted text-foreground rounded-xl rounded-bl-md'
+              ? 'px-4 py-2.5 bg-[#EDEEF1] text-foreground rounded-[20px]'
+              : 'text-foreground'
           )}
         >
           {isUser ? (
-            <p className="whitespace-pre-wrap">{message.content}</p>
+            <p className="whitespace-pre-wrap break-all">{message.content}</p>
           ) : (
-            <div className="prose prose-sm dark:prose-invert max-w-none min-w-0 [&_p]:my-1 [&_ul]:my-1 [&_ol]:my-1 [&_li]:my-0.5 [&_h3]:text-sm [&_h3]:mt-2 [&_h3]:mb-1 [&_h4]:text-sm [&_h4]:mt-2 [&_h4]:mb-1">
+            <div className="prose prose-sm dark:prose-invert max-w-none min-w-0 [&_p]:my-[8px] [&_ul]:my-[8px] [&_ol]:my-[8px] [&_li]:my-0.5 [&_h3]:text-[14px] [&_h3]:mt-2 [&_h3]:mb-1 [&_h4]:text-[14px] [&_h4]:mt-2 [&_h4]:mb-1 [&_p]:text-[14px] [&_p]:leading-[20px] [&_li]:text-[14px] [&_li]:leading-[20px]">
               <ReactMarkdown components={markdownComponents}>
                 {displayContent}
               </ReactMarkdown>
@@ -310,86 +300,8 @@ export function ChatMessage({
           </motion.div>
         )}
 
-        {/* Action bar for AI messages */}
-        {showActions && (
-          <motion.div
-            className="flex items-center gap-0.5 mt-1.5 px-1"
-            initial={{ opacity: 0, y: 4 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.2, delay: 0.15 }}
-          >
-            {/* Copy */}
-            <button
-              onClick={handleCopy}
-              className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-colors"
-              title="复制"
-            >
-              {copied ? <Check className="w-3.5 h-3.5 text-success" /> : <Copy className="w-3.5 h-3.5" />}
-            </button>
-
-            {/* Regenerate — only on the last AI message */}
-            {isLastAssistant && onRegenerate && (
-              <button
-                onClick={onRegenerate}
-                className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-colors"
-                title="重新生成"
-              >
-                <RefreshCw className="w-3.5 h-3.5" />
-              </button>
-            )}
-
-            {/* Divider */}
-            <div className="w-px h-3 bg-border mx-1" />
-
-            {/* Thumbs up */}
-            <button
-              onClick={() => onFeedback?.(message.id, 'positive')}
-              className={cn(
-                'p-1.5 rounded-md transition-colors',
-                message.feedback === 'positive'
-                  ? 'text-success bg-success/10'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-muted/80'
-              )}
-              title="有帮助"
-            >
-              <ThumbsUp className="w-3.5 h-3.5" />
-            </button>
-
-            {/* Thumbs down */}
-            <button
-              onClick={() => onFeedback?.(message.id, 'negative')}
-              className={cn(
-                'p-1.5 rounded-md transition-colors',
-                message.feedback === 'negative'
-                  ? 'text-destructive bg-destructive/10'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-muted/80'
-              )}
-              title="无帮助"
-            >
-              <ThumbsDown className="w-3.5 h-3.5" />
-            </button>
-          </motion.div>
-        )}
-
-        {/* Timestamp */}
-        {showTimestamp && !showActions && (
-          <span className="text-[10px] text-muted-foreground mt-1 px-1">
-            {formatTime(message.timestamp)}
-          </span>
-        )}
-        {showTimestamp && showActions && (
-          <span className="text-[10px] text-muted-foreground mt-0.5 px-1">
-            {formatTime(message.timestamp)}
-          </span>
-        )}
       </div>
 
-      {/* User Avatar */}
-      {isUser && (
-        <div className="w-7 h-7 rounded-full bg-accent flex items-center justify-center shrink-0 mt-0.5 ml-2">
-          <span className="text-xs font-semibold text-accent-foreground">U</span>
-        </div>
-      )}
     </motion.div>
   );
 }

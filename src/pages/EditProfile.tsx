@@ -47,16 +47,16 @@ export default function EditProfile() {
         </div>
 
         {/* Fields */}
-        <div className="card-elevated overflow-hidden">
+        <div className="bg-[#F7F8FA] rounded-xl overflow-hidden">
           {/* 用户名 */}
           <button
             onClick={() => navigate('/profile/info/edit/nickname')}
-            className="w-full flex items-center gap-3 px-4 py-4 border-b border-border active:bg-muted/50 transition-colors"
+            className="w-full flex items-center gap-3 px-4 py-4 active:bg-muted/50 transition-colors"
           >
             <User className="w-5 h-5 shrink-0" strokeWidth={1.5} style={{ color: '#000000' }} />
-            <span className="text-[16px] leading-6 font-normal text-foreground shrink-0 text-left">用户名</span>
+            <span className="text-[14px] leading-5 font-normal text-foreground shrink-0 text-left">用户名</span>
             <div className="flex-1 flex items-center justify-end gap-1">
-              <span className="text-[16px] leading-6 font-normal text-muted-foreground">{nickname || '未设置'}</span>
+              <span className="text-[14px] leading-5 font-normal text-muted-foreground">{nickname || '未设置'}</span>
               <ChevronRight className="w-5 h-5 text-muted-foreground shrink-0" strokeWidth={1} />
             </div>
           </button>
@@ -64,9 +64,9 @@ export default function EditProfile() {
           {/* UID */}
           <div className="flex items-center gap-3 px-4 py-4">
             <Hash className="w-5 h-5 shrink-0" strokeWidth={1.5} style={{ color: '#000000' }} />
-            <span className="text-[16px] leading-6 font-normal text-foreground shrink-0 text-left">UID</span>
+            <span className="text-[14px] leading-5 font-normal text-foreground shrink-0 text-left">UID</span>
             <div className="flex-1 flex items-center justify-end gap-1">
-              <span className="text-[16px] leading-6 font-normal text-muted-foreground select-none">{userId}</span>
+              <span className="text-[14px] leading-5 font-normal text-muted-foreground select-none">{userId}</span>
               <button
                 onClick={handleCopyUid}
                 className="flex items-center justify-center w-5 h-5 rounded-full active:opacity-60 transition-opacity shrink-0"

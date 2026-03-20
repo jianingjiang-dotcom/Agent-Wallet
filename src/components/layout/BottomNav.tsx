@@ -40,33 +40,34 @@ export function BottomNav() {
   const INACTIVE_COLOR = isDark ? DARK_INACTIVE : LIGHT_INACTIVE;
 
   return (
-    <nav
-      className="shrink-0 flex h-[64px] backdrop-blur-xl"
-      style={{ backgroundColor: 'rgba(245, 245, 245, 0.6)' }}
-    >
-      {tabLabels.map((label, i) => (
-        <button
-          key={i}
-          type="button"
-          onClick={() => navigate(navPaths[i])}
-          className="flex-1 flex items-center justify-center transition-all duration-200"
-          aria-label={label}
-        >
-          <div className="flex flex-col items-center gap-[2px]">
-            <svg width="26" height="26" viewBox="0 0 20 20" fill="none">
-              {iconData[i].map((d, j) => (
-                <path key={j} d={d} fill={i === activeIndex ? ACTIVE_COLOR : INACTIVE_COLOR} />
-              ))}
-            </svg>
-            <span
-              className="text-[10px] leading-3"
-              style={{ color: i === activeIndex ? ACTIVE_COLOR : INACTIVE_COLOR }}
-            >
-              {label}
-            </span>
-          </div>
-        </button>
-      ))}
-    </nav>
+    <div className="shrink-0 bg-background">
+      <nav className="flex h-[49px]">
+        {tabLabels.map((label, i) => (
+          <button
+            key={i}
+            type="button"
+            onClick={() => navigate(navPaths[i])}
+            className="flex-1 flex items-start justify-center pt-[8px] transition-all duration-200"
+            aria-label={label}
+          >
+            <div className="flex flex-col items-center gap-[2px]">
+              <svg width="26" height="26" viewBox="0 0 20 20" fill="none">
+                {iconData[i].map((d, j) => (
+                  <path key={j} d={d} fill={i === activeIndex ? ACTIVE_COLOR : INACTIVE_COLOR} />
+                ))}
+              </svg>
+              <span
+                className="text-[10px] leading-3"
+                style={{ color: i === activeIndex ? ACTIVE_COLOR : INACTIVE_COLOR }}
+              >
+                {label}
+              </span>
+            </div>
+          </button>
+        ))}
+      </nav>
+      {/* Home Indicator safe area */}
+      <div className="h-[34px]" />
+    </div>
   );
 }

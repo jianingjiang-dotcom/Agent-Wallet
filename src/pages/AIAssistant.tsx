@@ -26,7 +26,7 @@ export default function AIAssistant() {
       pageBg="bg-page"
       rightAction={
         <motion.button
-          className="flex items-center justify-center w-9 h-9 rounded-full bg-background card-elevated no-card-shadow"
+          className="flex items-center justify-center w-9 h-9"
           onClick={() => assistantRef.current?.startNewSession()}
           whileTap={{ scale: 0.9 }}
           transition={{ type: 'spring', stiffness: 400, damping: 25 }}
@@ -36,7 +36,7 @@ export default function AIAssistant() {
       }
       leftAction={
         <motion.button
-          className="flex items-center justify-center w-9 h-9 rounded-full bg-background card-elevated no-card-shadow"
+          className="flex items-center justify-center w-9 h-9"
           onClick={() => setHistoryOpen(true)}
           whileTap={{ scale: 0.9 }}
           transition={{ type: 'spring', stiffness: 400, damping: 25 }}

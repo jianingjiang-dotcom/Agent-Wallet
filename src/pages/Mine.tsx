@@ -22,7 +22,7 @@ export default function Mine() {
       title="我的"
       rightAction={
         <motion.button
-          className="flex items-center justify-center w-9 h-9 rounded-full bg-background card-elevated no-card-shadow"
+          className="flex items-center justify-center w-9 h-9"
           onClick={() => navigate('/profile/general')}
           whileTap={{ scale: 0.9 }}
           transition={{ type: 'spring', stiffness: 400, damping: 25 }}
@@ -35,7 +35,7 @@ export default function Mine() {
 
         {/* Profile Header */}
         <motion.div
-          className="card-elevated flex items-center gap-3 px-4 py-3 mb-6 cursor-pointer"
+          className="bg-[#F7F8FA] rounded-xl flex items-center gap-3 px-4 py-3 mb-4 cursor-pointer"
           onClick={() => navigate('/profile/info/edit')}
           whileTap={{ scale: 0.98 }}
           transition={{ type: 'spring', stiffness: 400, damping: 25 }}
@@ -54,9 +54,9 @@ export default function Mine() {
         </motion.div>
 
         {/* Agent 管理 */}
-        <div className="mb-6">
+        <div className="mb-4">
           <SectionHeader title="Agent 管理" />
-          <div className="card-elevated overflow-hidden">
+          <div className="bg-[#F7F8FA] rounded-xl overflow-hidden">
             {[
               { icon: Bot, label: 'Agent 授权管理', path: '/agent-management' },
               { icon: Settings2, label: 'Agent 风控管理', path: '/agent-settings' },
@@ -69,7 +69,7 @@ export default function Mine() {
                 icon={<item.icon className="w-5 h-5" strokeWidth={1.5} style={{ color: '#000000' }} />}
                 title={item.label}
                 showChevron
-                showDivider={index !== arr.length - 1}
+                showDivider={false}
                 onClick={() => navigate(item.path)}
                 className="py-4 px-4"
               />
@@ -78,9 +78,9 @@ export default function Mine() {
         </div>
 
         {/* 钱包管理 */}
-        <div className="mb-6">
+        <div className="mb-4">
           <SectionHeader title="钱包管理" />
-          <div className="card-elevated overflow-hidden">
+          <div className="bg-[#F7F8FA] rounded-xl overflow-hidden">
             {[
               { icon: Wallet, label: '钱包管理', path: '/profile/wallets' },
               { icon: BookUser, label: '地址簿', path: '/profile/contacts' },
@@ -91,7 +91,7 @@ export default function Mine() {
                 icon={<item.icon className="w-5 h-5" strokeWidth={1.5} style={{ color: '#000000' }} />}
                 title={item.label}
                 showChevron
-                showDivider={index !== arr.length - 1}
+                showDivider={false}
                 onClick={() => navigate(item.path)}
                 className="py-4 px-4"
               />

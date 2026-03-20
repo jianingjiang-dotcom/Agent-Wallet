@@ -72,8 +72,8 @@ export default function AccountSecurity() {
   return (
     <AppLayout title="账户安全" pageBg="bg-page" showBack showNav={false}>
       <div className="px-4 no-card-shadow">
-        <div className="mb-6 pt-4">
-          <div className="card-elevated overflow-hidden">
+        <div className="mb-[16px] pt-[8px]">
+          <div className="bg-[#F7F8FA] rounded-xl overflow-hidden">
             <ListItem
               icon={
                 <Phone className="w-5 h-5" strokeWidth={1.5} style={{ color: '#000000' }} />
@@ -81,7 +81,6 @@ export default function AccountSecurity() {
               title="手机号"
               value={boundPhone ? maskPhone(boundPhone) : '未绑定'}
               showChevron
-              showDivider
               onClick={() => handleBindAccount('phone')}
               className="py-4 px-4"
             />
@@ -92,7 +91,6 @@ export default function AccountSecurity() {
               title="邮箱"
               value={boundEmail ? maskEmail(boundEmail) : '未绑定'}
               showChevron
-              showDivider
               onClick={() => handleBindAccount('email')}
               className="py-4 px-4"
             />
@@ -109,8 +107,8 @@ export default function AccountSecurity() {
           </div>
         </div>
 
-        <div className="mb-6">
-          <div className="card-elevated overflow-hidden">
+        <div className="mb-[16px]">
+          <div className="bg-[#F7F8FA] rounded-xl overflow-hidden">
             <ListItem
               icon={
                 <Smartphone className="w-5 h-5" strokeWidth={1.5} style={{ color: '#000000' }} />
