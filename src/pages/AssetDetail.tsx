@@ -166,7 +166,7 @@ export default function AssetDetailPage() {
                   "relative flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap shrink-0 transition-colors",
                   selectedAddressId === 'all'
                     ? "text-foreground bg-muted"
-                    : "border border-border text-muted-foreground hover:bg-muted/30"
+                    : "border border-border text-muted-foreground"
                 )}
               >
                 全部
@@ -179,7 +179,7 @@ export default function AssetDetailPage() {
                     "relative flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap shrink-0 transition-colors",
                     selectedAddressId === addr.addressId
                       ? "text-foreground bg-muted"
-                      : "border border-border text-muted-foreground hover:bg-muted/30"
+                      : "border border-border text-muted-foreground"
                   )}
                 >
                   {addr.label || `${addr.address.slice(0, 6)}...${addr.address.slice(-4)}`}
@@ -258,7 +258,7 @@ export default function AssetDetailPage() {
                 {assetData.addresses.map((addr) => (
                   <button
                     key={addr.addressId}
-                    className="w-full card-elevated p-3 text-left hover:bg-muted/30 transition-colors"
+                    className="w-full card-elevated p-3 text-left transition-colors"
                     onClick={() => setSelectedAddressId(addr.addressId)}
                   >
                     <div className="flex items-center justify-between mb-2">
@@ -342,7 +342,7 @@ export default function AssetDetailPage() {
                           initial={{ opacity: 0, x: -20 }}
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ delay: 0.05 * index }}
-                          className="w-full card-elevated p-3 flex items-center justify-between text-left hover:bg-muted/50 transition-colors"
+                          className="w-full card-elevated p-3 flex items-center justify-between text-left transition-colors"
                           onClick={() => navigate(`/transaction/${tx.id}`)}
                         >
                           <div className="flex items-center gap-2">

@@ -268,7 +268,7 @@ export function AppLockScreen() {
                   {hasBiometric && (
                     <button
                       onClick={handleSwitchToBiometric}
-                      className="w-full text-sm text-muted-foreground hover:text-foreground transition-colors text-center"
+                      className="w-full text-sm text-muted-foreground transition-colors text-center"
                     >
                       使用生物识别
                     </button>

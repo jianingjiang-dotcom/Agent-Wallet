@@ -119,7 +119,7 @@ export function HumanAgentListPanel({
           <button
             onClick={handleRefresh}
             disabled={isRefreshing}
-            className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+            className="flex items-center gap-1.5 text-xs text-muted-foreground transition-colors"
           >
             <RefreshCw className={cn('w-3.5 h-3.5', isRefreshing && 'animate-spin')} />
             刷新
@@ -153,7 +153,7 @@ export function HumanAgentListPanel({
           {!isExpired && currentSetupToken && (
             <button
               onClick={handleCopy}
-              className="shrink-0 p-1 rounded hover:bg-muted transition-colors"
+              className="shrink-0 p-1 rounded transition-colors"
             >
               {copied ? (
                 <Check className="w-3.5 h-3.5 text-emerald-500" />

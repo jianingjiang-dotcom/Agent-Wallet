@@ -156,7 +156,7 @@ export function TokenManager({ addedSymbols, addedAssets, onAddToken, onRemoveTo
                     "px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors relative",
                     categoryFilter === cat.id
                       ? "text-accent"
-                      : "text-muted-foreground hover:text-foreground"
+                      : "text-muted-foreground"
                   )}
                 >
                   {cat.label}
@@ -190,7 +190,7 @@ export function TokenManager({ addedSymbols, addedAssets, onAddToken, onRemoveTo
                         "w-full flex items-center justify-between p-3 rounded-xl transition-colors",
                         isAdded 
                           ? "bg-muted/50 opacity-60 cursor-not-allowed"
-                          : "bg-card hover:bg-muted/50 cursor-pointer"
+                          : "bg-card cursor-pointer"
                       )}
                     >
                       <div className="flex items-center gap-3">
@@ -312,7 +312,7 @@ export function TokenManager({ addedSymbols, addedAssets, onAddToken, onRemoveTo
                       </div>
                       <button
                         onClick={() => setTokenToDelete(token.symbol)}
-                        className="p-2 rounded-lg hover:bg-destructive/10 transition-colors"
+                        className="p-2 rounded-lg transition-colors"
                       >
                         <Trash2 className="w-4 h-4 text-destructive" />
                       </button>
@@ -336,7 +336,7 @@ export function TokenManager({ addedSymbols, addedAssets, onAddToken, onRemoveTo
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>取消</AlertDialogCancel>
-            <AlertDialogAction onClick={handleConfirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+            <AlertDialogAction onClick={handleConfirmDelete} className="bg-destructive text-destructive-foreground">
               删除
             </AlertDialogAction>
           </AlertDialogFooter>

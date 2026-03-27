@@ -55,7 +55,7 @@ function FilterPillsInner<T extends string = string>(
                 "flex-1 h-11 text-sm font-medium transition-colors flex items-center justify-center gap-1.5 relative",
                 isActive
                   ? "text-accent"
-                  : "text-muted-foreground hover:text-foreground"
+                  : "text-muted-foreground"
               )}
             >
               {item.icon}
@@ -97,7 +97,7 @@ function FilterPillsInner<T extends string = string>(
               "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors shrink-0",
               isActive
                 ? "bg-muted text-foreground"
-                : "border border-border text-muted-foreground hover:bg-muted/30"
+                : "border border-border text-muted-foreground"
             )}
           >
             {item.icon}

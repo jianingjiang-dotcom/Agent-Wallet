@@ -49,7 +49,7 @@ export default function LinkAgentWallet() {
           <div className="flex items-center gap-2">
             <button
               onClick={handleBack}
-              className="p-1 -ml-1 text-muted-foreground hover:text-foreground transition-colors"
+              className="p-1 -ml-1 text-muted-foreground transition-colors"
             >
               <ChevronLeft className="w-6 h-6" />
             </button>
@@ -195,7 +195,7 @@ function TokenInputStep({
           />
           <button
             onClick={handlePaste}
-            className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-muted-foreground hover:text-foreground"
+            className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-muted-foreground"
           >
             <Clipboard className="w-4 h-4" />
           </button>

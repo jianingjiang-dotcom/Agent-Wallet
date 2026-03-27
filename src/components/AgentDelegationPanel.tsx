@@ -199,7 +199,7 @@ export function AgentDelegationPanel({
                   <Popover>
                     <PopoverTrigger asChild>
                       <button
-                        className="p-1 rounded-full hover:bg-muted transition-colors"
+                        className="p-1 rounded-full transition-colors"
                         onClick={(e) => e.stopPropagation()}
                       >
                         <Info className="w-3.5 h-3.5 text-muted-foreground" />
@@ -262,7 +262,7 @@ export function AgentDelegationPanel({
                         {!isExpired && currentSetupToken && (
                           <button
                             onClick={handleCopy}
-                            className="shrink-0 p-1 rounded hover:bg-muted transition-colors"
+                            className="shrink-0 p-1 rounded transition-colors"
                             title={tokenCardVariant === 'create-wallet' ? '复制包含 Token 的 Prompt' : '复制 Token'}
                           >
                             {copied ? (
@@ -314,7 +314,7 @@ export function AgentDelegationPanel({
                   <button
                     onClick={handleRefresh}
                     disabled={isRefreshing}
-                    className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                    className="flex items-center gap-1.5 text-xs text-muted-foreground transition-colors"
                   >
                     <RefreshCw className={cn('w-3.5 h-3.5', isRefreshing && 'animate-spin')} />
                     刷新
@@ -413,7 +413,7 @@ export function AgentDelegationPanel({
           {showSkip && onSkip && (
             <button
               onClick={onSkip}
-              className="w-full text-sm text-muted-foreground hover:text-foreground transition-colors"
+              className="w-full text-sm text-muted-foreground transition-colors"
             >
               跳过此步骤
             </button>

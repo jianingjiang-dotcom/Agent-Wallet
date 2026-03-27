@@ -697,7 +697,7 @@ function CloudBackupStep({ onComplete, onBackupSuccess }: { onComplete: () => vo
               我再想想
             </AlertDialogCancel>
             <AlertDialogAction 
-              className="bg-muted text-muted-foreground hover:bg-muted/80"
+              className="bg-muted text-muted-foreground"
               onClick={handleConfirmSkip}
             >
               我已了解风险，稍后备份
@@ -757,7 +757,7 @@ function AgentSetupStep({ onComplete }: { onComplete: () => void }) {
         </Button>
         <button
           onClick={onComplete}
-          className="w-full text-sm text-muted-foreground hover:text-foreground transition-colors"
+          className="w-full text-sm text-muted-foreground transition-colors"
         >
           稍后设置
         </button>
@@ -810,7 +810,7 @@ function RecoveryMethodStep({ onComplete }: { onComplete: () => void }) {
               'w-full flex items-center gap-4 p-4 rounded-xl border transition-colors',
               selectedMethod === 'scan' 
                 ? 'border-accent bg-accent/5' 
-                : 'border-border bg-card hover:border-accent/50'
+                : 'border-border bg-card'
             )}
           >
             <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
@@ -828,7 +828,7 @@ function RecoveryMethodStep({ onComplete }: { onComplete: () => void }) {
               'w-full flex items-center gap-4 p-4 rounded-xl border transition-colors',
               selectedMethod === 'cloud' 
                 ? 'border-accent bg-accent/5' 
-                : 'border-border bg-card hover:border-accent/50'
+                : 'border-border bg-card'
             )}
           >
             <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
@@ -917,7 +917,7 @@ function RecoveryDataStep({ onComplete }: { onComplete: () => void }) {
             <button
               onClick={() => handleCloudRestore('icloud')}
               disabled={isLoading}
-              className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card hover:border-accent transition-colors disabled:opacity-50"
+              className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card transition-colors disabled:opacity-50"
             >
               <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
                 {isLoading && source === 'icloud' ? (
@@ -940,7 +940,7 @@ function RecoveryDataStep({ onComplete }: { onComplete: () => void }) {
             <button
               onClick={() => handleCloudRestore('google_drive')}
               disabled={isLoading}
-              className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card hover:border-accent transition-colors disabled:opacity-50"
+              className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card transition-colors disabled:opacity-50"
             >
               <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
                 {isLoading && source === 'google_drive' ? (
@@ -962,7 +962,7 @@ function RecoveryDataStep({ onComplete }: { onComplete: () => void }) {
 
             <button
               onClick={() => setSource('file')}
-              className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card hover:border-accent transition-colors"
+              className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card transition-colors"
             >
               <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
                 <FileDown className="w-6 h-6 text-foreground" strokeWidth={1.5} />

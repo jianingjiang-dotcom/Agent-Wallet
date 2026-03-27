@@ -377,7 +377,7 @@ export default function AgentSettings() {
                     setPolicyTypePickerOpen(false);
                     setEditDrawerOpen(true);
                   }}
-                  className="w-full p-3 rounded-xl border border-border flex items-center gap-3 text-left hover:bg-muted/50 transition-colors"
+                  className="w-full p-3 rounded-xl border border-border flex items-center gap-3 text-left transition-colors"
                 >
                   <div className="w-9 h-9 rounded-lg bg-accent/10 flex items-center justify-center shrink-0">
                     <Icon className="w-4 h-4 text-accent" />

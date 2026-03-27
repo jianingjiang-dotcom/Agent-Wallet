@@ -1,8 +1,8 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTheme } from 'next-themes';
 
-const ACTIVE_COLOR = '#5459DA';
-const LIGHT_INACTIVE = '#6B7281';
+const ACTIVE_COLOR = '#1F32D6';
+const LIGHT_INACTIVE = '#73798B';
 const DARK_INACTIVE = '#8E8E9A';
 
 const iconData: string[][] = [

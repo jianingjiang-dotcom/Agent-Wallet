@@ -427,7 +427,7 @@ export function BindAccountDrawer({
                             disabled={oldCountdown > 0 || isLoading}
                             className={cn(
                               "text-sm",
-                              oldCountdown > 0 ? "text-muted-foreground" : "text-primary hover:underline"
+                              oldCountdown > 0 ? "text-muted-foreground" : "text-primary"
                             )}
                           >
                             {oldCountdown > 0 ? `${oldCountdown}s 后重新发送` : '重新发送验证码'}
@@ -449,7 +449,7 @@ export function BindAccountDrawer({
                         </div>
                         <button
                           onClick={() => setVerifyMode('password')}
-                          className="w-full flex items-center justify-center gap-1 text-sm text-primary hover:underline"
+                          className="w-full flex items-center justify-center gap-1 text-sm text-primary"
                         >
                           使用密码验证
                           <ChevronRight className="w-4 h-4" />
@@ -493,7 +493,7 @@ export function BindAccountDrawer({
                         <button
                           type="button"
                           onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors"
                         >
                           {showPassword ? (
                             <EyeOff className="w-5 h-5" />
@@ -541,7 +541,7 @@ export function BindAccountDrawer({
                         setPassword('');
                         setPasswordError('');
                       }}
-                      className="w-full flex items-center justify-center gap-1 text-sm text-primary hover:underline"
+                      className="w-full flex items-center justify-center gap-1 text-sm text-primary"
                     >
                       使用验证码验证
                       <ChevronRight className="w-4 h-4" />
@@ -656,7 +656,7 @@ export function BindAccountDrawer({
                     <CountryCodeSelector
                       selectedCountry={selectedCountry}
                       onSelect={setSelectedCountry}
-                      className="border-0 bg-transparent h-full rounded-l-md hover:bg-muted/50"
+                      className="border-0 bg-transparent h-full rounded-l-md"
                     />
                     <div className="w-px h-6 bg-border" />
                     <input
@@ -738,7 +738,7 @@ export function BindAccountDrawer({
                     disabled={countdown > 0 || isLoading}
                     className={cn(
                       "text-sm",
-                      countdown > 0 ? "text-muted-foreground" : "text-primary hover:underline"
+                      countdown > 0 ? "text-muted-foreground" : "text-primary"
                     )}
                   >
                     {countdown > 0 ? `${countdown}s 后重新发送` : '重新发送验证码'}

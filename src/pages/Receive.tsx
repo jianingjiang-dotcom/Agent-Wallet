@@ -328,7 +328,7 @@ export default function ReceivePage() {
   const NetworkItem = ({ network }: { network: typeof networks[0] }) => (
     <button
       onClick={() => handleSelectNetwork(network)}
-      className={`w-full p-4 flex items-center gap-3 hover:bg-muted/50 transition-colors rounded-xl ${
+      className={`w-full p-4 flex items-center gap-3 transition-colors rounded-xl ${
         selectedNetwork.id === network.id ? 'bg-accent/10' : ''
       }`}
     >
@@ -439,7 +439,7 @@ export default function ReceivePage() {
                           setIsAddressDrawerOpen(false);
                         }}
                         className={cn(
-                          'w-full p-4 flex items-center gap-3 hover:bg-muted/50 transition-colors rounded-xl',
+                          'w-full p-4 flex items-center gap-3 transition-colors rounded-xl',
                           (selectedWalletAddress?.id === addr.id) ? 'bg-accent/10' : ''
                         )}
                       >

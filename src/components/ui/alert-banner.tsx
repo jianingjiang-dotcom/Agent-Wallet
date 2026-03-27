@@ -118,7 +118,7 @@ const AlertBanner = React.forwardRef<HTMLDivElement, AlertBannerProps>(
             <button
               onClick={action.onClick}
               className={cn(
-                "font-medium mt-1.5 hover:underline",
+                "font-medium mt-1.5",
                 sizeKey === "sm" ? "text-[10px]" : "text-xs",
                 variantKey === "warning" && "text-warning",
                 variantKey === "danger" && "text-destructive",
@@ -135,7 +135,7 @@ const AlertBanner = React.forwardRef<HTMLDivElement, AlertBannerProps>(
         {onDismiss && (
           <button
             onClick={onDismiss}
-            className="text-muted-foreground hover:text-foreground transition-colors shrink-0 p-0.5"
+            className="text-muted-foreground transition-colors shrink-0 p-0.5"
             aria-label="Dismiss"
           >
             <svg

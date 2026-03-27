@@ -214,7 +214,7 @@ export default function ExportPrivateKeyPage() {
         {/* Toggle visibility */}
         <button
           onClick={() => setShowKey(!showKey)}
-          className="absolute top-3 right-3 p-1.5 rounded-md bg-background/80 hover:bg-muted transition-colors"
+          className="absolute top-3 right-3 p-1.5 rounded-md bg-background/80 transition-colors"
         >
           {showKey ? (
             <EyeOff className="w-4 h-4 text-muted-foreground" />

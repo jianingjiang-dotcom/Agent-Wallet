@@ -164,7 +164,7 @@ export default function WalletRecoveryPage() {
             onClick={() => handleSelectMethod(option.id)}
             className={cn(
               "w-full p-4 rounded-xl border-2 border-success/30 bg-success/5 flex items-center gap-4",
-              "hover:border-success/50 transition-colors"
+              "transition-colors"
             )}
           >
             <div className={cn("w-12 h-12 rounded-full flex items-center justify-center", option.bgColor)}>
@@ -613,7 +613,7 @@ export default function WalletRecoveryPage() {
             </div>
 
             <Button 
-              className="w-full bg-destructive hover:bg-destructive/90" 
+              className="w-full bg-destructive" 
               onClick={handlePasswordSubmit}
               disabled={isProcessing || !password.trim()}
             >
@@ -807,7 +807,7 @@ export default function WalletRecoveryPage() {
           <div className="px-4 pb-6 pt-2">
             <button
               onClick={() => navigate('/help')}
-              className="w-full flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors py-3"
+              className="w-full flex items-center justify-center gap-2 text-sm text-muted-foreground transition-colors py-3"
             >
               <MessageCircle className="w-4 h-4" />
               <span>遇到问题？联系客服</span>

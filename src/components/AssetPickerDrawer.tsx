@@ -159,7 +159,7 @@ export function AssetPickerDrawer({
                           "w-full p-3 rounded-xl flex items-center gap-3 text-left transition-colors",
                           isSelected
                             ? "bg-accent/10 border border-accent/30"
-                            : "bg-card border border-border/50 hover:bg-muted/50"
+                            : "bg-card border border-border/50"
                         )}
                       >
                         {/* Token Icon with Chain Badge */}

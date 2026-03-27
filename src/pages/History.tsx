@@ -1,12 +1,13 @@
-import { useState, useCallback, useMemo, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Send, TrendingDown, CheckCircle2, XCircle, ChevronRight, Clock, Loader2, Bot, Search, ListFilter } from 'lucide-react';
+import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Send, TrendingDown, CheckCircle2, XCircle, X, ChevronRight, ChevronDown, Clock, Loader2, Bot, Search, ListFilter } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { ProfileSidebar } from '@/components/ProfileSidebar';
 import { SearchInput } from '@/components/ui/search-input';
 import { useWallet } from '@/contexts/WalletContext';
 import { cn } from '@/lib/utils';
+import { getChainIconUrl } from '@/lib/crypto-icons';
 import { Transaction, SUPPORTED_CHAINS, ChainId, AgentTransferRequest, isAgentLinked } from '@/types/wallet';
 import { PullToRefresh } from '@/components/PullToRefresh';
 import { ChainIcon } from '@/components/ChainIcon';
@@ -16,11 +17,13 @@ import { EmptyState } from '@/components/EmptyState';
 import { AgentTxCard } from '@/components/AgentTxCard';
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Drawer, DrawerContent, DrawerTrigger } from '@/components/ui/drawer';
 import type { AgentTransaction } from '@/types/wallet';
 
 type SourceFilter = 'all' | 'manual' | 'agent' | 'requests';
 type FilterType = 'all' | 'send' | 'receive';
 type TimeFilter = 'all' | '7d' | '30d' | '3m';
+type TxTypeFilter = 'all' | 'transfer' | 'contract';
 
 export default function HistoryPage() {
   const navigate = useNavigate();
@@ -31,6 +34,9 @@ export default function HistoryPage() {
   const [chainFilter, setChainFilter] = useState<ChainId>('all');
   const [isLoading, setIsLoading] = useState(true);
   const [timeFilter, setTimeFilter] = useState<TimeFilter>('all');
+  const [chainDrawerOpen, setChainDrawerOpen] = useState(false);
+  const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
+  const [txTypeFilter, setTxTypeFilter] = useState<TxTypeFilter>('all');
   const {
     transactions,
     agentTransactions,
@@ -38,6 +44,8 @@ export default function HistoryPage() {
     currentWallet,
   } = useWallet();
   const isAgent = isAgentLinked(currentWallet);
+
+  // Search bar always visible at top
 
   // Simulate initial loading
   useEffect(() => {
@@ -179,53 +187,85 @@ export default function HistoryPage() {
         title="交易记录"
         showNav
         pageBg="bg-page"
+        leftAction={
+          <>
+            <motion.button
+              className="flex items-center justify-center"
+              whileTap={{ scale: 0.95 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+              onClick={() => setChainDrawerOpen(true)}
+            >
+              {chainFilter === 'all' ? (
+                <img src="/networks.svg" alt="网络筛选" className="w-6 h-6" />
+              ) : (
+                <ChainIcon chainId={SUPPORTED_CHAINS.find(c => c.id === chainFilter)?.icon || chainFilter} size="md" className="shrink-0 !w-6 !h-6" />
+              )}
+            </motion.button>
+          </>
+        }
         rightAction={
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <motion.button
-                className="relative flex items-center justify-center w-9 h-9"
-                whileTap={{ scale: 0.9 }}
-                transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-              >
-                <ListFilter className="w-5 h-5" strokeWidth={1.5} style={{ color: '#000000' }} />
-                {(sourceFilter !== 'all' || filter !== 'all' || chainFilter !== 'all' || timeFilter !== 'all') && (
-                  <span className="absolute top-0.5 right-0.5 w-2 h-2 rounded-full bg-accent" />
-                )}
-              </motion.button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-52 bg-popover border border-border shadow-xl z-50 max-h-[80vh] overflow-y-auto" container={document.getElementById('phone-frame-container') || undefined}>
-              <div className="px-3 py-1.5 text-xs text-muted-foreground font-medium">来源</div>
-              {([
-                { id: 'all' as SourceFilter, label: '全部来源' },
-                { id: 'manual' as SourceFilter, label: '手动' },
-                { id: 'agent' as SourceFilter, label: 'Agent' },
-                ...(isAgent ? [{ id: 'requests' as SourceFilter, label: '请求' }] : []),
-              ]).map(item => (
-                <DropdownMenuItem key={item.id} onClick={() => { setSourceFilter(item.id); setFilter('all'); }} className={cn("cursor-pointer", sourceFilter === item.id && "bg-muted/50 font-medium")}>
-                  {item.label}
-                </DropdownMenuItem>
-              ))}
-              <div className="h-px bg-border my-1" />
-              <div className="px-3 py-1.5 text-xs text-muted-foreground font-medium">方向</div>
-              {([
-                { id: 'all' as FilterType, label: '全部方向' },
-                { id: 'send' as FilterType, label: '转出' },
-                { id: 'receive' as FilterType, label: '收入' },
-              ]).map(item => (
-                <DropdownMenuItem key={item.id} onClick={() => setFilter(item.id)} className={cn("cursor-pointer", filter === item.id && "bg-muted/50 font-medium")}>
-                  {item.label}
-                </DropdownMenuItem>
-              ))}
-              <div className="h-px bg-border my-1" />
-              <div className="px-3 py-1.5 text-xs text-muted-foreground font-medium">网络</div>
-              {SUPPORTED_CHAINS.map(chain => (
-                <DropdownMenuItem key={chain.id} onClick={() => setChainFilter(chain.id)} className={cn("flex items-center gap-2.5 cursor-pointer", chainFilter === chain.id && "bg-muted/50 font-medium")}>
-                  <ChainIcon chainId={chain.icon} size="sm" className="shrink-0" />
-                  <span>{chain.name}</span>
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <>
+            <motion.button
+              className="relative flex items-center justify-center w-6 h-6"
+              whileTap={{ scale: 0.9 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+              onClick={() => setFilterDrawerOpen(true)}
+            >
+              <img src="/funnel.svg" alt="筛选" className="w-5 h-5" />
+              {(filter !== 'all' || txTypeFilter !== 'all') && (
+                <span className="absolute top-0.5 right-0.5 w-2 h-2 rounded-full" style={{ backgroundColor: '#E74E5A', boxShadow: '0 0 0 1.5px white' }} />
+              )}
+            </motion.button>
+            {/* Chain selector full page rendered via portal below */}
+            <Drawer open={filterDrawerOpen} onOpenChange={setFilterDrawerOpen}>
+              <DrawerContent className="px-0 pb-0">
+                <div>
+                  <div className="flex items-center h-6 px-4 mt-4" style={{ fontSize: '16px', lineHeight: '24px', color: '#73798B' }}>资金方向</div>
+                  <div className="px-4 mt-3">
+                    <div className="flex gap-3 w-full">
+                      {([
+                        { id: 'all' as FilterType, label: '全部' },
+                        { id: 'receive' as FilterType, label: '转入' },
+                        { id: 'send' as FilterType, label: '转出' },
+                      ]).map(item => (
+                        <button
+                          key={item.id}
+                          onClick={() => setFilter(item.id)}
+                          className={cn(
+                            "flex-1 px-4 py-[10px] rounded-[12px] text-base font-medium transition-colors leading-6"
+                          )}
+                          style={{ backgroundColor: filter === item.id ? 'rgba(31,50,214,0.05)' : '#F8F9FC', color: '#1c1c1c', boxShadow: filter === item.id ? 'inset 0 0 0 1px #1F32D6' : 'none' }}
+                        >
+                          {item.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="px-4 mt-6" style={{ paddingBottom: '58px' }}>
+                    <div className="mb-3" style={{ fontSize: '16px', lineHeight: '24px', color: '#73798B' }}>交易类型</div>
+                    <div className="flex gap-3 w-full">
+                      {([
+                        { id: 'all' as TxTypeFilter, label: '全部' },
+                        { id: 'transfer' as TxTypeFilter, label: '转账' },
+                        { id: 'contract' as TxTypeFilter, label: '合约调用' },
+                      ]).map(item => (
+                        <button
+                          key={item.id}
+                          onClick={() => setTxTypeFilter(item.id)}
+                          className={cn(
+                            "flex-1 px-4 py-[10px] rounded-[12px] text-base font-medium transition-colors leading-6"
+                          )}
+                          style={{ backgroundColor: txTypeFilter === item.id ? 'rgba(31,50,214,0.05)' : '#F8F9FC', color: '#1c1c1c', boxShadow: txTypeFilter === item.id ? 'inset 0 0 0 1px #1F32D6' : 'none' }}
+                        >
+                          {item.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </DrawerContent>
+            </Drawer>
+          </>
         }
       >
       <PullToRefresh onRefresh={handleRefresh}>
@@ -233,163 +273,76 @@ export default function HistoryPage() {
 
           {isLoading ? <TransactionListSkeleton count={5} showSearchBar showTabs /> : <>
               {/* Search bar */}
-              <div className="sticky top-0 z-10 pt-2 pb-2 bg-page">
+              <div className="sticky top-0 z-10 pt-2 pb-2 bg-page -mx-4 px-4">
                 <SearchInput
                   placeholder="搜索交易..."
                   value={searchQuery}
                   onChange={setSearchQuery}
-                  className="h-10 bg-[#F7F8FA] border border-[#EDEEF3] rounded-full"
+                  className="h-10 bg-[#F7F8FA] border-0 rounded-full pl-10 focus-visible:ring-0 focus-visible:ring-offset-0"
                   wrapperClassName="w-full"
                 />
               </div>
             </>}
 
           {/* Transactions List */}
-          {!isLoading && <div className="space-y-6 pt-2">
-              {/* Manual transactions (shown in 'all' and 'manual' modes) */}
-              {sourceFilter !== 'agent' && Object.entries(groupedTransactions).map(([date, txs]) => <motion.div key={`m-${date}`} initial={{
-            opacity: 0,
-            y: 20
-          }} animate={{
-            opacity: 1,
-            y: 0
-          }}>
-                  <h3 className="text-[12px] leading-[16px] text-muted-foreground mb-2">
-                    {date}
-                  </h3>
-                  <div className="space-y-2">
-                    {txs.map((tx, index) => {
-                return <motion.button key={tx.id} initial={{
-                  opacity: 0,
-                  x: -20
-                }} animate={{
-                  opacity: 1,
-                  x: 0
-                }} transition={{
-                  delay: 0.05 * index
-                }} onClick={() => navigate(`/transaction/${tx.id}`)} className={cn("w-full p-3 rounded-xl flex items-center justify-between text-left transition-all", "hover:bg-muted/30 active:scale-[0.98] active:bg-muted/50", "bg-card border border-border/50")}>
-                          <div className="flex items-center gap-2">
-                            <div className={cn('w-8 h-8 rounded-full flex items-center justify-center', tx.type === 'receive' ? 'bg-success/10' : 'bg-accent/10')}>
-                              {tx.type === 'receive' ? <TrendingDown className="w-4 h-4 text-success rotate-180" /> : <Send className="w-4 h-4 text-accent" />}
+          {!isLoading && <div className="space-y-6 py-4">
+              {/* Manual transactions grouped by date */}
+              {sourceFilter !== 'agent' && (() => {
+                const grouped = displayedTransactions.reduce<Record<string, typeof displayedTransactions>>((acc, tx) => {
+                  const dateKey = new Date(tx.timestamp).toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' });
+                  if (!acc[dateKey]) acc[dateKey] = [];
+                  acc[dateKey].push(tx);
+                  return acc;
+                }, {});
+                let globalIndex = 0;
+                return Object.entries(grouped).map(([dateLabel, txs]) => (
+                  <div key={dateLabel}>
+                    <h3 className="text-muted-foreground mb-3" style={{ fontSize: '14px', lineHeight: '20px' }}>{dateLabel}</h3>
+                    <div>
+                      {txs.map((tx) => {
+                        const idx = globalIndex++;
+                        return <motion.button key={tx.id} initial={{
+                          opacity: 0,
+                          x: -20
+                        }} animate={{
+                          opacity: 1,
+                          x: 0
+                        }} transition={{
+                          delay: 0.05 * Math.min(idx, 10)
+                        }} onClick={() => navigate(`/transaction/${tx.id}`)} className={cn("w-full py-3 px-0 flex items-center justify-between text-left transition-all", "active:scale-[0.98] active:bg-muted/50")}>
+                          <div className="flex items-center gap-3">
+                            <div className="w-9 h-9 relative">
+                              <ChainIcon chainId={tx.symbol.toLowerCase()} size="lg" className="!w-9 !h-9" />
+                              <img src={getChainIconUrl(tx.network)} alt={tx.network} className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full border-2 border-white" />
                             </div>
                             <div className="min-w-0">
                               <div className="flex items-center gap-1.5">
-                                <p className="font-medium text-foreground text-sm">
+                                <p className="font-medium text-foreground" style={{ fontSize: '14px', lineHeight: '20px' }}>
                                   {tx.type === 'receive' ? '转入' : '转出'}
                                 </p>
                               </div>
-                              <div className="flex items-center gap-1">
-                                <span className="text-xs text-muted-foreground truncate max-w-[100px]">
-                                  {tx.counterpartyLabel || `${tx.counterparty.slice(0, 6)}...${tx.counterparty.slice(-4)}`}
-                                </span>
-                                <span className="text-xs text-muted-foreground/60">·</span>
-                                <span className="text-xs text-muted-foreground">
-                                  {SUPPORTED_CHAINS.find(c => c.id === tx.network)?.shortName || tx.network}
-                                </span>
-                                {tx.status === 'pending' && <span className="text-xs text-warning flex items-center gap-0.5">
-                                    <Clock className="w-3 h-3" />
-                                  </span>}
-                                {tx.status === 'confirmed' && <span className="text-xs text-success flex items-center gap-0.5">
-                                    <CheckCircle2 className="w-3 h-3" />
-                                  </span>}
-                                {tx.status === 'failed' && <span className="text-xs text-destructive flex items-center gap-0.5">
-                                    <XCircle className="w-3 h-3" />
-                                  </span>}
-                              </div>
-                            </div>
-                          </div>
-                          <div className="text-right flex items-center gap-2">
-                            <div>
-                              <p className={cn('font-medium text-sm', tx.type === 'receive' ? 'text-success' : 'text-foreground')}>
-                                {tx.type === 'receive' ? '+' : '-'}{tx.amount} {tx.symbol}
+                              <p style={{ fontSize: '12px', lineHeight: '16px', color: '#73798B' }}>
+                                {tx.type === 'receive' ? '发送方 ' : '收款方 '}{tx.counterpartyLabel || (tx.counterparty ? `${tx.counterparty.slice(0, 6)}...${tx.counterparty.slice(-4)}` : '')}
                               </p>
-                              <p className="text-xs text-muted-foreground">
-                                ${tx.usdValue.toLocaleString()}
-                              </p>
-                            </div>
-                            <ChevronRight className="w-4 h-4 text-muted-foreground" />
-                          </div>
-                        </motion.button>;
-              })}
-                  </div>
-                </motion.div>)}
-
-              {/* Agent transactions (shown in 'all' and 'agent' modes) */}
-              {sourceFilter !== 'manual' && Object.entries(groupedAgentTransactions).map(([date, txs]) => (
-                <motion.div key={`a-${date}`} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-                  <div className="flex items-center gap-2 mb-2">
-                    <h3 className="text-[12px] leading-[16px] text-muted-foreground">{date}</h3>
-                    {sourceFilter === 'all' && (
-                      <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-accent/10 text-accent font-medium">Agent</span>
-                    )}
-                  </div>
-                  <div className="space-y-2">
-                    {txs.map(tx => (
-                      <AgentTxCard key={tx.id} tx={tx} onClick={() => navigate(`/agent-review/${tx.id}`)} />
-                    ))}
-                  </div>
-                </motion.div>
-              ))}
-
-              {/* Agent transfer requests (shown in 'all' and 'requests' modes for agent_linked wallets) */}
-              {(sourceFilter === 'all' || sourceFilter === 'requests') && Object.entries(groupedAgentRequests).map(([date, reqs]) => (
-                <motion.div key={`r-${date}`} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-                  <div className="flex items-center gap-2 mb-2">
-                    <h3 className="text-[12px] leading-[16px] text-muted-foreground">{date}</h3>
-                    {sourceFilter === 'all' && (
-                      <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 font-medium">请求</span>
-                    )}
-                  </div>
-                  <div className="space-y-2">
-                    {reqs.map((req) => {
-                      const statusConfig: Record<string, { color: string; label: string }> = {
-                        pending: { color: 'text-warning', label: '待处理' },
-                        accepted: { color: 'text-accent', label: '已接受' },
-                        rejected: { color: 'text-destructive', label: '已拒绝' },
-                        executing: { color: 'text-accent', label: '执行中' },
-                        completed: { color: 'text-success', label: '已完成' },
-                        failed: { color: 'text-destructive', label: '失败' },
-                      };
-                      const status = statusConfig[req.status] || { color: 'text-muted-foreground', label: req.status };
-                      return (
-                        <div
-                          key={req.id}
-                          className="w-full p-3 rounded-xl bg-card border border-border/50 flex items-center justify-between"
-                        >
-                          <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
-                              <Bot className="w-4 h-4 text-purple-600 dark:text-purple-400" />
-                            </div>
-                            <div className="min-w-0">
-                              <div className="flex items-center gap-1.5">
-                                <p className="font-medium text-foreground text-sm">请求转账</p>
-                                <span className={cn("text-[10px] font-medium", status.color)}>{status.label}</span>
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <span className="text-xs text-muted-foreground truncate max-w-[100px]">
-                                  {req.toLabel || `${req.toAddress.slice(0, 6)}...${req.toAddress.slice(-4)}`}
-                                </span>
-                                <span className="text-xs text-muted-foreground/60">·</span>
-                                <span className="text-xs text-muted-foreground">
-                                  {SUPPORTED_CHAINS.find(c => c.id === req.network)?.shortName || req.network}
-                                </span>
-                              </div>
                             </div>
                           </div>
                           <div className="text-right">
-                            <p className="font-medium text-sm text-foreground">
-                              -{req.amount} {req.symbol}
+                            <p className={cn('font-medium', tx.type === 'receive' ? 'text-success' : 'text-foreground')} style={{ fontSize: '14px', lineHeight: '20px' }}>
+                              {tx.type === 'receive' ? '+' : '-'}{tx.amount} {tx.symbol}
                             </p>
-                            <p className="text-xs text-muted-foreground">
-                              ${req.usdValue.toLocaleString()}
+                            <p className="text-xs" style={{ color: tx.status === 'pending' ? undefined : tx.status === 'confirmed' ? '#73798B' : undefined }}>
+                              <span className={tx.status === 'pending' ? 'text-warning' : tx.status === 'failed' ? 'text-destructive' : ''} style={tx.status === 'confirmed' ? { color: '#73798B' } : undefined}>
+                                {tx.status === 'pending' ? '进行中' : tx.status === 'confirmed' ? '已完成' : '失败'}
+                              </span>
                             </p>
                           </div>
-                        </div>
-                      );
-                    })}
+                        </motion.button>;
+                      })}
+                    </div>
                   </div>
-                </motion.div>
-              ))}
+                ));
+              })()}
+
 
               {totalCount === 0 && <EmptyState icon={sourceFilter === 'agent' ? Bot : sourceFilter === 'requests' ? Bot : Send} title={sourceFilter === 'agent' ? '暂无 Agent 交易' : sourceFilter === 'requests' ? '暂无请求记录' : '暂无交易记录'} />}
 
@@ -406,6 +359,56 @@ export default function HistoryPage() {
             </div>}
         </div>
       </PullToRefresh>
+
     </AppLayout>
+
+    {/* Chain selector full page */}
+    <AnimatePresence>
+      {chainDrawerOpen && (
+        <motion.div
+          initial={{ y: '100%' }}
+          animate={{ y: 0 }}
+          exit={{ y: '100%' }}
+          transition={{ type: 'tween', duration: 0.3, ease: 'easeOut' }}
+          className="absolute inset-0 z-[200] bg-white flex flex-col"
+        >
+          {/* Header */}
+          <div className="flex items-center justify-between h-[44px] px-4 shrink-0">
+            <button onClick={() => setChainDrawerOpen(false)} className="flex items-center justify-center w-6 h-6">
+              <X className="w-6 h-6" strokeWidth={1.5} style={{ color: '#1c1c1c' }} />
+            </button>
+            <span className="font-semibold text-foreground" style={{ fontSize: '18px', lineHeight: '28px' }}>选择网络</span>
+            <div className="w-6 h-6" />
+          </div>
+          {/* List */}
+          <div className="flex-1 overflow-y-auto">
+            <div className="space-y-0 pt-2">
+              {SUPPORTED_CHAINS.map(chain => (
+                <button
+                  key={chain.id}
+                  onClick={() => { setChainFilter(chain.id); setChainDrawerOpen(false); }}
+                  className={cn(
+                    "flex items-center gap-3 w-full py-4 px-4 rounded-none text-base leading-6 transition-colors",
+                    chainFilter === chain.id ? "font-medium" : "font-medium text-foreground"
+                  )}
+                  style={chainFilter === chain.id ? { backgroundColor: '#F8F9FC' } : undefined}
+                >
+                  {chain.id === 'all' ? (
+                    <img src="/networks.svg" alt="全部网络" className="w-9 h-9" />
+                  ) : (
+                    <ChainIcon chainId={chain.icon} size="lg" className="shrink-0 !w-9 !h-9" />
+                  )}
+                  <span className="flex-1 text-left text-base leading-6 font-medium">{chain.name}</span>
+                  {chainFilter === chain.id && (
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1F32D6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0"><path d="M20 6 9 17l-5-5"/></svg>
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+
     </ProfileSidebar>;
 }

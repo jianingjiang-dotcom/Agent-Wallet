@@ -106,7 +106,7 @@ export function AddressPicker({
                 'w-full flex items-center gap-3 p-3 rounded-xl transition-colors text-left',
                 selection.mode === 'all'
                   ? 'bg-accent/10'
-                  : 'hover:bg-muted/50',
+                  : '',
               )}
             >
               <div className="w-9 h-9 rounded-full bg-muted flex items-center justify-center shrink-0">
@@ -139,7 +139,7 @@ export function AddressPicker({
                       'w-full flex items-center gap-3 p-3 rounded-xl transition-colors text-left',
                       isSelected(addr.id)
                         ? 'bg-accent/10'
-                        : 'hover:bg-muted/50',
+                        : '',
                     )}
                   >
                     <div className={cn(
@@ -157,7 +157,7 @@ export function AddressPicker({
                     <div className="flex items-center gap-1.5 shrink-0">
                       <button
                         onClick={(e) => handleCopy(e, addr)}
-                        className="p-1.5 rounded-lg hover:bg-muted/80 transition-colors"
+                        className="p-1.5 rounded-lg transition-colors"
                       >
                         {copiedId === addr.id ? (
                           <Check className="w-3.5 h-3.5 text-success" />

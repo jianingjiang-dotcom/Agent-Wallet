@@ -333,7 +333,7 @@ export default function WalletBackupPage() {
                   }
                 }}
                 disabled={isLoading}
-                className="w-full p-4 rounded-xl border border-success/30 bg-success/5 hover:bg-success/10 transition-colors text-left disabled:opacity-50"
+                className="w-full p-4 rounded-xl border border-success/30 bg-success/5 transition-colors text-left disabled:opacity-50"
               >
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-success/10 flex items-center justify-center shrink-0">
@@ -387,7 +387,7 @@ export default function WalletBackupPage() {
                   }
                 }}
                 disabled={isLoading}
-                className="w-full p-4 rounded-xl border border-border bg-card hover:bg-muted/50 transition-colors text-left disabled:opacity-50"
+                className="w-full p-4 rounded-xl border border-border bg-card transition-colors text-left disabled:opacity-50"
               >
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
@@ -410,7 +410,7 @@ export default function WalletBackupPage() {
             {/* Local backup option — always available */}
             <button
               onClick={() => { setBackupType('local'); setShowPasswordForm(true); }}
-              className="w-full p-4 rounded-xl border border-border bg-card hover:bg-muted/50 transition-colors text-left"
+              className="w-full p-4 rounded-xl border border-border bg-card transition-colors text-left"
             >
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center shrink-0">

@@ -198,7 +198,7 @@ export default function DelegateAgent() {
               <button
                 onClick={handleRefresh}
                 disabled={isRefreshing}
-                className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                className="flex items-center gap-1.5 text-xs text-muted-foreground transition-colors"
               >
                 <RefreshCw className={cn('w-3.5 h-3.5', isRefreshing && 'animate-spin')} />
                 刷新
@@ -259,7 +259,7 @@ export default function DelegateAgent() {
                     'shrink-0 text-xs px-3 py-1 rounded-full font-medium transition-colors',
                     selectedWalletFilter === ALL_WALLETS
                       ? 'bg-purple-600 text-white dark:bg-purple-500'
-                      : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                      : 'bg-muted text-muted-foreground'
                   )}
                 >
                   全部
@@ -272,7 +272,7 @@ export default function DelegateAgent() {
                       'shrink-0 text-xs px-3 py-1 rounded-full font-medium transition-colors whitespace-nowrap',
                       selectedWalletFilter === opt.walletId
                         ? 'bg-purple-600 text-white dark:bg-purple-500'
-                        : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                        : 'bg-muted text-muted-foreground'
                     )}
                   >
                     {opt.name}
@@ -407,7 +407,7 @@ export default function DelegateAgent() {
             <button
               onClick={handleRefresh}
               disabled={isRefreshing}
-              className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors py-2"
+              className="flex items-center gap-1.5 text-xs text-muted-foreground transition-colors py-2"
             >
               <RefreshCw className={cn('w-3.5 h-3.5', isRefreshing && 'animate-spin')} />
               刷新 Agent 列表
@@ -471,7 +471,7 @@ export default function DelegateAgent() {
                 {!isExpired && currentSetupToken && (
                   <button
                     onClick={handleCopy}
-                    className="shrink-0 p-1.5 rounded-lg hover:bg-muted transition-colors"
+                    className="shrink-0 p-1.5 rounded-lg transition-colors"
                     title="复制 Token"
                   >
                     {copied ? (
@@ -492,7 +492,7 @@ export default function DelegateAgent() {
                       Token 已失效
                     </div>
                     <button
-                      className="text-xs text-primary hover:underline"
+                      className="text-xs text-primary"
                       onClick={handleNewToken}
                       disabled={isGenerating}
                     >

@@ -62,7 +62,7 @@ export function PhoneFrame({ children }: PhoneFrameProps) {
         {children}
       </div>
       {/* Home Indicator */}
-      <div className="absolute bottom-[8px] left-1/2 -translate-x-1/2 w-[134px] h-[5px] bg-black rounded-[2.5px] z-50" />
+      <div className="absolute bottom-[8px] left-1/2 -translate-x-1/2 w-[134px] h-[5px] bg-black rounded-[2.5px] z-[9999] pointer-events-none" />
     </div>
   );
 }

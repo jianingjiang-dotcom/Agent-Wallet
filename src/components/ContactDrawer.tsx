@@ -131,7 +131,7 @@ export function ContactDrawer({
                     className={cn(
                       "w-full p-4 rounded-xl bg-card border border-border/50",
                       "flex flex-col gap-1 text-left",
-                      "hover:bg-muted/50 transition-colors"
+                      "transition-colors"
                     )}
                   >
                     {/* Name + Chain Label */}

@@ -155,7 +155,7 @@ export default function HelpPage() {
                 const Icon = item.icon;
                 return (
                   <AccordionItem key={item.id} value={item.id} className="border-b border-border last:border-b-0">
-                    <AccordionTrigger className="px-3 py-3 hover:no-underline hover:bg-muted/50">
+                    <AccordionTrigger className="px-3 py-3">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center">
                           <Icon className="w-4 h-4 text-accent" />
@@ -195,7 +195,7 @@ export default function HelpPage() {
                 <button
                   key={item.title}
                   className={cn(
-                    'w-full p-3 flex items-center gap-3 hover:bg-muted/50 transition-colors',
+                    'w-full p-3 flex items-center gap-3 transition-colors',
                     index !== contactItems.length - 1 && 'border-b border-border'
                   )}
                 >

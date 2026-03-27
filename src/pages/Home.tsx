@@ -127,7 +127,7 @@ function EmptyWalletState() {
             <p className="text-xs text-muted-foreground">
               已有备份？
               <button 
-                className="text-primary ml-1 hover:underline"
+                className="text-primary ml-1"
                 onClick={() => navigate('/onboarding?recover=true')}
               >
                 恢复钱包
@@ -447,7 +447,7 @@ export default function HomePage() {
               {/* Quick Actions */}
               <div className="flex gap-3">
                 <Button
-                  className="flex-1 h-10 bg-white/20 backdrop-blur-sm text-white border border-white/20 hover:bg-white/30 transition-colors"
+                  className="flex-1 h-10 bg-white/20 backdrop-blur-sm text-white border border-white/20 transition-colors"
                   onClick={() => navigate(isAgentLinked(currentWallet) ? '/request-agent' : '/send')}
                 >
                   {isAgentLinked(currentWallet) ? (
@@ -458,7 +458,7 @@ export default function HomePage() {
                   {isAgentLinked(currentWallet) ? '请求Agent执行' : '转账'}
                 </Button>
                 <Button
-                  className="flex-1 h-10 bg-white/10 backdrop-blur-sm text-white/90 border border-white/15 hover:bg-white/20 transition-colors"
+                  className="flex-1 h-10 bg-white/10 backdrop-blur-sm text-white/90 border border-white/15 transition-colors"
                   onClick={() => navigate('/receive')}
                 >
                   <QrCode className="w-4 h-4 mr-2" strokeWidth={1.5} />
@@ -575,7 +575,7 @@ export default function HomePage() {
                     exit={{ opacity: 0, x: 20 }}
                     transition={{ delay: 0.05 * index }}
                     onClick={() => navigate(`/asset/${asset.symbol}?chain=${asset.network}`)}
-                    className="w-full card-elevated p-3 flex items-center justify-between hover:bg-muted/30 active:scale-[0.98] active:bg-muted/50 transition-all"
+                    className="w-full card-elevated p-3 flex items-center justify-between active:scale-[0.98] active:bg-muted/50 transition-all"
                   >
                     <div className="flex items-center gap-2">
                       <CryptoIconWithChain symbol={asset.symbol} chainId={asset.network} size="md" />
@@ -614,7 +614,7 @@ export default function HomePage() {
                 <motion.button
                   layout
                   onClick={() => setShowAllAssets(!showAllAssets)}
-                  className="w-full py-3 flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors rounded-xl hover:bg-muted/30"
+                  className="w-full py-3 flex items-center justify-center gap-2 text-sm text-muted-foreground transition-colors rounded-xl"
                 >
                   <motion.div
                     animate={{ rotate: showAllAssets ? 180 : 0 }}
@@ -663,7 +663,7 @@ export default function HomePage() {
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.05 * index }}
                         onClick={() => navigate(`/transaction/${tx.id}`)}
-                        className="w-full card-elevated p-3 flex items-center justify-between text-left hover:bg-muted/30 active:scale-[0.98] active:bg-muted/50 transition-all"
+                        className="w-full card-elevated p-3 flex items-center justify-between text-left active:scale-[0.98] active:bg-muted/50 transition-all"
                       >
                         <div className="flex items-center gap-2">
                           <div className={cn(
@@ -725,7 +725,7 @@ export default function HomePage() {
               {hasMoreTransactions && (
                 <motion.button
                   onClick={() => navigate('/history')}
-                  className="w-full py-3 flex items-center justify-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors rounded-xl hover:bg-muted/30"
+                  className="w-full py-3 flex items-center justify-center gap-1 text-sm text-muted-foreground transition-colors rounded-xl"
                 >
                   查看全部
                   <ChevronRight className="w-4 h-4" />

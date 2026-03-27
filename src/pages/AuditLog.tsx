@@ -142,7 +142,7 @@ export default function AuditLog() {
                 'flex-1 py-2 text-xs font-medium rounded-lg transition-all',
                 filter === tab.value
                   ? 'bg-background text-foreground shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
+                  : 'text-muted-foreground'
               )}
             >
               {tab.label}

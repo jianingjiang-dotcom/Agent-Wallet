@@ -500,7 +500,7 @@ export default function PolicyEditDrawer({
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 shrink-0 text-muted-foreground hover:text-destructive"
+                  className="h-8 w-8 shrink-0 text-muted-foreground"
                   onClick={() => removeContract(index)}
                 >
                   <Trash2 className="h-4 w-4" />
@@ -602,7 +602,7 @@ export default function PolicyEditDrawer({
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 shrink-0 text-muted-foreground hover:text-destructive"
+                  className="h-8 w-8 shrink-0 text-muted-foreground"
                   onClick={() => removeAddress(index)}
                 >
                   <Trash2 className="h-4 w-4" />
@@ -666,7 +666,7 @@ export default function PolicyEditDrawer({
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 shrink-0 text-muted-foreground hover:text-destructive"
+                  className="h-8 w-8 shrink-0 text-muted-foreground"
                   onClick={() => removeToken(index)}
                 >
                   <Trash2 className="h-4 w-4" />
@@ -709,7 +709,7 @@ export default function PolicyEditDrawer({
                   'rounded-lg border px-4 py-2 text-sm font-medium transition-colors',
                   isSelected
                     ? 'bg-accent text-accent-foreground border-accent'
-                    : 'bg-background text-muted-foreground border-input hover:bg-muted/50',
+                    : 'bg-background text-muted-foreground border-input',
                 )}
               >
                 {chain.label}
@@ -792,7 +792,7 @@ export default function PolicyEditDrawer({
                       'flex-1 flex items-center justify-center gap-1.5 rounded-lg border px-3 py-2.5 text-sm font-medium transition-colors',
                       effect === 'allow'
                         ? 'bg-emerald-100 border-emerald-500 text-emerald-700'
-                        : 'bg-background border-input text-muted-foreground hover:bg-muted/50',
+                        : 'bg-background border-input text-muted-foreground',
                     )}
                   >
                     <CheckCircle2 className="h-4 w-4" />
@@ -805,7 +805,7 @@ export default function PolicyEditDrawer({
                       'flex-1 flex items-center justify-center gap-1.5 rounded-lg border px-3 py-2.5 text-sm font-medium transition-colors',
                       effect === 'deny'
                         ? 'bg-red-100 border-red-500 text-red-700'
-                        : 'bg-background border-input text-muted-foreground hover:bg-muted/50',
+                        : 'bg-background border-input text-muted-foreground',
                     )}
                   >
                     <XCircle className="h-4 w-4" />
@@ -826,7 +826,7 @@ export default function PolicyEditDrawer({
                 {isEditing && onDelete && (
                   <Button
                     variant="outline"
-                    className="w-full text-destructive border-destructive/30 hover:bg-destructive/10"
+                    className="w-full text-destructive border-destructive/30"
                     onClick={() => setShowDeleteDialog(true)}
                   >
                     <Trash2 className="h-4 w-4 mr-1" />
@@ -852,7 +852,7 @@ export default function PolicyEditDrawer({
             <AlertDialogCancel>取消</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className="bg-destructive text-destructive-foreground"
             >
               删除
             </AlertDialogAction>

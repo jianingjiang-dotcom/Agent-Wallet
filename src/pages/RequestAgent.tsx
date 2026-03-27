@@ -194,7 +194,7 @@ export default function RequestAgentPage() {
                         "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap shrink-0 transition-colors",
                         assetFilterChain === chain.id
                           ? "bg-muted text-foreground"
-                          : "border border-border text-muted-foreground hover:bg-muted/30"
+                          : "border border-border text-muted-foreground"
                       )}
                     >
                       <ChainIcon chainId={chain.id} size="sm" />
@@ -223,7 +223,7 @@ export default function RequestAgentPage() {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: index * 0.03 }}
                         onClick={() => handleSelectAsset(asset)}
-                        className="w-full p-3 rounded-xl bg-card border border-border/50 flex items-center gap-3 text-left hover:bg-muted/50 transition-colors"
+                        className="w-full p-3 rounded-xl bg-card border border-border/50 flex items-center gap-3 text-left transition-colors"
                       >
                         <div className="relative shrink-0">
                           <CryptoIcon symbol={asset.symbol} size="lg" />
@@ -264,7 +264,7 @@ export default function RequestAgentPage() {
               {selectedAsset && (
                 <button
                   onClick={() => setStep('asset')}
-                  className="w-full p-3 rounded-xl bg-muted/50 border border-border/50 flex items-center gap-3 hover:bg-muted/80 transition-colors"
+                  className="w-full p-3 rounded-xl bg-muted/50 border border-border/50 flex items-center gap-3 transition-colors"
                 >
                   <div className="relative shrink-0">
                     <CryptoIcon symbol={selectedAsset.symbol} size="md" />
@@ -357,7 +357,7 @@ export default function RequestAgentPage() {
                   </div>
                   <button
                     onClick={() => setAmount(selectedAsset.balance.toString())}
-                    className="px-3 py-1 text-xs font-medium text-primary bg-primary/10 rounded-full hover:bg-primary/20 transition-colors"
+                    className="px-3 py-1 text-xs font-medium text-primary bg-primary/10 rounded-full transition-colors"
                   >
                     全部
                   </button>

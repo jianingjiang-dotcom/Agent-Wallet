@@ -111,7 +111,7 @@ export default function ContactDetailPage() {
               </div>
               <button
                 onClick={handleCopyAddress}
-                className="w-full flex items-center gap-2 p-3 rounded-xl bg-muted/50 hover:bg-muted transition-colors"
+                className="w-full flex items-center gap-2 p-3 rounded-xl bg-muted/50 transition-colors"
               >
                 <span className="flex-1 font-mono text-sm text-left break-all">
                   {contact.address}
@@ -222,7 +222,7 @@ export default function ContactDetailPage() {
           <div className="px-4 pb-4">
             <Button
               variant="outline"
-              className="w-full justify-start gap-3 h-12 text-destructive hover:text-destructive hover:bg-destructive/10"
+              className="w-full justify-start gap-3 h-12 text-destructive"
               onClick={() => setShowDeleteDialog(true)}
             >
               <Trash2 className="w-5 h-5" />
@@ -257,7 +257,7 @@ export default function ContactDetailPage() {
             <AlertDialogCancel>取消</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className="bg-destructive text-destructive-foreground"
             >
               删除
             </AlertDialogAction>

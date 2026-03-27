@@ -409,7 +409,7 @@ export default function LoginPage() {
       <div className="flex items-center py-3 -mx-4 px-4">
         <button
           onClick={handleBack}
-          className="p-2 -ml-2 text-muted-foreground hover:text-foreground transition-colors"
+          className="p-2 -ml-2 text-muted-foreground transition-colors"
         >
           <ArrowLeft className="w-5 h-5" />
         </button>
@@ -508,7 +508,7 @@ export default function LoginPage() {
               ) : (
                 <button
                   onClick={handleResendCode}
-                  className="text-sm text-primary hover:underline"
+                  className="text-sm text-primary"
                 >
                   重新发送验证码
                 </button>
@@ -579,7 +579,7 @@ export default function LoginPage() {
         <button
           onClick={handleSwitchAuthMode}
           disabled={isLoading}
-          className="text-sm text-primary hover:underline disabled:opacity-50"
+          className="text-sm text-primary disabled:opacity-50"
         >
           {authMode === 'otp' ? '使用密码登录' : '使用验证码登录'}
         </button>
@@ -603,7 +603,7 @@ export default function LoginPage() {
             "flex-1 py-3 rounded-xl text-sm font-medium transition-all flex items-center justify-center gap-2 relative",
             loginMethod === 'phone'
               ? "bg-muted/50 text-foreground border border-border"
-              : "text-muted-foreground hover:text-foreground hover:bg-muted/30"
+              : "text-muted-foreground"
           )}
         >
           <Phone className="w-4 h-4" />
@@ -620,7 +620,7 @@ export default function LoginPage() {
             "flex-1 py-3 rounded-xl text-sm font-medium transition-all flex items-center justify-center gap-2 relative",
             loginMethod === 'email'
               ? "bg-muted/50 text-foreground border border-border"
-              : "text-muted-foreground hover:text-foreground hover:bg-muted/30"
+              : "text-muted-foreground"
           )}
         >
           <Mail className="w-4 h-4" />
@@ -646,7 +646,7 @@ export default function LoginPage() {
             <CountryCodeSelector
               selectedCountry={selectedCountry}
               onSelect={setSelectedCountry}
-              className="border-0 bg-transparent h-full rounded-l-md hover:bg-muted/50"
+              className="border-0 bg-transparent h-full rounded-l-md"
             />
             <div className="w-px h-6 bg-border" />
             <input
@@ -1062,10 +1062,10 @@ export default function LoginPage() {
         <div className="px-4 pb-[24px]">
           <p className="text-xs text-center text-muted-foreground">
             继续即表示您同意我们的 <button
-              className="text-[#000000] hover:underline"
+              className="text-[#000000]"
               onClick={() => navigate('/terms')}
             > 服务条款 </button> 和 <button
-              className="text-[#000000] hover:underline"
+              className="text-[#000000]"
               onClick={() => navigate('/privacy')}
             >隐私政策</button>
           </p>

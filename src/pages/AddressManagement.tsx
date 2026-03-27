@@ -133,7 +133,7 @@ export default function AddressManagement() {
             {/* Wallet Switcher */}
             <button
               onClick={() => setWalletDrawerOpen(true)}
-              className="w-full p-3 rounded-xl border border-border bg-card flex items-center gap-3 hover:bg-muted/30 transition-colors"
+              className="w-full p-3 rounded-xl border border-border bg-card flex items-center gap-3 transition-colors"
             >
               <div className="w-9 h-9 rounded-full bg-muted flex items-center justify-center shrink-0">
                 <Wallet className="w-4 h-4 text-muted-foreground" />
@@ -237,7 +237,7 @@ export default function AddressManagement() {
                     {/* Create New Address Button */}
                     <button
                       onClick={() => handleOpenCreate(systemInfo.id)}
-                      className="w-full p-3 rounded-xl border-2 border-dashed border-border hover:border-accent/50 hover:bg-accent/5 flex items-center justify-center gap-2 text-muted-foreground hover:text-accent transition-all"
+                      className="w-full p-3 rounded-xl border-2 border-dashed border-border flex items-center justify-center gap-2 text-muted-foreground transition-all"
                     >
                       <Plus className="w-4 h-4" />
                       <span className="text-sm font-medium">创建新 {systemInfo.name} 地址</span>
@@ -271,7 +271,7 @@ export default function AddressManagement() {
                   key={w.id}
                   onClick={() => handleSelectWallet(w.id)}
                   className={cn(
-                    'w-full p-4 flex items-center gap-3 hover:bg-muted/50 transition-colors rounded-xl text-left',
+                    'w-full p-4 flex items-center gap-3 transition-colors rounded-xl text-left',
                     activeWalletId === w.id ? 'bg-accent/10' : ''
                   )}
                 >

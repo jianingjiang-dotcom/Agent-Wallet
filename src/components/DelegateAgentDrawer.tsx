@@ -151,7 +151,7 @@ export function DelegateAgentDrawer({
                   />
                   <button
                     onClick={handlePaste}
-                    className="absolute top-3 right-3 p-1.5 rounded-lg hover:bg-muted transition-colors"
+                    className="absolute top-3 right-3 p-1.5 rounded-lg transition-colors"
                     title="粘贴"
                   >
                     <Clipboard className="w-4 h-4 text-muted-foreground" />
@@ -229,7 +229,7 @@ export function DelegateAgentDrawer({
 
                 <button
                   onClick={() => setStep(1)}
-                  className="w-full text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  className="w-full text-sm text-muted-foreground transition-colors"
                 >
                   返回上一步
                 </button>
@@ -310,7 +310,7 @@ export function DelegateAgentDrawer({
 
                 <button
                   onClick={() => setStep(2)}
-                  className="w-full text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  className="w-full text-sm text-muted-foreground transition-colors"
                 >
                   返回上一步
                 </button>

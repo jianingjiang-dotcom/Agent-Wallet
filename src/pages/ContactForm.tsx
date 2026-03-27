@@ -171,7 +171,7 @@ export default function ContactFormPage() {
                         "w-full flex items-center gap-3 p-4 rounded-xl transition-colors",
                         network === chain.id
                           ? "bg-primary/10 border border-primary"
-                          : "bg-muted/50 border border-transparent hover:bg-muted"
+                          : "bg-muted/50 border border-transparent"
                       )}
                     >
                       <ChainIcon chainId={chain.id} size="sm" />
@@ -199,7 +199,7 @@ export default function ContactFormPage() {
               />
               <button
                 onClick={() => setShowQRScanner(true)}
-                className="absolute right-2 top-1/2 -translate-y-1/2 p-2 hover:bg-muted rounded-lg transition-colors"
+                className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-lg transition-colors"
               >
                 <Scan className="w-5 h-5 text-muted-foreground" />
               </button>

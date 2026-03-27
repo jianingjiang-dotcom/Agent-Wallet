@@ -19,7 +19,7 @@ const DrawerOverlay = React.forwardRef<
   React.ElementRef<typeof DrawerPrimitive.Overlay>,
   React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Overlay>
 >(({ className, ...props }, ref) => (
-  <DrawerPrimitive.Overlay ref={ref} className={cn("absolute inset-0 z-[140] bg-black/80", className)} {...props} />
+  <DrawerPrimitive.Overlay ref={ref} className={cn("absolute inset-0 z-[140] bg-black/60", className)} {...props} />
 ));
 DrawerOverlay.displayName = DrawerPrimitive.Overlay.displayName;
 
@@ -57,7 +57,9 @@ const DrawerContent = React.forwardRef<
         )}
         {...props}
       >
-        <div className="mx-auto mt-4 h-1 w-[100px] rounded-full bg-muted" />
+        <div className="flex items-end justify-center h-[12px]">
+          <div className="w-[36px] h-[4px] rounded-full" style={{ backgroundColor: '#EDEEF3' }} />
+        </div>
         {children}
         {/* Extend background below content to prevent page bleeding through */}
         <div className="bg-background absolute inset-x-0 top-full h-screen" />

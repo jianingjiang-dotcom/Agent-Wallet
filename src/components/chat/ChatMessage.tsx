@@ -145,7 +145,7 @@ export function ChatMessage({
               <span className="text-[10px] text-white/50 uppercase tracking-wide">{match[1]}</span>
               <button
                 onClick={() => handleCodeCopy(codeString)}
-                className="flex items-center gap-1 text-[10px] text-white/50 hover:text-white/80 transition-colors"
+                className="flex items-center gap-1 text-[10px] text-white/50 transition-colors"
               >
                 {codeCopied === codeString ? (
                   <><Check className="w-3 h-3" /> 已复制</>
@@ -184,7 +184,7 @@ export function ChatMessage({
               <span className="text-[10px] text-white/50 uppercase tracking-wide">code</span>
               <button
                 onClick={() => handleCodeCopy(codeString)}
-                className="flex items-center gap-1 text-[10px] text-white/50 hover:text-white/80 transition-colors"
+                className="flex items-center gap-1 text-[10px] text-white/50 transition-colors"
               >
                 {codeCopied === codeString ? (
                   <><Check className="w-3 h-3" /> 已复制</>
@@ -246,7 +246,7 @@ export function ChatMessage({
           {onRetry && (
             <button
               onClick={onRetry}
-              className="flex items-center gap-1.5 mt-2 px-3 py-1.5 text-xs font-medium rounded-full border border-destructive/30 text-destructive hover:bg-destructive/10 transition-colors"
+              className="flex items-center gap-1.5 mt-2 px-3 py-1.5 text-xs font-medium rounded-full border border-destructive/30 text-destructive transition-colors"
             >
               <RotateCcw className="w-3 h-3" />
               重试

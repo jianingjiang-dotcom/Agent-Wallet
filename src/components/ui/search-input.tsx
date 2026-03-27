@@ -31,7 +31,7 @@ const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(
   ) => {
     return (
       <div className={cn("relative", wrapperClassName)}>
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none" strokeWidth={1.5} style={{ color: '#B9BCC5' }} />
         <Input
           ref={ref}
           placeholder={placeholder}
@@ -49,7 +49,7 @@ const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(
           <button
             type="button"
             onClick={() => onChange("")}
-            className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 hover:bg-muted rounded transition-colors"
+            className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 rounded transition-colors"
             aria-label="Clear search"
           >
             <X className="w-4 h-4 text-muted-foreground" />

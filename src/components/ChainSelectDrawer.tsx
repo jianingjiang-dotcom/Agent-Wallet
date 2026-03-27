@@ -50,7 +50,7 @@ export function ChainSelectDrawer({
                 <button
                   key={chain.network}
                   onClick={() => handleSelect(chain.network)}
-                  className="w-full p-4 flex items-center gap-3 hover:bg-muted/50 transition-colors rounded-xl bg-card border border-border/50"
+                  className="w-full p-4 flex items-center gap-3 transition-colors rounded-xl bg-card border border-border/50"
                 >
                   <div className="w-10 h-10 rounded-full bg-muted/50 flex items-center justify-center">
                     <ChainIcon chainId={chain.network} size="lg" />

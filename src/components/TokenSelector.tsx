@@ -28,7 +28,7 @@ export function TokenSelector({ assets, selectedAsset, onSelect }: TokenSelector
       <button
         type="button"
         onClick={() => setIsOpen(true)}
-        className="flex items-center gap-2.5 px-3 py-2 bg-muted hover:bg-muted/80 rounded-xl transition-colors border border-border/50"
+        className="flex items-center gap-2.5 px-3 py-2 bg-muted rounded-xl transition-colors border border-border/50"
       >
         <CryptoIcon symbol={selectedAsset.symbol} size="md" />
         <div className="flex flex-col items-start">
@@ -57,7 +57,7 @@ export function TokenSelector({ assets, selectedAsset, onSelect }: TokenSelector
                   setIsOpen(false);
                 }}
                 className={cn(
-                  "w-full flex items-center gap-3 px-4 py-3 hover:bg-muted/50 active:bg-muted transition-colors",
+                  "w-full flex items-center gap-3 px-4 py-3 active:bg-muted transition-colors",
                   selectedAsset.symbol === asset.symbol && selectedAsset.network === asset.network && "bg-accent/10"
                 )}
               >

@@ -24,7 +24,7 @@ export function ContactCard({
       className={cn(
         "w-full p-4 rounded-xl bg-card border border-border/50",
         "flex items-center gap-3 text-left",
-        "hover:bg-muted/50 hover:shadow-lg transition-all",
+        "transition-all",
         contact.isWhitelisted && "border-l-2 border-l-success/40",
         className
       )}

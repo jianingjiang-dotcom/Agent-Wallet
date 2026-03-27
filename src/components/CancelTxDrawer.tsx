@@ -43,7 +43,7 @@ export function CancelTxDrawer({ open, onOpenChange, transaction, onConfirm }: C
         <DrawerHeader className="flex flex-row items-start justify-between p-4 pb-2 text-left">
           <DrawerTitle className="text-lg font-semibold text-foreground">取消交易</DrawerTitle>
           <DrawerClose asChild>
-            <button className="p-2 -mr-2 -mt-1 hover:bg-muted rounded-full transition-colors">
+            <button className="p-2 -mr-2 -mt-1 rounded-full transition-colors">
               <X className="w-5 h-5 text-muted-foreground" />
             </button>
           </DrawerClose>
