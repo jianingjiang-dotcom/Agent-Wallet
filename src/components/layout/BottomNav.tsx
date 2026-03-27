@@ -40,34 +40,53 @@ export function BottomNav() {
   const INACTIVE_COLOR = isDark ? DARK_INACTIVE : LIGHT_INACTIVE;
 
   return (
-    <div className="shrink-0 bg-background">
-      <nav className="flex h-[49px]">
-        {tabLabels.map((label, i) => (
-          <button
-            key={i}
-            type="button"
-            onClick={() => navigate(navPaths[i])}
-            className="flex-1 flex items-start justify-center pt-[8px] transition-all duration-200"
-            aria-label={label}
-          >
-            <div className="flex flex-col items-center gap-[2px]">
+    <div className="flex justify-center px-[16px] pb-[21px]">
+      <nav
+        className="flex flex-row justify-center items-center w-full rounded-[47px]"
+        style={{
+          padding: '4px',
+          height: '62px',
+          background: isDark
+            ? 'rgba(30, 30, 30, 0.65)'
+            : 'rgba(255, 255, 255, 0.3)',
+          backdropFilter: 'blur(40px) saturate(200%)',
+          WebkitBackdropFilter: 'blur(40px) saturate(200%)',
+          boxShadow: isDark
+            ? '0 2px 20px rgba(0,0,0,0.3), inset 0 0.5px 0 rgba(255,255,255,0.1)'
+            : '0 2px 20px rgba(0,0,0,0.08), inset 0 0.5px 0 rgba(255,255,255,0.8)',
+          border: isDark
+            ? '0.5px solid rgba(255,255,255,0.08)'
+            : '0.5px solid rgba(255,255,255,0.5)',
+        }}
+      >
+        {tabLabels.map((label, i) => {
+          const isActive = i === activeIndex;
+          return (
+            <button
+              key={i}
+              type="button"
+              onClick={() => navigate(navPaths[i])}
+              className="flex-1 flex flex-col items-center justify-center gap-[2px] transition-all duration-200 relative h-full rounded-full"
+              aria-label={label}
+              style={isActive ? {
+                background: isDark ? 'rgba(255,255,255,0.1)' : '#EDEEF3',
+              } : undefined}
+            >
               <svg width="26" height="26" viewBox="0 0 20 20" fill="none">
                 {iconData[i].map((d, j) => (
-                  <path key={j} d={d} fill={i === activeIndex ? ACTIVE_COLOR : INACTIVE_COLOR} />
+                  <path key={j} d={d} fill={isActive ? ACTIVE_COLOR : INACTIVE_COLOR} />
                 ))}
               </svg>
               <span
-                className="text-[10px] leading-3"
-                style={{ color: i === activeIndex ? ACTIVE_COLOR : INACTIVE_COLOR }}
+                className="text-[10px] leading-3 font-medium"
+                style={{ color: isActive ? ACTIVE_COLOR : INACTIVE_COLOR }}
               >
                 {label}
               </span>
-            </div>
-          </button>
-        ))}
+            </button>
+          );
+        })}
       </nav>
-      {/* Home Indicator safe area */}
-      <div className="h-[34px]" />
     </div>
   );
 }

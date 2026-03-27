@@ -64,6 +64,7 @@ import AccountSecurity from "./pages/AccountSecurity";
 import ComponentDemo from "./pages/ComponentDemo";
 import Mine from "./pages/Mine";
 import TransactionHashDetail from "./pages/TransactionHashDetail";
+import TssSigning from "./pages/TssSigning";
 
 const queryClient = new QueryClient();
 
@@ -147,6 +148,7 @@ function AppRoutes() {
       <Route path="/component-demo" element={<ProtectedRoute><ComponentDemo /></ProtectedRoute>} />
       <Route path="/profile/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
       <Route path="/profile/help" element={<ProtectedRoute><Help /></ProtectedRoute>} />
+      <Route path="/profile/tss-signing" element={<ProtectedRoute><TssSigning /></ProtectedRoute>} />
       <Route path="/profile/contacts" element={<ProtectedRoute><Contacts /></ProtectedRoute>} />
       <Route path="/profile/contacts/add" element={<ProtectedRoute><ContactForm /></ProtectedRoute>} />
       <Route path="/profile/contacts/edit/:id" element={<ProtectedRoute><ContactForm /></ProtectedRoute>} />

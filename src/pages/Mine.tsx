@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import {
   Settings, Bot, Settings2, FileText,
-  Wallet, BookUser, Shield, ClipboardCheck, ChevronRight
+  Wallet, BookUser, Shield, ClipboardCheck, ChevronRight, KeyRound
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -22,12 +22,11 @@ export default function Mine() {
       title="我的"
       rightAction={
         <motion.button
-          className="flex items-center justify-center w-9 h-9"
           onClick={() => navigate('/profile/general')}
           whileTap={{ scale: 0.9 }}
           transition={{ type: 'spring', stiffness: 400, damping: 25 }}
         >
-          <Settings className="w-5 h-5" strokeWidth={1.5} style={{ color: '#000000' }} />
+          <Settings className="w-6 h-6" strokeWidth={1.5} style={{ color: '#000000' }} />
         </motion.button>
       }
     >
@@ -83,7 +82,7 @@ export default function Mine() {
             {[
               { icon: Wallet, label: '钱包管理', path: '/profile/wallets' },
               { icon: BookUser, label: '地址簿', path: '/profile/contacts' },
-              { icon: Shield, label: '钱包安全', path: '/profile/security' },
+              { icon: KeyRound, label: 'TSS 签名', path: '/profile/tss-signing' },
             ].map((item, index, arr) => (
               <ListItem
                 key={item.label}

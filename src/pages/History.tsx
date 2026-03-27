@@ -212,7 +212,7 @@ export default function HistoryPage() {
               transition={{ type: 'spring', stiffness: 400, damping: 25 }}
               onClick={() => setFilterDrawerOpen(true)}
             >
-              <img src="/funnel.svg" alt="筛选" className="w-5 h-5" />
+              <img src="/funnel.svg" alt="筛选" className="w-[21px] h-[21px]" />
               {(filter !== 'all' || txTypeFilter !== 'all') && (
                 <span className="absolute top-0.5 right-0.5 w-2 h-2 rounded-full" style={{ backgroundColor: '#E74E5A', boxShadow: '0 0 0 1.5px white' }} />
               )}
