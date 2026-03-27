@@ -38,7 +38,7 @@ export function ChainSelector({
             "relative flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap shrink-0 transition-colors",
             selectedChain === chain.id
               ? "text-foreground border border-transparent"
-              : "border border-border text-muted-foreground hover:bg-muted/30"
+              : "border border-border text-muted-foreground"
           )}
         >
           {selectedChain === chain.id && (

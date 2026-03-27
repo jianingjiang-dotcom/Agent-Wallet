@@ -82,7 +82,7 @@ export function QuickActions({ onAction }: QuickActionsProps) {
           <button
             key={a.label}
             onClick={() => onAction(a.message)}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-full border border-border bg-card text-foreground hover:bg-muted transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-full border border-border bg-card text-foreground transition-colors"
           >
             <a.icon className="w-3 h-3 text-accent" />
             {a.label}
@@ -95,7 +95,7 @@ export function QuickActions({ onAction }: QuickActionsProps) {
             <button
               key={a.label}
               onClick={() => onAction(a.message)}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-full border border-border bg-card text-foreground hover:bg-muted transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-full border border-border bg-card text-foreground transition-colors"
             >
               <a.icon className="w-3 h-3 text-accent" />
               {a.label}

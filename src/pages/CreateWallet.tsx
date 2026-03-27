@@ -88,7 +88,7 @@ export default function CreateWalletPage() {
           <div className="flex items-center gap-2">
             <button 
               onClick={handleBack}
-              className="p-1 -ml-1 text-muted-foreground hover:text-foreground transition-colors"
+              className="p-1 -ml-1 text-muted-foreground transition-colors"
             >
               <ChevronLeft className="w-6 h-6" />
             </button>
@@ -913,7 +913,7 @@ function BackupStep({
                   }
                 }}
                 disabled={isLoading}
-                className="w-full p-4 rounded-xl border border-border bg-card hover:bg-muted/50 transition-colors text-left disabled:opacity-50"
+                className="w-full p-4 rounded-xl border border-border bg-card transition-colors text-left disabled:opacity-50"
               >
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
@@ -939,7 +939,7 @@ function BackupStep({
                   setBackupType('local');
                   setShowPasswordForm(true);
                 }}
-                className="w-full p-4 rounded-xl border border-border bg-card hover:bg-muted/50 transition-colors text-left"
+                className="w-full p-4 rounded-xl border border-border bg-card transition-colors text-left"
               >
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center shrink-0">

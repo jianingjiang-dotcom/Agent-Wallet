@@ -141,7 +141,7 @@ export function ChatInput({ onSend, onStop, disabled, isLoading }: ChatInputProp
                 <p className="text-xs font-medium truncate">{attachment.name}</p>
                 <p className="text-[10px] text-muted-foreground">{formatFileSize(attachment.size)}</p>
               </div>
-              <button onClick={removeAttachment} className="p-1 rounded-full hover:bg-muted transition-colors">
+              <button onClick={removeAttachment} className="p-1 rounded-full transition-colors">
                 <X className="w-4 h-4 text-muted-foreground" />
               </button>
             </div>
@@ -161,19 +161,19 @@ export function ChatInput({ onSend, onStop, disabled, isLoading }: ChatInputProp
           >
             <div className="flex items-center justify-center gap-6 px-4 py-3">
               <button onClick={() => cameraInputRef.current?.click()} className="flex flex-col items-center gap-1.5">
-                <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center hover:bg-accent/20 transition-colors">
+                <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center transition-colors">
                   <Camera className="w-5 h-5 text-accent" />
                 </div>
                 <span className="text-[10px] text-muted-foreground">相机</span>
               </button>
               <button onClick={() => galleryInputRef.current?.click()} className="flex flex-col items-center gap-1.5">
-                <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center hover:bg-accent/20 transition-colors">
+                <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center transition-colors">
                   <ImageIcon className="w-5 h-5 text-accent" />
                 </div>
                 <span className="text-[10px] text-muted-foreground">图库</span>
               </button>
               <button onClick={() => fileInputRef.current?.click()} className="flex flex-col items-center gap-1.5">
-                <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center hover:bg-accent/20 transition-colors">
+                <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center transition-colors">
                   <FileIcon className="w-5 h-5 text-accent" />
                 </div>
                 <span className="text-[10px] text-muted-foreground">文件</span>

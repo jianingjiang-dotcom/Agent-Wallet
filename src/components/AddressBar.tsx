@@ -24,7 +24,7 @@ export function AddressBar({ address, label, onClear, className }: AddressBarPro
       {onClear && (
         <button
           onClick={onClear}
-          className="w-6 h-6 rounded-full bg-muted flex items-center justify-center hover:bg-muted-foreground/20 transition-colors shrink-0"
+          className="w-6 h-6 rounded-full bg-muted flex items-center justify-center transition-colors shrink-0"
         >
           <X className="w-3.5 h-3.5 text-muted-foreground" />
         </button>

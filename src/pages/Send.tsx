@@ -303,7 +303,7 @@ export default function SendPage() {
         <div className="flex items-center justify-between px-4 py-3 shrink-0">
           <button
             onClick={handleBack}
-            className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center hover:bg-muted/80 transition-colors"
+            className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center transition-colors"
           >
             <ChevronLeft className="w-6 h-6 text-foreground" />
           </button>
@@ -370,7 +370,7 @@ export default function SendPage() {
                           "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap shrink-0 transition-colors",
                           assetFilterChain === chain.id
                             ? "bg-muted text-foreground"
-                            : "border border-border text-muted-foreground hover:bg-muted/30"
+                            : "border border-border text-muted-foreground"
                         )}
                       >
                         <ChainIcon chainId={chain.id} size="sm" />
@@ -400,7 +400,7 @@ export default function SendPage() {
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: index * 0.03 }}
                           onClick={() => handleSelectAsset(asset)}
-                          className="w-full p-3 rounded-xl bg-card border border-border/50 flex items-center gap-3 text-left hover:bg-muted/50 transition-colors"
+                          className="w-full p-3 rounded-xl bg-card border border-border/50 flex items-center gap-3 text-left transition-colors"
                         >
                           {/* Token Icon with Chain Badge */}
                           <div className="relative shrink-0">
@@ -461,7 +461,7 @@ export default function SendPage() {
                     }}
                     className={cn(
                       "w-full p-3 rounded-xl bg-muted/50 border border-border/50 flex items-center gap-3",
-                      !assetFromUrl && "hover:bg-muted/80 transition-colors"
+                      !assetFromUrl && "transition-colors"
                     )}
                   >
                     <div className="relative shrink-0">
@@ -503,7 +503,7 @@ export default function SendPage() {
                               'w-full p-3 rounded-xl border flex items-center gap-3 text-left transition-all',
                               isSelected
                                 ? 'border-accent bg-accent/5 ring-2 ring-inset ring-accent/30'
-                                : 'border-border hover:border-muted-foreground/30'
+                                : 'border-border'
                             )}
                           >
                             <div className="flex-1 min-w-0">
@@ -603,7 +603,7 @@ export default function SendPage() {
                         {filteredContacts.length > 3 && (
                           <button
                             onClick={() => setShowContactDrawer(true)}
-                            className="text-xs text-primary hover:text-primary/80"
+                            className="text-xs text-primary"
                           >
                             查看全部
                           </button>
@@ -618,7 +618,7 @@ export default function SendPage() {
                               'w-full p-4 rounded-xl border text-left transition-colors',
                               selectedContact?.id === contact.id 
                                 ? 'border-accent bg-accent/5' 
-                                : 'border-border hover:border-accent/50'
+                                : 'border-border'
                             )}
                           >
                             <div className="flex items-center justify-between">
@@ -698,7 +698,7 @@ export default function SendPage() {
                     </div>
                     <button
                       onClick={() => setAmount((hasMultipleSourceAddresses ? sourceBalance : selectedAsset.balance).toString())}
-                      className="px-3 py-1 text-xs font-medium text-primary bg-primary/10 rounded-full hover:bg-primary/20 transition-colors"
+                      className="px-3 py-1 text-xs font-medium text-primary bg-primary/10 rounded-full transition-colors"
                     >
                       全部
                     </button>
@@ -720,7 +720,7 @@ export default function SendPage() {
                           <Lightbulb className="w-3.5 h-3.5 text-warning shrink-0" />
                           <span className="text-xs text-foreground flex-1">首次转账建议先小额验证</span>
                           <button
-                            className="text-xs text-muted-foreground hover:text-foreground ml-auto"
+                            className="text-xs text-muted-foreground ml-auto"
                             onClick={() => setTestTipDismissed(true)}
                           >
                             忽略

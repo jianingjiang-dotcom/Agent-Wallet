@@ -55,7 +55,7 @@ const SectionHeader = React.forwardRef<HTMLDivElement, SectionHeaderProps>(
             type="button"
             onClick={action.onClick}
             className={cn(
-              "font-medium text-accent hover:text-accent/80 transition-colors",
+              "font-medium text-accent transition-colors",
               size === "sm" ? "text-xs" : "text-sm"
             )}
           >

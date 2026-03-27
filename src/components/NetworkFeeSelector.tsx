@@ -68,7 +68,7 @@ export function NetworkFeeSelector({ selectedTier, onSelect, networkName = 'Ethe
       <button
         type="button"
         onClick={() => setIsOpen(true)}
-        className="w-full card-elevated p-4 text-left hover:bg-muted/30 transition-colors"
+        className="w-full card-elevated p-4 text-left transition-colors"
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -96,7 +96,7 @@ export function NetworkFeeSelector({ selectedTier, onSelect, networkName = 'Ethe
               <p className="text-sm text-muted-foreground mt-1">{networkName} 网络</p>
             </div>
             <DrawerClose asChild>
-              <button className="p-2 -mr-2 -mt-1 hover:bg-muted rounded-full transition-colors">
+              <button className="p-2 -mr-2 -mt-1 rounded-full transition-colors">
                 <X className="w-5 h-5 text-muted-foreground" />
               </button>
             </DrawerClose>
@@ -115,7 +115,7 @@ export function NetworkFeeSelector({ selectedTier, onSelect, networkName = 'Ethe
                   "w-full flex items-center gap-4 p-4 rounded-xl border transition-all",
                   selectedTier === option.tier 
                     ? "border-accent bg-accent/5" 
-                    : "border-border hover:border-accent/50"
+                    : "border-border"
                 )}
               >
                 {/* Icon */}

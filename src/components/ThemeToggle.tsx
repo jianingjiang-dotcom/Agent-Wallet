@@ -15,7 +15,7 @@ export function ThemeToggle() {
       variant="ghost"
       size="icon"
       onClick={toggleTheme}
-      className="h-10 w-10 rounded-full hover:bg-muted relative overflow-hidden"
+      className="h-10 w-10 rounded-full relative overflow-hidden"
     >
       <AnimatePresence mode="wait" initial={false}>
         {theme === "dark" ? (

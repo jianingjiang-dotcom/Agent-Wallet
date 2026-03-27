@@ -52,7 +52,7 @@ export function EmergencyStopButton({ isPaused, onPause, onResume, label }: Emer
           <AlertDialogFooter>
             <AlertDialogCancel>取消</AlertDialogCancel>
             <AlertDialogAction
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className="bg-destructive text-destructive-foreground"
               onClick={() => { onPause('手动紧急暂停'); setShowConfirm(false); }}
             >
               确认暂停

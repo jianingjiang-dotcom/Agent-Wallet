@@ -60,20 +60,20 @@
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 11%;
     
-    /* Primary - #5459DA (card-matched indigo-blue) */
-    --primary: 238 64% 59%;
+    /* Primary - #1F32D6 */
+    --primary: 233.8 74.7% 48%;
     --primary-foreground: 0 0% 100%;
 
     /* Secondary - Soft slate */
-    --secondary: 220 14% 96%;
+    --secondary: 225 40% 98%;
     --secondary-foreground: 0 0% 11%;
-    
-    --muted: 220 14% 96%;
-    --muted-foreground: 220 9% 46%;
-    
+
+    --muted: 225 40% 98%;
+    --muted-foreground: 225 9.4% 49.8%;
+
     /* Text hierarchy - darker for key info, lighter for placeholders */
-    --text-secondary: 220 9% 46%;
-    --text-placeholder: 220 9% 64%;
+    --text-secondary: 225 9.4% 49.8%;
+    --text-placeholder: 225 9.4% 74.9%;
     
     /* Accent - Same as primary for simplified design system */
     --accent: var(--primary);
@@ -94,9 +94,9 @@
     --trust: 158 64% 42%;
     --trust-foreground: 0 0% 100%;
     
-    /* Border/Stroke - Cobo Brand #EDEEF3 */
-    --border: 228 18% 94%;
-    --input: 228 18% 94%;
+    /* 分割线描边 #EDEEF3 */
+    --border: 230 20% 94.1%;
+    --input: 230 20% 94.1%;
     --ring: 238 64% 59%;
 
     --radius: 0.75rem;
@@ -157,8 +157,8 @@
     --popover: 222 47% 9%;
     --popover-foreground: 210 40% 98%;
     
-    /* Primary - #5459DA (card-matched indigo-blue) */
-    --primary: 238 64% 62%;
+    /* Primary - #1F32D6 */
+    --primary: 233.8 74.7% 48%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 222 30% 14%;

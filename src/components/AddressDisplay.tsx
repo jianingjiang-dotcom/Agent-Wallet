@@ -38,7 +38,7 @@ export function AddressDisplay({
     <button
       onClick={handleCopy}
       className={cn(
-        "flex items-start gap-2 px-3 py-2.5 rounded-xl bg-muted/50 hover:bg-muted transition-colors group w-full text-left",
+        "flex items-start gap-2 px-3 py-2.5 rounded-xl bg-muted/50 transition-colors group w-full text-left",
         className
       )}
     >

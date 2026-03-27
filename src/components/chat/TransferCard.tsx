@@ -43,7 +43,7 @@ export function TransferCard({ data }: { data: TransferCardData }) {
 
       <div className="flex gap-2">
         <Button variant="ghost" size="sm" className="flex-1 text-xs">取消</Button>
-        <Button size="sm" className="flex-1 text-xs bg-accent text-accent-foreground hover:bg-accent/90" onClick={handleGo}>
+        <Button size="sm" className="flex-1 text-xs bg-accent text-accent-foreground" onClick={handleGo}>
           去转账
         </Button>
       </div>

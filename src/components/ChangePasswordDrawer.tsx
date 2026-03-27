@@ -238,7 +238,7 @@ export function ChangePasswordDrawer({
             {(step === 'forgot-choose' || step === 'forgot-otp') && (
               <button
                 onClick={handleBack}
-                className="mr-1 p-1 -ml-1 text-muted-foreground hover:text-foreground transition-colors"
+                className="mr-1 p-1 -ml-1 text-muted-foreground transition-colors"
               >
                 <ArrowLeft className="w-5 h-5" />
               </button>
@@ -280,7 +280,7 @@ export function ChangePasswordDrawer({
                   <button
                     type="button"
                     onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors"
                   >
                     {showCurrentPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
@@ -314,7 +314,7 @@ export function ChangePasswordDrawer({
                 {hasBoundAccounts && (
                   <button
                     onClick={handleForgotPassword}
-                    className="w-full text-center text-sm text-primary hover:underline"
+                    className="w-full text-center text-sm text-primary"
                   >
                     忘记密码？
                   </button>
@@ -342,7 +342,7 @@ export function ChangePasswordDrawer({
                       className={`w-full p-4 rounded-lg border-2 transition-all flex items-center gap-3 ${
                         resetMethod === 'email'
                           ? 'border-primary bg-primary/5'
-                          : 'border-border hover:border-muted-foreground/50'
+                          : 'border-border'
                       }`}
                     >
                       <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
@@ -366,7 +366,7 @@ export function ChangePasswordDrawer({
                       className={`w-full p-4 rounded-lg border-2 transition-all flex items-center gap-3 ${
                         resetMethod === 'phone'
                           ? 'border-primary bg-primary/5'
-                          : 'border-border hover:border-muted-foreground/50'
+                          : 'border-border'
                       }`}
                     >
                       <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
@@ -449,7 +449,7 @@ export function ChangePasswordDrawer({
                     <button
                       onClick={handleResendCode}
                       disabled={isLoading}
-                      className="text-sm text-primary hover:underline disabled:opacity-50"
+                      className="text-sm text-primary disabled:opacity-50"
                     >
                       重新发送验证码
                     </button>
@@ -498,7 +498,7 @@ export function ChangePasswordDrawer({
                     <button
                       type="button"
                       onClick={() => setShowNewPassword(!showNewPassword)}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors"
                     >
                       {showNewPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                     </button>
@@ -555,7 +555,7 @@ export function ChangePasswordDrawer({
                     <button
                       type="button"
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors"
                     >
                       {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                     </button>

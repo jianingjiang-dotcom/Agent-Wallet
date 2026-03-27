@@ -167,7 +167,7 @@ export default function TSSRecoveryPage() {
           <div className="flex items-center gap-2">
             <button 
               onClick={handleBack}
-              className="p-1 -ml-1 text-muted-foreground hover:text-foreground transition-colors"
+              className="p-1 -ml-1 text-muted-foreground transition-colors"
             >
               <ChevronLeft className="w-6 h-6" strokeWidth={1.5} />
             </button>
@@ -344,7 +344,7 @@ function MethodSelectionStep({
           transition={{ delay: 0.1 }}
           onClick={() => hasCloudBackup ? onSelect('cloud') : onCloudUnavailable()}
           disabled={isRecovering}
-          className="w-full bg-card border border-border rounded-xl p-4 text-left hover:border-accent/50 transition-colors disabled:opacity-50"
+          className="w-full bg-card border border-border rounded-xl p-4 text-left transition-colors disabled:opacity-50"
         >
           <div className="flex items-start gap-3">
             <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
@@ -381,7 +381,7 @@ function MethodSelectionStep({
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: hasCloudBackup ? 0.2 : 0.1 }}
           onClick={() => onSelect('local_file')}
-          className="w-full bg-card border border-border rounded-xl p-4 text-left hover:border-accent/50 transition-colors"
+          className="w-full bg-card border border-border rounded-xl p-4 text-left transition-colors"
         >
           <div className="flex items-start gap-3">
             <div className="w-10 h-10 rounded-full bg-warning/10 flex items-center justify-center shrink-0">
@@ -448,7 +448,7 @@ function FileSelectStep({
           {!selectedFile ? (
             <button
               onClick={handleFileSelect}
-              className="w-full border-2 border-dashed border-border rounded-xl p-8 flex flex-col items-center gap-3 hover:border-accent/50 hover:bg-accent/5 transition-colors"
+              className="w-full border-2 border-dashed border-border rounded-xl p-8 flex flex-col items-center gap-3 transition-colors"
             >
               <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
                 <Upload className="w-6 h-6 text-muted-foreground" />
@@ -480,7 +480,7 @@ function FileSelectStep({
               </div>
               <button
                 onClick={handleFileSelect}
-                className="w-full mt-3 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                className="w-full mt-3 text-xs text-muted-foreground transition-colors"
               >
                 重新选择
               </button>

@@ -175,7 +175,7 @@ export function DelegateAgentFlowDrawer({
                       }}
                       className={cn(
                         'w-full p-3 rounded-xl border flex items-center gap-3 transition-all text-left',
-                        'border-border hover:border-muted-foreground/30 active:bg-muted/50'
+                        'border-border active:bg-muted/50'
                       )}
                     >
                       <div className="w-9 h-9 rounded-full bg-muted flex items-center justify-center shrink-0">
@@ -209,7 +209,7 @@ export function DelegateAgentFlowDrawer({
                       <button
                         key={perm.key}
                         onClick={() => togglePermission(perm.key)}
-                        className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-muted/30 transition-colors text-left"
+                        className="w-full flex items-center gap-3 p-3 rounded-xl transition-colors text-left"
                       >
                         <div className={cn(
                           'w-9 h-9 rounded-full flex items-center justify-center shrink-0',
@@ -261,7 +261,7 @@ export function DelegateAgentFlowDrawer({
                         'flex-1 py-2.5 px-3 rounded-xl border text-sm font-medium transition-all',
                         defaultAction === 'allow'
                           ? 'border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-600'
-                          : 'border-border text-muted-foreground hover:border-muted-foreground/30'
+                          : 'border-border text-muted-foreground'
                       )}
                     >
                       🟢 允许通过
@@ -272,7 +272,7 @@ export function DelegateAgentFlowDrawer({
                         'flex-1 py-2.5 px-3 rounded-xl border text-sm font-medium transition-all',
                         defaultAction === 'deny'
                           ? 'border-red-500 bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-400 dark:border-red-600'
-                          : 'border-border text-muted-foreground hover:border-muted-foreground/30'
+                          : 'border-border text-muted-foreground'
                       )}
                     >
                       🔴 拒绝交易

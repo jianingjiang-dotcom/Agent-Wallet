@@ -249,7 +249,7 @@ function CountryItem({ country, isSelected, onSelect }: CountryItemProps) {
       onClick={() => onSelect(country)}
       className={cn(
         "w-full flex items-center gap-3 p-3 rounded-xl transition-colors",
-        isSelected ? "bg-accent/10" : "hover:bg-muted/50"
+        isSelected ? "bg-accent/10" : ""
       )}
     >
       <span className="text-2xl">{country.flag}</span>

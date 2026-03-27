@@ -113,7 +113,7 @@ export default function NotificationsPage() {
               <div className="flex-1">
                 <p className="text-sm font-medium">大额交易提醒</p>
                 <button
-                  className="text-xs text-accent hover:underline"
+                  className="text-xs text-accent"
                   onClick={() => {
                     setTempThreshold(config.largeAmountThreshold.toString());
                     setShowThresholdDrawer(true);

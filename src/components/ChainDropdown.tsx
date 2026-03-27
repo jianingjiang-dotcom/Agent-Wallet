@@ -29,7 +29,7 @@ export function ChainDropdown({
         <Button
           variant="ghost"
           className={cn(
-            "h-8 px-2 gap-1.5 bg-secondary/80 hover:bg-muted/50 hover:text-foreground rounded-xl focus-visible:ring-0 focus-visible:ring-offset-0",
+            "h-8 px-2 gap-1.5 bg-secondary/80 rounded-xl focus-visible:ring-0 focus-visible:ring-offset-0",
             className
           )}
         >
@@ -49,7 +49,7 @@ export function ChainDropdown({
               key={chain.id}
               onClick={() => onSelectChain(chain.id)}
               className={cn(
-                "flex items-center gap-3 py-2.5 px-3 cursor-pointer hover:bg-muted/50 focus:bg-muted/50",
+                "flex items-center gap-3 py-2.5 px-3 cursor-pointer focus:bg-muted/50",
                 isSelected && "bg-muted/50"
               )}
             >

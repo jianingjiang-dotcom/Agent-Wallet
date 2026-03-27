@@ -130,7 +130,7 @@ export function PolicyCard({
             onClick={(e) => { e.stopPropagation(); onMoveUp(); }}
             disabled={isFirst}
             className={cn(
-              'p-1 rounded hover:bg-muted transition-colors',
+              'p-1 rounded transition-colors',
               isFirst && 'opacity-30 cursor-not-allowed',
             )}
           >
@@ -140,7 +140,7 @@ export function PolicyCard({
             onClick={(e) => { e.stopPropagation(); onMoveDown(); }}
             disabled={isLast}
             className={cn(
-              'p-1 rounded hover:bg-muted transition-colors',
+              'p-1 rounded transition-colors',
               isLast && 'opacity-30 cursor-not-allowed',
             )}
           >

@@ -394,7 +394,7 @@ export const AssistantView = forwardRef<AssistantViewHandle, AssistantViewProps>
         {showScrollBtn && !showWelcome && (
           <button
             onClick={() => scrollToBottom()}
-            className="absolute bottom-16 left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-card border shadow-md flex items-center justify-center z-10 hover:bg-muted transition-colors"
+            className="absolute bottom-16 left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-card border shadow-md flex items-center justify-center z-10 transition-colors"
           >
             <ChevronDown className="w-4 h-4" />
           </button>

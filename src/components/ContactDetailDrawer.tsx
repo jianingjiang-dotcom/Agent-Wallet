@@ -238,7 +238,7 @@ export function ContactDetailDrawer({
                 <Drawer open={showNetworkDrawer} onOpenChange={setShowNetworkDrawer}>
                   <button 
                     onClick={() => setShowNetworkDrawer(true)}
-                    className="w-full flex items-center gap-3 h-12 px-3 rounded-xl bg-background border border-input hover:bg-muted/50 transition-colors"
+                    className="w-full flex items-center gap-3 h-12 px-3 rounded-xl bg-background border border-input transition-colors"
                   >
                     <ChainIcon chainId={network} size="sm" />
                     <span className="flex-1 text-left font-medium">{selectedChain.name}</span>
@@ -266,7 +266,7 @@ export function ContactDetailDrawer({
                             "w-full flex items-center gap-3 p-4 rounded-xl transition-colors",
                             network === chain.id
                               ? "bg-primary/10 border border-primary"
-                              : "bg-muted/50 border border-transparent hover:bg-muted"
+                              : "bg-muted/50 border border-transparent"
                           )}
                         >
                           <ChainIcon chainId={chain.id} size="sm" />
@@ -347,7 +347,7 @@ export function ContactDetailDrawer({
               {!isAddMode && (
                 <Button
                   variant="outline"
-                  className="w-full justify-start gap-3 h-12 text-destructive hover:text-destructive hover:bg-destructive/10"
+                  className="w-full justify-start gap-3 h-12 text-destructive"
                   onClick={() => setShowDeleteDialog(true)}
                 >
                   <Trash2 className="w-5 h-5" />
@@ -385,7 +385,7 @@ export function ContactDetailDrawer({
               <AlertDialogCancel>取消</AlertDialogCancel>
               <AlertDialogAction
                 onClick={handleDelete}
-                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                className="bg-destructive text-destructive-foreground"
               >
                 删除
               </AlertDialogAction>

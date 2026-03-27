@@ -68,9 +68,9 @@ export function AppLayout({
             {leftAction ?? (showBack && (
               <button
                 onClick={handleBack}
-                className="flex items-center justify-center w-9 h-9 rounded-full"
+                className="flex items-center justify-center w-6 h-6"
               >
-                <BackIcon className="w-5 h-5" strokeWidth={1} style={{ color: '#000000' }} />
+                <BackIcon className="w-6 h-6" strokeWidth={1.5} style={{ color: '#1c1c1c' }} />
               </button>
             ))}
           </div>
@@ -78,7 +78,7 @@ export function AppLayout({
           <div className="absolute inset-x-0 flex items-center justify-center pointer-events-none">
             <div className="flex items-center gap-1.5">
               {title && (
-                <h1 className="text-base font-semibold text-foreground">
+                <h1 className="text-lg font-semibold text-foreground leading-7">
                   {title}
                 </h1>
               )}

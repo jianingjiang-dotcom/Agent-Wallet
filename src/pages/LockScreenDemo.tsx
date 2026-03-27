@@ -176,7 +176,7 @@ export default function LockScreenDemo() {
             {/* Lock icon container */}
             <motion.button
               onClick={handleIconClick}
-              className="relative w-24 h-24 rounded-full bg-primary/10 dark:bg-white/10 flex items-center justify-center shadow-lg cursor-pointer hover:bg-primary/15 dark:hover:bg-white/15 transition-colors"
+              className="relative w-24 h-24 rounded-full bg-primary/10 dark:bg-white/10 flex items-center justify-center shadow-lg cursor-pointer dark:hover:bg-white/15 transition-colors"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               transition={{ type: "spring", stiffness: 400, damping: 25 }}
@@ -244,7 +244,7 @@ export default function LockScreenDemo() {
                   <button
                     onClick={handleBiometricAuth}
                     disabled={isLoading}
-                    className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center hover:bg-primary/20 transition-colors disabled:opacity-50"
+                    className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center transition-colors disabled:opacity-50"
                   >
                     <Fingerprint className={cn(
                       "w-10 h-10 text-primary",

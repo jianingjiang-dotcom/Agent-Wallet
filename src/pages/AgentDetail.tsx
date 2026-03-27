@@ -179,7 +179,7 @@ export default function AgentDetail() {
                 <h2 className="text-lg font-bold truncate">{agent.agentName}</h2>
                 <button
                   onClick={openNameDrawer}
-                  className="flex-shrink-0 p-1 rounded hover:bg-muted transition-colors"
+                  className="flex-shrink-0 p-1 rounded transition-colors"
                 >
                   <Pencil className="w-3.5 h-3.5 text-muted-foreground" />
                 </button>
@@ -208,7 +208,7 @@ export default function AgentDetail() {
                 </span>
                 <button
                   onClick={() => handleCopy(agent.principalId)}
-                  className="flex-shrink-0 p-1 rounded hover:bg-muted transition-colors"
+                  className="flex-shrink-0 p-1 rounded transition-colors"
                 >
                   <Copy className="w-3.5 h-3.5 text-muted-foreground" />
                 </button>
@@ -232,7 +232,7 @@ export default function AgentDetail() {
               <>
                 <Button
                   variant="outline"
-                  className="flex-1 border-yellow-300 text-yellow-700 hover:bg-yellow-50 dark:border-yellow-700 dark:text-yellow-400 dark:hover:bg-yellow-900/20"
+                  className="flex-1 border-yellow-300 text-yellow-700 dark:border-yellow-700 dark:text-yellow-400 dark:hover:bg-yellow-900/20"
                   onClick={handlePauseClick}
                 >
                   <Pause className="w-4 h-4 mr-1.5" />
@@ -298,7 +298,7 @@ export default function AgentDetail() {
                 <button
                   key={perm.key}
                   onClick={() => togglePermission(perm.key)}
-                  className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-muted/30 transition-colors text-left"
+                  className="w-full flex items-center gap-3 p-3 rounded-xl transition-colors text-left"
                 >
                   <div className={cn(
                     'w-9 h-9 rounded-full flex items-center justify-center shrink-0',
@@ -331,7 +331,7 @@ export default function AgentDetail() {
         >
           <button
             onClick={() => navigate(`/agent-settings?agent=${agent.id}`)}
-            className="w-full card-elevated p-4 flex items-center justify-between hover:bg-muted/30 transition-colors"
+            className="w-full card-elevated p-4 flex items-center justify-between transition-colors"
           >
             <span className="text-sm font-semibold">风控设置</span>
             <ChevronRight className="w-4 h-4 text-muted-foreground" />
@@ -349,7 +349,7 @@ export default function AgentDetail() {
             <h3 className="text-sm font-semibold">最近交易</h3>
             <button
               onClick={() => navigate('/agent-review')}
-              className="text-xs text-primary flex items-center gap-0.5 hover:underline"
+              className="text-xs text-primary flex items-center gap-0.5"
             >
               查看全部
               <ChevronRight className="w-3.5 h-3.5" />
@@ -440,7 +440,7 @@ export default function AgentDetail() {
             <AlertDialogCancel>取消</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleRevokeConfirm}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className="bg-destructive text-destructive-foreground"
             >
               确认撤销
             </AlertDialogAction>

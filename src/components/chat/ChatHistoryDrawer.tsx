@@ -83,7 +83,7 @@ export function ChatHistoryDrawer({
                             'group flex items-center gap-2 px-3 py-2.5 rounded-lg cursor-pointer transition-colors',
                             s.id === currentSessionId
                               ? 'bg-accent/10 text-accent'
-                              : 'hover:bg-muted'
+                              : ''
                           )}
                           onClick={() => {
                             onSelectSession(s.id);
@@ -101,7 +101,7 @@ export function ChatHistoryDrawer({
                               e.stopPropagation();
                               onDeleteSession(s.id);
                             }}
-                            className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-destructive/10 transition-all"
+                            className="opacity-0 group-hover:opacity-100 p-1 rounded transition-all"
                           >
                             <Trash2 className="w-3.5 h-3.5 text-destructive" />
                           </button>

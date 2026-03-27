@@ -132,7 +132,7 @@ export function QRScanner({ isOpen, onClose, onScan }: QRScannerProps) {
                 stopScanner();
                 onClose();
               }}
-              className="text-white hover:bg-white/20"
+              className="text-white"
             >
               <ArrowLeft className="w-6 h-6" />
             </Button>
@@ -149,7 +149,7 @@ export function QRScanner({ isOpen, onClose, onScan }: QRScannerProps) {
                 <p className="text-sm text-white/70">请检查摄像头权限设置</p>
                 <Button
                   variant="outline"
-                  className="mt-6 border-white/30 text-white hover:bg-white/20"
+                  className="mt-6 border-white/30 text-white"
                   onClick={onClose}
                 >
                   返回
@@ -204,7 +204,7 @@ export function QRScanner({ isOpen, onClose, onScan }: QRScannerProps) {
                 <Button
                   variant="outline"
                   size="lg"
-                  className="mt-8 border-white/30 text-white hover:bg-white/20 gap-2"
+                  className="mt-8 border-white/30 text-white gap-2"
                   onClick={toggleFlash}
                 >
                   {isFlashOn ? (
@@ -232,7 +232,7 @@ export function QRScanner({ isOpen, onClose, onScan }: QRScannerProps) {
                 stopScanner();
                 onClose();
               }}
-              className="w-14 h-14 rounded-full bg-white/10 text-white hover:bg-white/20"
+              className="w-14 h-14 rounded-full bg-white/10 text-white"
             >
               <X className="w-6 h-6" />
             </Button>

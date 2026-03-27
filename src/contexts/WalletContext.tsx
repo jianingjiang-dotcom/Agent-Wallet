@@ -244,7 +244,7 @@ const mockTransactionsWallet1: Transaction[] = [
     network: 'ethereum',
     fee: 0,
 
-    failureReason: 'Gas 不足：交易执行时余额不足以支付网络费用',
+    failureReason: 'Gas 不足，无法支付网络手续费',
     nonce: 45,
   },
   // Failed transaction 2 - network error (today)
@@ -261,7 +261,7 @@ const mockTransactionsWallet1: Transaction[] = [
     network: 'ethereum',
     fee: 0,
 
-    failureReason: '执行失败：合约调用时发生 revert，可能是目标地址拒绝接收',
+    failureReason: '合约调用被拒绝，目标地址未接受本次操作',
     nonce: 44,
   },
   // Failed transaction 3 - on Tron network (yesterday)
@@ -279,7 +279,7 @@ const mockTransactionsWallet1: Transaction[] = [
     network: 'tron',
     fee: 0,
 
-    failureReason: '能量不足：TRX 余额不足以提供交易所需的能量',
+    failureReason: 'TRX 余额不足，无法提供交易所需的能量。',
     nonce: 12,
   },
   // === Additional mock transactions for lazy loading testing ===

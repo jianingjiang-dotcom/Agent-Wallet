@@ -156,7 +156,7 @@ export default function TSSBackupManagement() {
         <div className="space-y-3">
           <span className="text-xs text-muted-foreground">云端备份</span>
           
-          <Card className="p-4 cursor-pointer hover:bg-muted/50 active:bg-muted/50 transition-colors" onClick={() => handleStartBackup('cloud')}>
+          <Card className="p-4 cursor-pointer active:bg-muted/50 transition-colors" onClick={() => handleStartBackup('cloud')}>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className={`h-10 w-10 rounded-full flex items-center justify-center ${tssNodeInfo.backup.hasCloudBackup ? 'bg-success/10' : 'bg-muted'}`}>
@@ -180,7 +180,7 @@ export default function TSSBackupManagement() {
         <div className="space-y-3">
           <span className="text-xs text-muted-foreground">本地备份</span>
           
-          <Card className="p-4 cursor-pointer hover:bg-muted/50 active:bg-muted/50 transition-colors" onClick={() => handleStartBackup('local')}>
+          <Card className="p-4 cursor-pointer active:bg-muted/50 transition-colors" onClick={() => handleStartBackup('local')}>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className={`h-10 w-10 rounded-full flex items-center justify-center ${tssNodeInfo.backup.hasLocalBackup ? 'bg-success/10' : 'bg-muted'}`}>

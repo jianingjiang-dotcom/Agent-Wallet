@@ -1,6 +1,6 @@
 import * as React from "react";
-import { Copy, ExternalLink } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { ExternalLink } from "lucide-react";
+import { toast } from "@/lib/toast";
 
 import { cn, copyToClipboard } from "@/lib/utils";
 
@@ -39,24 +39,21 @@ const DetailRow = React.forwardRef<HTMLDivElement, DetailRowProps>(
     },
     ref
   ) => {
-    const [copied, setCopied] = React.useState(false);
-
     const handleCopy = React.useCallback(async () => {
       if (!copyValue) return;
       const ok = await copyToClipboard(copyValue);
       if (ok) {
-        setCopied(true);
-        setTimeout(() => setCopied(false), 1500);
+        toast.success('复制成功');
       }
     }, [copyValue]);
 
     return (
       <div
         ref={ref}
-        className={cn("flex items-center justify-between p-3", className)}
+        className={cn("flex items-center justify-between px-4", className)}
         {...props}
       >
-        <span className="text-xs text-muted-foreground shrink-0">{label}</span>
+        <span className="text-muted-foreground shrink-0" style={{ fontSize: '14px', lineHeight: '20px' }}>{label}</span>
 
         <div className="flex items-center gap-1.5 min-w-0 justify-end">
           {icon}
@@ -85,31 +82,10 @@ const DetailRow = React.forwardRef<HTMLDivElement, DetailRowProps>(
           {copyValue && (
             <button
               onClick={handleCopy}
-              className="p-0.5 hover:bg-muted rounded transition-colors shrink-0"
+              className="p-0 rounded transition-colors shrink-0"
               aria-label="Copy"
             >
-              <AnimatePresence mode="wait">
-                {copied ? (
-                  <motion.span
-                    key="check"
-                    initial={{ scale: 0.5, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    exit={{ scale: 0.5, opacity: 0 }}
-                    className="text-success text-[10px] font-medium px-0.5"
-                  >
-                    ✓
-                  </motion.span>
-                ) : (
-                  <motion.span
-                    key="copy"
-                    initial={{ scale: 0.5, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    exit={{ scale: 0.5, opacity: 0 }}
-                  >
-                    <Copy className="w-3 h-3 text-muted-foreground" />
-                  </motion.span>
-                )}
-              </AnimatePresence>
+              <img src="/copy.svg" alt="copy" className="w-4 h-4" />
             </button>
           )}
 
@@ -118,7 +94,7 @@ const DetailRow = React.forwardRef<HTMLDivElement, DetailRowProps>(
               href={externalLink}
               target="_blank"
               rel="noopener noreferrer"
-              className="p-0.5 hover:bg-muted rounded transition-colors shrink-0"
+              className="p-0.5 rounded transition-colors shrink-0"
               aria-label="Open link"
             >
               <ExternalLink className="w-3 h-3 text-muted-foreground" />

@@ -181,7 +181,7 @@ export function AgentActivationDrawer({
                     'w-full p-6 rounded-xl border-2 border-dashed transition-all text-center',
                     fileName
                       ? 'border-emerald-500/50 bg-emerald-50/50 dark:bg-emerald-950/20'
-                      : 'border-border hover:border-muted-foreground/40 hover:bg-muted/20'
+                      : 'border-border'
                   )}
                 >
                   {fileName ? (
@@ -212,7 +212,7 @@ export function AgentActivationDrawer({
                     />
                     <button
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
                     >
                       <Lock className="w-4 h-4" />
                     </button>
@@ -229,7 +229,7 @@ export function AgentActivationDrawer({
 
                 <button
                   onClick={() => setStep(1)}
-                  className="w-full text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  className="w-full text-sm text-muted-foreground transition-colors"
                 >
                   返回上一步
                 </button>

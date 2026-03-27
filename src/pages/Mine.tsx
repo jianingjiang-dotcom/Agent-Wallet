@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import {
-  Settings, Bot, Settings2, BarChart3, FileText,
+  Settings, Bot, Settings2, FileText,
   Wallet, BookUser, Shield, ClipboardCheck, ChevronRight
 } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -61,7 +61,6 @@ export default function Mine() {
               { icon: Bot, label: 'Agent 授权管理', path: '/agent-management' },
               { icon: Settings2, label: 'Agent 风控管理', path: '/agent-settings' },
               { icon: ClipboardCheck, label: 'Agent 审核管理', path: '/agent-review' },
-              { icon: BarChart3, label: '结算对账', path: '/settlement-dashboard' },
               { icon: FileText, label: '审计日志', path: '/audit-log' },
             ].map((item, index, arr) => (
               <ListItem

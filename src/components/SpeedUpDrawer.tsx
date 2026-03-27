@@ -62,7 +62,7 @@ export function SpeedUpDrawer({ open, onOpenChange, transaction, onConfirm }: Sp
         <DrawerHeader className="flex flex-row items-start justify-between p-4 pb-2 text-left">
           <DrawerTitle className="text-lg font-semibold text-foreground">加速交易</DrawerTitle>
           <DrawerClose asChild>
-            <button className="p-2 -mr-2 -mt-1 hover:bg-muted rounded-full transition-colors">
+            <button className="p-2 -mr-2 -mt-1 rounded-full transition-colors">
               <X className="w-5 h-5 text-muted-foreground" />
             </button>
           </DrawerClose>
@@ -96,7 +96,7 @@ export function SpeedUpDrawer({ open, onOpenChange, transaction, onConfirm }: Sp
                 "w-full flex items-center gap-4 p-4 rounded-xl border transition-all",
                 selectedTier === option.tier 
                   ? "border-accent bg-accent/5" 
-                  : "border-border hover:border-accent/50"
+                  : "border-border"
               )}
             >
               {/* Icon */}
