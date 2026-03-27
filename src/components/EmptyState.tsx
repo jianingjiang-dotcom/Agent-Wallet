@@ -4,7 +4,8 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 interface EmptyStateProps {
-  icon: LucideIcon;
+  icon?: LucideIcon;
+  customIcon?: React.ReactNode;
   title: string;
   description?: string;
   action?: {
@@ -18,6 +19,7 @@ interface EmptyStateProps {
 
 export function EmptyState({
   icon: Icon,
+  customIcon,
   title,
   description,
   action,
@@ -30,36 +32,47 @@ export function EmptyState({
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.3, ease: 'easeOut' }}
       className={cn(
-        "card-elevated p-8 flex flex-col items-center justify-center text-center",
+        "p-8 flex flex-col items-center justify-center text-center",
         className
       )}
     >
-      <motion.div
-        initial={{ scale: 0.8, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ delay: 0.1, duration: 0.3 }}
-        className={cn(
-          "w-16 h-16 rounded-full flex items-center justify-center mb-4",
-          variant === 'success' ? 'bg-success/10' : 'bg-muted/50'
-        )}
-      >
+      {customIcon ? (
         <motion.div
-          initial={{ rotate: -10 }}
-          animate={{ rotate: 0 }}
-          transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ delay: 0.1, duration: 0.3 }}
+          className="mb-2"
         >
-          <Icon className={cn(
-            "w-8 h-8",
-            variant === 'success' ? 'text-success' : 'text-muted-foreground'
-          )} />
+          {customIcon}
         </motion.div>
-      </motion.div>
+      ) : Icon ? (
+        <motion.div
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ delay: 0.1, duration: 0.3 }}
+          className={cn(
+            "w-16 h-16 rounded-full flex items-center justify-center mb-4",
+            variant === 'success' ? 'bg-success/10' : 'bg-muted/50'
+          )}
+        >
+          <motion.div
+            initial={{ rotate: -10 }}
+            animate={{ rotate: 0 }}
+            transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
+          >
+            <Icon className={cn(
+              "w-8 h-8",
+              variant === 'success' ? 'text-success' : 'text-muted-foreground'
+            )} />
+          </motion.div>
+        </motion.div>
+      ) : null}
       
       <motion.p
         initial={{ opacity: 0, y: 5 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.15 }}
-        className="text-sm font-medium text-foreground mb-1"
+        className="text-sm font-normal" style={{ color: '#1C1C1C' }}
       >
         {title}
       </motion.p>

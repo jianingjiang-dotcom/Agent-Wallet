@@ -14,6 +14,7 @@ import { ChainIcon } from '@/components/ChainIcon';
 import { toast } from '@/lib/toast';
 import { TransactionListSkeleton } from '@/components/skeletons';
 import { EmptyState } from '@/components/EmptyState';
+import { EmptyIcon } from '@/components/icons/EmptyIcon';
 import { AgentTxCard } from '@/components/AgentTxCard';
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -344,7 +345,7 @@ export default function HistoryPage() {
               })()}
 
 
-              {totalCount === 0 && <EmptyState icon={sourceFilter === 'agent' ? Bot : sourceFilter === 'requests' ? Bot : Send} title={sourceFilter === 'agent' ? '暂无 Agent 交易' : sourceFilter === 'requests' ? '暂无请求记录' : '暂无交易记录'} />}
+              {totalCount === 0 && <div className="flex-1 flex items-center justify-center" style={{ minHeight: 'calc(100vh - 280px)' }}><div style={{ marginTop: '-15vh' }}><EmptyState customIcon={<EmptyIcon />} title={sourceFilter === 'agent' ? '暂无 Agent 交易' : sourceFilter === 'requests' ? '暂无请求记录' : '无任何交易记录'} /></div></div>}
 
               {/* Scroll trigger for infinite loading (manual transactions) */}
               {sourceFilter !== 'agent' && filteredTransactions.length > 0 && <>

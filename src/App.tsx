@@ -63,6 +63,7 @@ import GeneralSettings from "./pages/GeneralSettings";
 import AccountSecurity from "./pages/AccountSecurity";
 import ComponentDemo from "./pages/ComponentDemo";
 import Mine from "./pages/Mine";
+import TransactionHashDetail from "./pages/TransactionHashDetail";
 
 const queryClient = new QueryClient();
 
@@ -93,7 +94,7 @@ const pageVariants = {
   animate: (mode: NavMode) => ({ x: 0, transition: mode === 'push' ? slideTransition : instant }),
   exit: (mode: NavMode) => ({
     x: mode === 'pop' ? '100%' : 0,
-    transition: mode === 'pop' ? slideTransition : instant,
+    transition: mode === 'tab' ? instant : slideTransition,
   }),
 };
 
@@ -131,6 +132,7 @@ function AppRoutes() {
       <Route path="/history" element={<ProtectedRoute><History /></ProtectedRoute>} />
       <Route path="/mine" element={<ProtectedRoute><Mine /></ProtectedRoute>} />
       <Route path="/transaction/:id" element={<ProtectedRoute><TransactionDetail /></ProtectedRoute>} />
+      <Route path="/tx-hash/:hash" element={<ProtectedRoute bypassAuth><TransactionHashDetail /></ProtectedRoute>} />
       <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
       <Route path="/assistant" element={<ProtectedRoute bypassAuth><AIAssistant /></ProtectedRoute>} />
       <Route path="/profile/info" element={<ProtectedRoute><PersonalInfo /></ProtectedRoute>} />

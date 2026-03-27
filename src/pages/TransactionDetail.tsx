@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { AnimatePresence, motion } from 'framer-motion';
 import {
-  CheckCircle2, XCircle, Clock
+  CheckCircle2, XCircle, Clock, ArrowLeft, X
 } from 'lucide-react';
 import { useWallet } from '@/contexts/WalletContext';
 import { cn } from '@/lib/utils';
@@ -15,6 +16,7 @@ import { DetailRow } from '@/components/ui/detail-row';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { toast } from '@/lib/toast';
 import { RbfActionSection } from '@/components/RbfActionSection';
+import { Drawer, DrawerContent } from '@/components/ui/drawer';
 import { SpeedUpDrawer } from '@/components/SpeedUpDrawer';
 import { CancelTxDrawer } from '@/components/CancelTxDrawer';
 import { SpeedUpTier } from '@/lib/rbf-utils';
@@ -29,6 +31,10 @@ export default function TransactionDetail() {
   // RBF drawer states
   const [speedUpDrawerOpen, setSpeedUpDrawerOpen] = useState(false);
   const [cancelDrawerOpen, setCancelDrawerOpen] = useState(false);
+  const [showHashDetail, setShowHashDetail] = useState(false);
+  const [showMoreDrawer, setShowMoreDrawer] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const handleSpeedUpConfirm = (tier: SpeedUpTier, newFee: number, newGasAmount: number) => {
     setSpeedUpDrawerOpen(false);
@@ -73,7 +79,11 @@ export default function TransactionDetail() {
 
   return (
     <PageTransition>
-      <AppLayout showNav={false} showBack title="交易详情" pageBg="bg-background">
+      <AppLayout showNav={false} showBack title="交易详情" pageBg="bg-background" rightAction={
+        <button className="flex items-center justify-center w-6 h-6">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1C1C1C" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z"/><path d="M12 8v6"/><path d="M9 11h6"/></svg>
+        </button>
+      }>
         <div className="flex-1 overflow-y-auto">
           <div className="px-4 pt-6 space-y-4" style={{ paddingBottom: '64px' }}>
 
@@ -196,7 +206,7 @@ export default function TransactionDetail() {
                     <span
                       className="text-sm text-foreground font-medium truncate block underline cursor-pointer"
                       style={{ maxWidth: '180px' }}
-                      onClick={() => window.open('#', '_blank')}
+                      onClick={() => { setRefreshKey(0); setShowHashDetail(true); }}
                     >
                       {`${transaction.txHash.slice(0, 10)}...${transaction.txHash.slice(-6)}`}
                     </span>
@@ -225,6 +235,136 @@ export default function TransactionDetail() {
           onConfirm={handleCancelConfirm}
         />
       </AppLayout>
+
+      {/* Transaction Hash Detail Overlay */}
+      <AnimatePresence>
+        {showHashDetail && transaction?.txHash && (
+          <motion.div
+            className="absolute inset-0 z-50 bg-background flex flex-col"
+            initial={{ y: '100%' }}
+            animate={{ y: 0 }}
+            exit={{ y: '100%' }}
+            transition={{ type: 'tween', duration: 0.28, ease: [0.25, 0.46, 0.45, 0.94] }}
+          >
+            {/* Header */}
+            <div className="flex items-center h-11 px-4 relative">
+              <button
+                onClick={() => setShowHashDetail(false)}
+                className="flex items-center justify-center"
+              >
+                <X className="w-6 h-6 text-foreground" />
+              </button>
+              <p className="flex-1 text-base font-semibold text-foreground truncate mx-8">
+                Transaction {transaction.txHash}
+              </p>
+              <button className="flex items-center justify-center" onClick={() => setShowMoreDrawer(true)}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 13C12.5523 13 13 12.5523 13 12C13 11.4477 12.5523 11 12 11C11.4477 11 11 11.4477 11 12C11 12.5523 11.4477 13 12 13Z" fill="#1C1C1C" stroke="#1C1C1C" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M19 13C19.5523 13 20 12.5523 20 12C20 11.4477 19.5523 11 19 11C18.4477 11 18 11.4477 18 12C18 12.5523 18.4477 13 19 13Z" fill="#1C1C1C" stroke="#1C1C1C" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M5 13C5.55228 13 6 12.5523 6 12C6 11.4477 5.55228 11 5 11C4.44772 11 4 11.4477 4 12C4 12.5523 4.44772 13 5 13Z" fill="#1C1C1C" stroke="#1C1C1C" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
+            </div>
+
+            {/* Loading progress bar */}
+            <motion.div
+              key={`progress-${refreshKey}`}
+              className="w-full h-[1.5px] bg-muted overflow-hidden"
+              initial={{ opacity: 1 }}
+              animate={{ opacity: 0 }}
+              transition={{ delay: 3, duration: 0.3 }}
+            >
+              <motion.div
+                className="h-full"
+                style={{ backgroundColor: '#1F32D6' }}
+                initial={{ width: '0%' }}
+                animate={{ width: '100%' }}
+                transition={{ duration: 3, ease: 'easeInOut' }}
+              />
+            </motion.div>
+
+            {/* Content - empty demo */}
+            <motion.div
+              key={`content-${refreshKey}`}
+              className="flex-1 flex items-center justify-center"
+              initial={{ backgroundColor: refreshKey > 0 ? '#F8F9FC' : '#FFFFFF' }}
+              animate={{ backgroundColor: '#F8F9FC' }}
+              transition={refreshKey > 0 ? { duration: 0 } : { delay: 3, duration: 0.3 }}
+            >
+              <motion.p
+                className="text-base leading-6 text-muted-foreground"
+                initial={{ opacity: refreshKey > 0 ? 1 : 0 }}
+                animate={{ opacity: 1 }}
+                transition={refreshKey > 0 ? { duration: 0 } : { delay: 3.3, duration: 0.3 }}
+              >
+                此处展示区块浏览器页面
+              </motion.p>
+            </motion.div>
+
+            {/* More actions drawer */}
+            <Drawer open={showMoreDrawer} onOpenChange={setShowMoreDrawer}>
+              <DrawerContent className="px-0 pb-0">
+                <div className="px-4 pt-4 pb-[50px]">
+                  <div className="flex flex-col gap-4">
+                    <button
+                      className="flex items-center gap-3 w-full text-base font-medium transition-colors leading-6"
+                      style={{ color: '#1c1c1c' }}
+                      onClick={() => {
+                        setShowMoreDrawer(false);
+                        setToastMessage('已清除缓存');
+                        setTimeout(() => setToastMessage(null), 2000);
+                      }}
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1C1C1C" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="m16 22-1-4"/><path d="M19 14a1 1 0 0 0 1-1v-1a2 2 0 0 0-2-2h-3a1 1 0 0 1-1-1V4a2 2 0 0 0-4 0v5a1 1 0 0 1-1 1H6a2 2 0 0 0-2 2v1a1 1 0 0 0 1 1"/><path d="M19 14H5l-1.973 6.767A1 1 0 0 0 4 22h16a1 1 0 0 0 .973-1.233z"/><path d="m8 22 1-4"/></svg>
+                      清除缓存
+                    </button>
+                    <button
+                      className="flex items-center gap-3 w-full text-base font-medium transition-colors leading-6"
+                      style={{ color: '#1c1c1c' }}
+                      onClick={() => {
+                        setShowMoreDrawer(false);
+                        setRefreshKey(k => k + 1);
+                      }}
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1C1C1C" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg>
+                      刷新
+                    </button>
+                    <button
+                      className="flex items-center gap-3 w-full text-base font-medium transition-colors leading-6"
+                      style={{ color: '#1c1c1c' }}
+                      onClick={() => {
+                        setShowMoreDrawer(false);
+                        setToastMessage('链接已复制');
+                        setTimeout(() => setToastMessage(null), 2000);
+                      }}
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1C1C1C" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                      复制链接
+                    </button>
+                  </div>
+                </div>
+              </DrawerContent>
+            </Drawer>
+
+            {/* Toast */}
+            <AnimatePresence>
+              {toastMessage && (
+                <motion.div
+                  className="absolute inset-0 flex items-center justify-center pointer-events-none z-[200]"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <div className="bg-[#1C1C1C]/80 text-white text-sm px-5 py-2.5 rounded-lg">
+                    {toastMessage}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </PageTransition>
   );
 }
