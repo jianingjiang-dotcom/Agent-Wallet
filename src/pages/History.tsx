@@ -318,7 +318,7 @@ export default function HistoryPage() {
                             </div>
                             <div className="min-w-0">
                               <div className="flex items-center gap-1.5">
-                                <p className="font-medium text-foreground" style={{ fontSize: '14px', lineHeight: '20px' }}>
+                                <p className="font-medium text-foreground" style={{ fontSize: '16px', lineHeight: '24px' }}>
                                   {tx.type === 'receive' ? '转入' : '转出'}
                                 </p>
                               </div>
@@ -328,7 +328,7 @@ export default function HistoryPage() {
                             </div>
                           </div>
                           <div className="text-right">
-                            <p className={cn('font-medium', tx.type === 'receive' ? 'text-success' : 'text-foreground')} style={{ fontSize: '14px', lineHeight: '20px' }}>
+                            <p className={cn('font-medium', tx.type === 'receive' ? 'text-success' : 'text-foreground')} style={{ fontSize: '16px', lineHeight: '24px' }}>
                               {tx.type === 'receive' ? '+' : '-'}{tx.amount} {tx.symbol}
                             </p>
                             <p className="text-xs" style={{ color: tx.status === 'pending' ? undefined : tx.status === 'confirmed' ? '#73798B' : undefined }}>
