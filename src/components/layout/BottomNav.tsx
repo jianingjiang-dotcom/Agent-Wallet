@@ -1,3 +1,4 @@
+import { useState, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTheme } from 'next-themes';
 
@@ -35,42 +36,73 @@ export function BottomNav() {
   const location = useLocation();
   const { resolvedTheme } = useTheme();
 
-  const activeIndex = Math.max(0, navPaths.findIndex(p => location.pathname.startsWith(p)));
+  const realIndex = Math.max(0, navPaths.findIndex(p => location.pathname.startsWith(p)));
+  const [displayIndex, setDisplayIndex] = useState(realIndex);
+  const [isAnimating, setIsAnimating] = useState(false);
+  const [isBouncing, setIsBouncing] = useState(false);
   const isDark = resolvedTheme === 'dark';
   const INACTIVE_COLOR = isDark ? DARK_INACTIVE : LIGHT_INACTIVE;
+
+  const handleTabClick = useCallback((i: number) => {
+    if (i === realIndex || isAnimating) return;
+    setIsAnimating(true);
+    setDisplayIndex(i);
+    // Wait for slide animation to finish, then navigate
+    setTimeout(() => {
+      navigate(navPaths[i]);
+      setIsAnimating(false);
+    }, 250);
+  }, [realIndex, isAnimating, navigate]);
 
   return (
     <div className="flex justify-center px-[16px] pb-[21px]">
       <nav
-        className="flex flex-row justify-center items-center w-full rounded-[47px]"
+        className="flex flex-row justify-center items-center w-full rounded-[47px] relative overflow-hidden"
+        onTouchStart={() => setIsBouncing(true)}
+        onTouchEnd={() => setIsBouncing(false)}
+        onMouseDown={() => setIsBouncing(true)}
+        onMouseUp={() => setIsBouncing(false)}
+        onMouseLeave={() => setIsBouncing(false)}
         style={{
+          transform: isBouncing ? 'scale(1.03)' : 'scale(1)',
+          transition: 'transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1)',
           padding: '4px',
           height: '62px',
           background: isDark
             ? 'rgba(30, 30, 30, 0.65)'
-            : 'rgba(255, 255, 255, 0.3)',
+            : 'rgba(255, 255, 255, 0.6)',
           backdropFilter: 'blur(40px) saturate(200%)',
           WebkitBackdropFilter: 'blur(40px) saturate(200%)',
           boxShadow: isDark
-            ? '0 2px 20px rgba(0,0,0,0.3), inset 0 0.5px 0 rgba(255,255,255,0.1)'
-            : '0 2px 20px rgba(0,0,0,0.08), inset 0 0.5px 0 rgba(255,255,255,0.8)',
+            ? '0 2px 20px rgba(0,0,0,0.3), inset 0 0 0 1px rgba(255,255,255,0.1)'
+            : '0 2px 20px rgba(0,0,0,0.08), inset 0 0 0 1px rgba(255,255,255,0.9)',
           border: isDark
             ? '0.5px solid rgba(255,255,255,0.08)'
             : '0.5px solid rgba(255,255,255,0.5)',
         }}
       >
+        {/* Sliding active indicator */}
+        <div
+          className="absolute rounded-full"
+          style={{
+            top: '4px',
+            bottom: '4px',
+            width: `calc((100% + 28px) / ${tabLabels.length})`,
+            left: `calc(4px + ${displayIndex} * (100% - 20px) / ${tabLabels.length})`,
+            transition: 'left 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+            background: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(237, 238, 243, 0.9)',
+          }}
+        />
         {tabLabels.map((label, i) => {
-          const isActive = i === activeIndex;
+          const isActive = i === displayIndex;
           return (
             <button
               key={i}
               type="button"
-              onClick={() => navigate(navPaths[i])}
-              className="flex-1 flex flex-col items-center justify-center gap-[2px] transition-all duration-200 relative h-full rounded-full"
+              onClick={() => handleTabClick(i)}
+              className="flex-1 flex flex-col items-center justify-center gap-[2px] transition-colors duration-200 relative h-full rounded-full z-[1]"
               aria-label={label}
-              style={isActive ? {
-                background: isDark ? 'rgba(255,255,255,0.1)' : '#EDEEF3',
-              } : undefined}
+              style={i > 0 ? { marginLeft: '-12px' } : undefined}
             >
               <svg width="26" height="26" viewBox="0 0 20 20" fill="none">
                 {iconData[i].map((d, j) => (
