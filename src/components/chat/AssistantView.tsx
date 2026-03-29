@@ -7,7 +7,7 @@ import { QuickActions } from '@/components/chat/QuickActions';
 import { TypingIndicator } from '@/components/chat/TypingIndicator';
 import { streamChat } from '@/lib/chat-stream';
 import { useWallet } from '@/contexts/WalletContext';
-import { cn } from '@/lib/utils';
+import { cn, generateId } from '@/lib/utils';
 import type { ChatMessage as ChatMessageType, ChatCard } from '@/types/chat';
 import type { useChatHistory } from '@/hooks/useChatHistory';
 
@@ -167,12 +167,8 @@ export const AssistantView = forwardRef<AssistantViewHandle, AssistantViewProps>
     }, [assets, transactions, setCardOnLastAssistant]);
 
     const sendMessage = useCallback(async (text: string, _attachment?: File) => {
-      if (!currentSessionId) {
-        startNewSession();
-      }
-
       const userMsg: ChatMessageType = {
-        id: crypto.randomUUID(),
+        id: generateId(),
         role: 'user',
         content: text,
         timestamp: Date.now(),
@@ -204,7 +200,7 @@ export const AssistantView = forwardRef<AssistantViewHandle, AssistantViewProps>
           abortRef.current = null;
           // Add an inline error message instead of just a toast
           addMessage({
-            id: crypto.randomUUID(),
+            id: generateId(),
             role: 'assistant',
             content: err,
             timestamp: Date.now(),
@@ -268,7 +264,7 @@ export const AssistantView = forwardRef<AssistantViewHandle, AssistantViewProps>
           setIsLoading(false);
           abortRef.current = null;
           addMessage({
-            id: crypto.randomUUID(),
+            id: generateId(),
             role: 'assistant',
             content: err,
             timestamp: Date.now(),
@@ -322,7 +318,7 @@ export const AssistantView = forwardRef<AssistantViewHandle, AssistantViewProps>
           setIsLoading(false);
           abortRef.current = null;
           addMessage({
-            id: crypto.randomUUID(),
+            id: generateId(),
             role: 'assistant',
             content: err,
             timestamp: Date.now(),

@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { Plus, History } from 'lucide-react';
+import { Plus, Menu } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { AssistantView, type AssistantViewHandle } from '@/components/chat/AssistantView';
@@ -26,22 +26,22 @@ export default function AIAssistant() {
       pageBg="bg-page"
       rightAction={
         <motion.button
-          className="flex items-center justify-center w-9 h-9"
+          className="flex items-center justify-center"
           onClick={() => assistantRef.current?.startNewSession()}
           whileTap={{ scale: 0.9 }}
           transition={{ type: 'spring', stiffness: 400, damping: 25 }}
         >
-          <Plus className="w-5 h-5" strokeWidth={1.5} style={{ color: '#000000' }} />
+          <Plus className="w-6 h-6" strokeWidth={1.5} style={{ color: '#000000' }} />
         </motion.button>
       }
       leftAction={
         <motion.button
-          className="flex items-center justify-center w-9 h-9"
+          className="flex items-center justify-center"
           onClick={() => setHistoryOpen(true)}
           whileTap={{ scale: 0.9 }}
           transition={{ type: 'spring', stiffness: 400, damping: 25 }}
         >
-          <History className="w-5 h-5" strokeWidth={1} style={{ color: '#000000' }} />
+          <Menu className="w-6 h-6" strokeWidth={1.5} style={{ color: '#000000' }} />
         </motion.button>
       }
     >

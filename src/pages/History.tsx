@@ -279,7 +279,7 @@ export default function HistoryPage() {
                   placeholder="搜索交易..."
                   value={searchQuery}
                   onChange={setSearchQuery}
-                  className="h-10 bg-[#F7F8FA] border-0 rounded-full pl-10 focus-visible:ring-0 focus-visible:ring-offset-0"
+                  className="h-10 bg-[#F7F8FA] border-0 rounded-[12px] pl-10 focus-visible:ring-0 focus-visible:ring-offset-0"
                   wrapperClassName="w-full"
                 />
               </div>
