@@ -5,6 +5,19 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+/** Generate a UUID that works in non-secure contexts (e.g. HTTP on mobile) */
+export function generateId(): string {
+  try {
+    return crypto.randomUUID();
+  } catch {
+    // Fallback for non-secure contexts (HTTP, not localhost)
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+      const r = (Math.random() * 16) | 0;
+      return (c === 'x' ? r : (r & 0x3) | 0x8).toString(16);
+    });
+  }
+}
+
 export function formatAddressShort(address: string, prefixLen = 6, suffixLen = 4): string {
   if (!address || address.length <= prefixLen + suffixLen) return address;
   return `${address.slice(0, prefixLen)}...${address.slice(-suffixLen)}`;

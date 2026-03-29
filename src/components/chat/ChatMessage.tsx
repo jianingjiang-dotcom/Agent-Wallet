@@ -232,7 +232,7 @@ export function ChatMessage({
   if (isError) {
     return (
       <motion.div
-        className="flex w-full px-4 justify-start"
+        className="flex w-full px-6 justify-start"
         variants={bubbleVariants}
         initial="hidden"
         animate="visible"
@@ -270,7 +270,7 @@ export function ChatMessage({
           className={cn(
             'text-[14px] leading-[20px] overflow-hidden max-w-full',
             isUser
-              ? 'px-4 py-2.5 bg-[#EDEEF1] text-foreground rounded-[20px]'
+              ? 'px-4 py-2.5 bg-[#F4F5FD] text-foreground rounded-[12px]'
               : 'text-foreground'
           )}
         >

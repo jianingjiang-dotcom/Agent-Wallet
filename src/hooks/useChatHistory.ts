@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import type { ChatSession, ChatMessage, ChatCard } from '@/types/chat';
 import { loadSessions, saveSessions, createSession, clearAllSessions } from '@/lib/chat-storage';
+import { generateId } from '@/lib/utils';
 
 export function useChatHistory() {
   const [sessions, setSessions] = useState<ChatSession[]>(() => loadSessions());
@@ -40,17 +41,38 @@ export function useChatHistory() {
   }, []);
 
   const addMessage = useCallback((msg: ChatMessage) => {
-    const sid = sessionIdRef.current;
+    let sid = sessionIdRef.current;
+
+    // If no session exists, create one first (synchronously update ref + state)
+    if (!sid) {
+      const session = createSession();
+      session.messages = [msg];
+      session.title = msg.role === 'user' ? msg.content.slice(0, 20) : '新对话';
+      session.updatedAt = Date.now();
+      sid = session.id;
+      sessionIdRef.current = session.id;
+      setCurrentSessionId(session.id);
+      setSessions(prev => {
+        const updated = [session, ...prev];
+        saveSessions(updated);
+        return updated;
+      });
+      return;
+    }
+
+    // Find the session - it might have just been created by startNewSession
+    // but not yet reflected in state, so also check if it exists
     setSessions(prev => {
+      const found = prev.some(s => s.id === sid);
       let updated: ChatSession[];
-      if (!sid) {
+      if (!found) {
+        // Session was created but not yet in state (race condition)
         const session = createSession();
+        session.id = sid!;
         session.messages = [msg];
         session.title = msg.role === 'user' ? msg.content.slice(0, 20) : '新对话';
         session.updatedAt = Date.now();
         updated = [session, ...prev];
-        setCurrentSessionId(session.id);
-        sessionIdRef.current = session.id;
       } else {
         updated = prev.map(s => {
           if (s.id !== sid) return s;
@@ -78,7 +100,7 @@ export function useChatHistory() {
           msgs[lastIdx] = { ...msgs[lastIdx], content };
         } else {
           msgs.push({
-            id: crypto.randomUUID(),
+            id: generateId(),
             role: 'assistant',
             content,
             timestamp: Date.now(),

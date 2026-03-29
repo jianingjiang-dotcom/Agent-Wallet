@@ -327,7 +327,7 @@ export default function HomePage() {
       <PullToRefresh onRefresh={handleRefresh}>
         <div className="px-4 relative">
         {/* Header - Wallet Selector */}
-        <div className="flex items-center justify-between h-[54px] mb-2">
+        <div className="flex items-center justify-between h-[44px] mb-2">
           <motion.button
             onClick={() => setShowWalletSwitcher(true)}
             className="flex items-center gap-3 rounded-xl p-1 -m-1 active:bg-muted/50 transition-colors"
@@ -373,17 +373,17 @@ export default function HomePage() {
           <div className="flex items-center gap-3">
             {/* Message Center Entry */}
             <motion.button
-              className="relative flex items-center justify-center w-9 h-9 rounded-full"
+              className="relative flex items-center justify-center"
               onClick={() => navigate('/messages')}
               whileTap={{ scale: 0.9 }}
               transition={{ type: 'spring', stiffness: 400, damping: 25 }}
             >
-              <Bell className="w-5 h-5" strokeWidth={1.5} style={{ color: '#000000' }} />
+              <Bell className="w-6 h-6" strokeWidth={1.5} style={{ color: '#000000' }} />
               {unreadNotificationCount > 0 && (
                 <motion.span
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
-                  className="absolute -top-0.5 -right-0.5 min-w-4 h-4 px-1 bg-destructive text-destructive-foreground text-[10px] font-medium rounded-full flex items-center justify-center"
+                  className="absolute -top-[6px] -right-[6px] min-w-4 h-4 px-1 bg-destructive text-destructive-foreground text-[10px] font-medium rounded-full flex items-center justify-center"
                 >
                   {unreadNotificationCount > 9 ? '9+' : unreadNotificationCount}
                 </motion.span>

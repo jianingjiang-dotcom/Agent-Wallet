@@ -31,7 +31,7 @@ export function PhoneFrame({ children }: PhoneFrameProps) {
       id="phone-frame-container"
       className="relative h-dvh overflow-hidden flex flex-col bg-background"
     >
-      <div className="h-[44px] w-full flex-shrink-0 bg-background flex items-center justify-between">
+      <div className="h-[44px] w-full flex-shrink-0 bg-transparent flex items-center justify-between relative z-50">
         {/* Left: Time */}
         <div className="flex items-center justify-center" style={{ width: '33.47%', height: 22, padding: '0 4.27%' }}>
           <svg viewBox="0 0 33.33 12.58" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ height: 12 }}>

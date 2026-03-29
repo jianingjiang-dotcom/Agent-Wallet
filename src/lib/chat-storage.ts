@@ -1,4 +1,5 @@
 import type { ChatSession } from '@/types/chat';
+import { generateId } from '@/lib/utils';
 
 const STORAGE_KEY = 'ai_chat_history';
 const MAX_SESSIONS = 50;
@@ -25,7 +26,7 @@ export function saveSessions(sessions: ChatSession[]) {
 
 export function createSession(): ChatSession {
   return {
-    id: crypto.randomUUID(),
+    id: generateId(),
     title: '新对话',
     messages: [],
     createdAt: Date.now(),
