@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { Send, Square, Mic, Plus, X, Camera, ImageIcon, FileIcon } from 'lucide-react';
+import { Send, Square, Mic, Plus, X, Camera, ImageIcon, FileIcon, ArrowUp } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSpeechRecognition } from '@/hooks/useSpeechRecognition';
 import { cn } from '@/lib/utils';
@@ -101,7 +101,7 @@ export function ChatInput({ onSend, onStop, disabled, isLoading }: ChatInputProp
     const el = inputRef.current;
     if (!el) return;
     el.style.height = 'auto';
-    const newHeight = Math.max(el.scrollHeight, 40);
+    const newHeight = Math.max(el.scrollHeight, 24);
     el.style.height = `${Math.min(newHeight, 84)}px`;
   }, [displayText]);
 
@@ -118,7 +118,7 @@ export function ChatInput({ onSend, onStop, disabled, isLoading }: ChatInputProp
   }, [isExpanded]);
 
   return (
-    <div className="bg-page" ref={containerRef}>
+    <div ref={containerRef}>
       {/* Attachment preview */}
       <AnimatePresence>
         {attachment && (
@@ -189,11 +189,11 @@ export function ChatInput({ onSend, onStop, disabled, isLoading }: ChatInputProp
       <input ref={fileInputRef} type="file" accept="*/*" onChange={handleFileSelect} className="hidden" />
 
       {/* Main input container */}
-      <div className="px-4 py-2">
+      <div className="px-4 pt-2 pb-[3px]">
         <div
           className={cn(
-            'bg-[#F7F8FA] rounded-[22px] border transition-all',
-            isExpanded ? 'border-accent' : 'border-[#EDEEF3]',
+            'bg-white/60 rounded-[12px] border-0 transition-all shadow-[0_2px_20px_0_rgba(0,0,0,0.08),inset_0_0_0_1px_rgba(255,255,255,0.9)] backdrop-blur-xl',
+            isExpanded && '',
             isListening && 'ring-2 ring-destructive/50'
           )}
           onClick={() => {
@@ -207,30 +207,30 @@ export function ChatInput({ onSend, onStop, disabled, isLoading }: ChatInputProp
             /* ── Expanded: text on top, actions on bottom ── */
             <div className="flex flex-col">
               {/* Text area */}
-              <div className="px-3 pt-3">
+              <div className="px-4 pt-3">
                 <textarea
                   ref={inputRef}
                   value={displayText}
                   onChange={e => { if (!isListening) setText(e.target.value); }}
                   onKeyDown={handleKeyDown}
                   onFocus={() => setIsFocused(true)}
-                  placeholder={isListening ? '正在聆听...' : '输入消息...'}
+                  placeholder={isListening ? '正在聆听...' : '发消息...'}
                   rows={1}
                   disabled={disabled || isLoading || isListening}
-                  className="w-full resize-none bg-transparent text-sm placeholder:text-text-placeholder focus:outline-none disabled:opacity-50 overflow-y-auto leading-5"
-                  style={{ maxHeight: '84px', minHeight: '40px' }}
+                  className="block w-full resize-none bg-transparent text-base placeholder:text-text-placeholder focus:outline-none disabled:opacity-50 overflow-y-auto leading-6"
+                  style={{ maxHeight: '84px', minHeight: '24px' }}
                   autoFocus
                 />
               </div>
 
               {/* Bottom action row */}
-              <div className="flex items-center justify-between pl-1.5 pr-1.5 pt-1 pb-1.5">
+              <div className="flex items-center justify-between p-3">
                 {/* Left: attach */}
                 <motion.button
                   whileTap={{ scale: 0.85 }}
                   onClick={toggleAttachPanel}
                   className={cn(
-                    'shrink-0 flex items-center justify-center w-8 h-8 rounded-full transition-colors text-foreground'
+                    'shrink-0 flex items-center justify-center w-6 h-6 rounded-full transition-colors text-foreground'
                   )}
                 >
                   <motion.div animate={{ rotate: showAttachPanel ? 45 : 0 }} transition={{ duration: 0.2 }}>
@@ -243,7 +243,7 @@ export function ChatInput({ onSend, onStop, disabled, isLoading }: ChatInputProp
                   {isLoading ? (
                     <motion.button whileTap={{ scale: 0.85 }}
                       onClick={onStop}
-                      className="w-8 h-8 rounded-full bg-destructive flex items-center justify-center"
+                      className="w-6 h-6 rounded-full bg-destructive flex items-center justify-center"
                     >
                       <Square className="w-3 h-3 fill-white text-white" />
                     </motion.button>
@@ -255,9 +255,9 @@ export function ChatInput({ onSend, onStop, disabled, isLoading }: ChatInputProp
                           whileTap={{ scale: 0.85 }}
                           onClick={handleSend}
                           disabled={(!text.trim() && !attachment) || disabled}
-                          className="w-8 h-8 rounded-full bg-accent flex items-center justify-center disabled:opacity-50"
+                          className="w-6 h-6 rounded-full bg-accent flex items-center justify-center disabled:opacity-50"
                         >
-                          <Send className="w-5 h-5 text-white" />
+                          <ArrowUp className="w-3.5 h-3.5 text-white [&]:!stroke-[2px]" />
                         </motion.button>
                       )}
                       {/* Voice wave / send when no text */}
@@ -268,11 +268,11 @@ export function ChatInput({ onSend, onStop, disabled, isLoading }: ChatInputProp
                           onPointerLeave={handleVoiceUp}
                           disabled={!voiceSupported || disabled}
                           className={cn(
-                            'flex items-center justify-center w-8 h-8 rounded-full transition-colors bg-accent',
+                            'flex items-center justify-center w-6 h-6 rounded-full transition-colors bg-accent',
                             (!voiceSupported || disabled) && 'opacity-50'
                           )}
                         >
-                          <Mic className="w-5 h-5 text-white" />
+                          <ArrowUp className="w-3.5 h-3.5 text-white [&]:!stroke-[2px]" />
                         </button>
                       )}
                     </>
@@ -282,7 +282,7 @@ export function ChatInput({ onSend, onStop, disabled, isLoading }: ChatInputProp
             </div>
           ) : (
             /* ── Collapsed: single row ── */
-            <div className="flex items-center pl-1.5 pr-1.5 gap-2" style={{ minHeight: '44px' }}>
+            <div className="flex items-center p-3 gap-2">
               {/* Attach button */}
               <motion.button
                 whileTap={{ scale: 0.85 }}
@@ -290,14 +290,14 @@ export function ChatInput({ onSend, onStop, disabled, isLoading }: ChatInputProp
                   e.stopPropagation();
                   toggleAttachPanel();
                 }}
-                className="shrink-0 flex items-center justify-center w-8 h-8 rounded-full text-foreground transition-colors"
+                className="shrink-0 flex items-center justify-center w-6 h-6 rounded-full text-foreground transition-colors"
               >
                 <Plus className="w-5 h-5" />
               </motion.button>
 
               {/* Placeholder text */}
-              <span className="flex-1 text-sm text-text-placeholder select-none">
-                {isListening ? '正在聆听...' : '输入消息...'}
+              <span className="flex-1 text-base leading-6 text-text-placeholder select-none">
+                {isListening ? '正在聆听...' : '发消息...'}
               </span>
 
               {/* Mic button */}
@@ -308,12 +308,12 @@ export function ChatInput({ onSend, onStop, disabled, isLoading }: ChatInputProp
                   onPointerLeave={handleVoiceUp}
                   disabled={!voiceSupported || disabled}
                   className={cn(
-                    'flex items-center justify-center w-8 h-8 rounded-full transition-colors',
+                    'flex items-center justify-center w-6 h-6 rounded-full transition-colors',
                     isListening ? 'bg-destructive animate-pulse' : 'bg-accent',
                     (!voiceSupported || disabled) && 'opacity-50'
                   )}
                 >
-                  <Mic className="w-5 h-5 text-white" />
+                  <ArrowUp className="w-3.5 h-3.5 text-white [&]:!stroke-[2px]" />
                 </button>
               </motion.div>
             </div>

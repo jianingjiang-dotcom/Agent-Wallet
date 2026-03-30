@@ -52,7 +52,7 @@ export function AppLayout({
   };
 
   return (
-    <div className={cn("h-full flex flex-col relative overflow-hidden", pageBg ?? (showNav ? "bg-page" : "bg-background"))}>
+    <div className="h-full flex flex-col relative overflow-hidden">
 {showBanner && <SecurityBanner />}
 
       {/* Page Header */}
@@ -102,7 +102,7 @@ export function AppLayout({
         </header>
       )}
 
-      <main className="flex-1 flex flex-col overflow-auto">
+      <main className={cn("flex-1 flex flex-col overflow-auto", pageBg ?? (showNav ? "bg-page" : "bg-background"))}>
         {children}
         {showNav && <div className="shrink-0 h-[96px]" />}
       </main>

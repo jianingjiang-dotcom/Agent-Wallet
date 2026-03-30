@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState, useCallback, forwardRef, useImperativeHandle } from 'react';
-import { MessageSquareText, ChevronDown, Bot } from 'lucide-react';
+import { MessageSquareText, ArrowDown, Bot } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { ChatMessage } from '@/components/chat/ChatMessage';
 import { ChatInput } from '@/components/chat/ChatInput';
@@ -43,8 +43,33 @@ export const AssistantView = forwardRef<AssistantViewHandle, AssistantViewProps>
     const { currentWallet, assets, transactions } = useWallet();
     const [isLoading, setIsLoading] = useState(false);
     const [showScrollBtn, setShowScrollBtn] = useState(false);
+    const [inputHeight, setInputHeight] = useState(59);
     const scrollRef = useRef<HTMLDivElement>(null);
+    const inputWrapperRef = useRef<HTMLDivElement>(null);
     const abortRef = useRef<AbortController | null>(null);
+
+    // Track input container height changes and auto-scroll only if already at bottom
+    useEffect(() => {
+      const el = inputWrapperRef.current;
+      if (!el) return;
+      const observer = new ResizeObserver((entries) => {
+        for (const entry of entries) {
+          setInputHeight(entry.contentRect.height);
+          // Only auto-scroll if user is near the bottom
+          const scrollEl = scrollRef.current;
+          if (scrollEl) {
+            const distFromBottom = scrollEl.scrollHeight - scrollEl.scrollTop - scrollEl.clientHeight;
+            if (distFromBottom < 150) {
+              requestAnimationFrame(() => {
+                scrollEl.scrollTo({ top: scrollEl.scrollHeight, behavior: 'smooth' });
+              });
+            }
+          }
+        }
+      });
+      observer.observe(el);
+      return () => observer.disconnect();
+    }, []);
 
     const messages = currentSession?.messages ?? [];
 
@@ -166,6 +191,16 @@ export const AssistantView = forwardRef<AssistantViewHandle, AssistantViewProps>
       }
     }, [assets, transactions, setCardOnLastAssistant]);
 
+    const mockResponses: Record<string, string> = {
+      '你好': '你好！我是你的智能钱包助手 🤖\n\n我可以帮你：\n- 查询钱包余额和资产\n- 发起转账和收款\n- 查看交易记录\n- 管理钱包安全设置\n\n请问有什么可以帮你的？',
+      '余额': '根据当前钱包数据，你的资产概况如下：\n\n**USDT** — 12,500.00 USDT（≈ $12,500）\n**ETH** — 3.25 ETH（≈ $6,175）\n**BTC** — 0.15 BTC（≈ $9,450）\n\n总资产约 **$28,125**。如需查看更多详情，可以前往钱包页面。',
+      '转账': '好的，请提供以下信息来发起转账：\n\n1. **收款地址** — 对方的钱包地址\n2. **转账金额** — 如 100 USDT\n3. **网络** — 如 Ethereum、Tron 等\n\n或者你可以直接前往转账页面操作。需要我引导你去转账页面吗？',
+    };
+
+    const getDefaultResponse = (input: string) => {
+      return `收到你的消息："${input}"\n\n这是一个模拟回复。我目前处于演示模式，暂未接入真实的大语言模型。\n\n在正式版本中，我将能够：\n- 理解你的自然语言指令\n- 智能分析你的钱包数据\n- 提供个性化的建议\n\n如需体验完整功能，请联系管理员配置 AI 服务。`;
+    };
+
     const sendMessage = useCallback(async (text: string, _attachment?: File) => {
       const userMsg: ChatMessageType = {
         id: generateId(),
@@ -176,41 +211,27 @@ export const AssistantView = forwardRef<AssistantViewHandle, AssistantViewProps>
       addMessage(userMsg);
       setIsLoading(true);
 
-      const historyMsgs = [...(currentSession?.messages ?? []), userMsg]
-        .slice(-20)
-        .map(m => ({ role: m.role as 'user' | 'assistant', content: m.content }));
-
+      // Mock streaming response
+      const response = mockResponses[text.trim()] || getDefaultResponse(text);
+      const chars = Array.from(response);
       let assistantContent = '';
+      let i = 0;
 
-      const controller = streamChat({
-        messages: historyMsgs,
-        walletContext: buildWalletContext(),
-        onDelta: (chunk) => {
+      const streamInterval = setInterval(() => {
+        if (i < chars.length) {
+          const chunkSize = Math.floor(Math.random() * 3) + 1;
+          const chunk = chars.slice(i, i + chunkSize).join('');
           assistantContent += chunk;
           updateLastAssistantMessage(assistantContent);
-        },
-        onToolCall: handleToolCall,
-        onDone: () => {
+          i += chunkSize;
+        } else {
+          clearInterval(streamInterval);
           setIsLoading(false);
-          abortRef.current = null;
           persistCurrent();
-        },
-        onError: (err) => {
-          setIsLoading(false);
-          abortRef.current = null;
-          // Add an inline error message instead of just a toast
-          addMessage({
-            id: generateId(),
-            role: 'assistant',
-            content: err,
-            timestamp: Date.now(),
-            error: true,
-          });
-          persistCurrent();
-        },
-      });
+        }
+      }, 30);
 
-      abortRef.current = controller;
+      abortRef.current = { abort: () => { clearInterval(streamInterval); setIsLoading(false); } } as unknown as AbortController;
     }, [currentSession, currentSessionId, startNewSession, addMessage, updateLastAssistantMessage, persistCurrent, buildWalletContext, handleToolCall]);
 
     const handleStop = useCallback(() => {
@@ -345,9 +366,9 @@ export const AssistantView = forwardRef<AssistantViewHandle, AssistantViewProps>
     })();
 
     return (
-      <div className={cn('flex-1 flex flex-col min-h-0 relative', className)}>
-        {/* Messages area */}
-        <div ref={scrollRef} className="flex-1 overflow-y-auto scroll-smooth">
+      <div className={cn('flex-1 min-h-0 relative', className)}>
+        {/* Messages area - extends behind input & nav */}
+        <div ref={scrollRef} className="absolute inset-0 -bottom-[96px] overflow-y-auto scroll-smooth">
           {showWelcome && (
             <div className="flex flex-col items-center justify-center h-full gap-[16px]">
               <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center">
@@ -356,7 +377,7 @@ export const AssistantView = forwardRef<AssistantViewHandle, AssistantViewProps>
               <span className="text-[24px] leading-[32px] font-bold text-foreground">有什么可以帮您？</span>
             </div>
           )}
-          {!showWelcome && <div className="py-4 space-y-[16px]">
+          {!showWelcome && <div className="pt-4 space-y-[16px]" style={{ paddingBottom: inputHeight + 48 + 88 }}>
             {messages.map((msg, idx) => {
               const next = messages[idx + 1];
               const showTs = !next || next.role !== msg.role ||
@@ -388,21 +409,25 @@ export const AssistantView = forwardRef<AssistantViewHandle, AssistantViewProps>
 
         {/* Scroll to bottom button */}
         {showScrollBtn && !showWelcome && (
-          <button
-            onClick={() => scrollToBottom()}
-            className="absolute bottom-16 left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-card border shadow-md flex items-center justify-center z-10 transition-colors"
-          >
-            <ChevronDown className="w-4 h-4" />
-          </button>
+          <div className="absolute left-1/2 -translate-x-1/2 z-20" style={{ bottom: inputHeight + 8 }}>
+            <button
+              onClick={() => scrollToBottom()}
+              className="w-8 h-8 rounded-full bg-white/60 backdrop-blur-xl shadow-[0_2px_20px_0_rgba(0,0,0,0.08),inset_0_0_0_1px_rgba(255,255,255,0.9)] flex items-center justify-center transition-colors"
+            >
+              <ArrowDown className="w-4 h-4 [&]:!stroke-[2px]" />
+            </button>
+          </div>
         )}
 
-        {/* Input */}
-        <ChatInput
-          onSend={sendMessage}
-          onStop={handleStop}
-          disabled={false}
-          isLoading={isLoading}
-        />
+        {/* Input - floating at bottom above content */}
+        <div ref={inputWrapperRef} className="absolute bottom-0 left-0 right-0 z-10">
+          <ChatInput
+            onSend={sendMessage}
+            onStop={handleStop}
+            disabled={false}
+            isLoading={isLoading}
+          />
+        </div>
 
       </div>
     );
