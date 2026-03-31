@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
-  CheckCircle2, XCircle, Clock, ArrowLeft, X
+  CheckCircle2, XCircle, Clock, ArrowLeft, X, Menu, Plus
 } from 'lucide-react';
 import { useWallet } from '@/contexts/WalletContext';
 import { cn } from '@/lib/utils';
@@ -17,9 +17,12 @@ import { StatusBadge } from '@/components/ui/status-badge';
 import { toast } from '@/lib/toast';
 import { RbfActionSection } from '@/components/RbfActionSection';
 import { Drawer, DrawerContent } from '@/components/ui/drawer';
+import { AssistantView } from '@/components/chat/AssistantView';
+import { useChatHistory } from '@/hooks/useChatHistory';
 import { SpeedUpDrawer } from '@/components/SpeedUpDrawer';
 import { CancelTxDrawer } from '@/components/CancelTxDrawer';
 import { SpeedUpTier } from '@/lib/rbf-utils';
+import { BottomNav } from '@/components/layout/BottomNav';
 
 export default function TransactionDetail() {
   const { id } = useParams<{ id: string }>();
@@ -28,12 +31,37 @@ export default function TransactionDetail() {
 
   const transaction = transactions.find(tx => tx.id === id);
 
+  const [chatOpen, setChatOpen] = useState(false);
+  const [chatExpanding, setChatExpanding] = useState(false);
+  const chatHistory = useChatHistory();
+
+  const handleChatClose = useCallback(() => {
+    chatHistory.cleanEmptySessions();
+    setChatOpen(false);
+  }, [chatHistory]);
+
+  const handleExpandToAssistant = () => {
+    setChatExpanding(true);
+    // Fade out the drawer overlay so navigate doesn't flash
+    requestAnimationFrame(() => {
+      const drawerEl = document.querySelector('[data-vaul-drawer]');
+      if (drawerEl?.previousElementSibling) {
+        const overlay = drawerEl.previousElementSibling as HTMLElement;
+        overlay.style.transition = 'opacity 0.3s ease';
+        overlay.style.opacity = '0';
+      }
+    });
+    // Wait for expansion + nav animation to finish, then seamlessly switch
+    setTimeout(() => {
+      navigate('/assistant', { replace: true });
+    }, 500);
+  };
+
   // RBF drawer states
   const [speedUpDrawerOpen, setSpeedUpDrawerOpen] = useState(false);
   const [cancelDrawerOpen, setCancelDrawerOpen] = useState(false);
   const [showHashDetail, setShowHashDetail] = useState(false);
   const [showMoreDrawer, setShowMoreDrawer] = useState(false);
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
   const handleSpeedUpConfirm = (tier: SpeedUpTier, newFee: number, newGasAmount: number) => {
@@ -80,7 +108,7 @@ export default function TransactionDetail() {
   return (
     <PageTransition>
       <AppLayout showNav={false} showBack title="交易详情" pageBg="bg-background" rightAction={
-        <button className="flex items-center justify-center w-6 h-6">
+        <button className="flex items-center justify-center w-6 h-6" onClick={() => { chatHistory.cleanEmptySessions(); chatHistory.switchSession(null); setChatOpen(true); }}>
           <svg xmlns="http://www.w3.org/2000/svg" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#1C1C1C" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z"/><path d="M12 8v6"/><path d="M9 11h6"/></svg>
         </button>
       }>
@@ -234,6 +262,65 @@ export default function TransactionDetail() {
           transaction={transaction}
           onConfirm={handleCancelConfirm}
         />
+        {/* AI Chat Drawer */}
+        <Drawer open={chatOpen} onOpenChange={(open) => { if (!open) handleChatClose(); else setChatOpen(true); }}>
+          <DrawerContent className={cn("px-0 pb-0 [&>div:first-child]:hidden transition-all duration-300 ease-out", chatExpanding ? "!rounded-none h-[calc(100%-44px)]" : "h-[85vh]")} style={{ border: 'none', boxShadow: 'none', outline: 'none', background: chatExpanding ? '#F8F9FC' : 'transparent' }}>
+            {/* Handle bar + Header */}
+            <div className={cn("shrink-0 bg-white relative z-20 transition-all duration-300", chatExpanding ? "rounded-none bg-page" : "rounded-t-[20px]")}>
+              <div className={cn("flex justify-center pt-2 pb-2 transition-all duration-300 overflow-hidden", chatExpanding ? "opacity-0 h-0 pt-0 pb-0" : "h-auto")}>
+                <div className="w-9 h-1 rounded-full bg-[#EDEEF3]" />
+              </div>
+              <div className="relative flex items-center justify-center px-4 h-[44px]">
+                {/* Expand icon → Menu icon crossfade */}
+                <button className="absolute left-4 flex items-center justify-center w-6 h-6" onClick={handleExpandToAssistant}>
+                  <svg
+                    width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1C1C1C" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
+                    className={cn("absolute transition-opacity duration-300", chatExpanding ? "opacity-0" : "opacity-100")}
+                  >
+                    <path d="m15 15 6 6"/><path d="m15 9 6-6"/><path d="M21 16v5h-5"/><path d="M21 8V3h-5"/><path d="M3 16v5h5"/><path d="m3 21 6-6"/><path d="M3 8V3h5"/><path d="M9 9 3 3"/>
+                  </svg>
+                  <Menu
+                    className={cn("w-6 h-6 absolute transition-opacity duration-300 pointer-events-none", chatExpanding ? "opacity-100" : "opacity-0")}
+                    strokeWidth={1.5}
+                    style={{ color: '#000000' }}
+                  />
+                </button>
+                <h3 className="text-[18px] leading-[28px] font-semibold text-foreground">AI 助手</h3>
+                {/* Close icon → Plus icon crossfade */}
+                <button className="absolute right-4 flex items-center justify-center w-6 h-6" onClick={handleChatClose}>
+                  <svg
+                    width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1C1C1C" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
+                    className={cn("absolute transition-opacity duration-300", chatExpanding ? "opacity-0" : "opacity-100")}
+                  >
+                    <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
+                  </svg>
+                  <Plus
+                    className={cn("w-6 h-6 absolute transition-opacity duration-300 pointer-events-none", chatExpanding ? "opacity-100" : "opacity-0")}
+                    strokeWidth={1.5}
+                    style={{ color: '#000000' }}
+                  />
+                </button>
+              </div>
+            </div>
+            {/* Chat content + input */}
+            {/* Chat content + input */}
+            <div className={cn("flex-1 min-h-0 flex flex-col -mt-px transition-colors duration-300", chatExpanding ? "bg-page overflow-visible" : "bg-white overflow-hidden")}>
+              <AssistantView chatHistory={chatHistory} hideNav inputPaddingBottom={chatExpanding ? 0 : undefined} scrollBottomOffset={chatExpanding ? 96 : 0} hideInputGradient={chatExpanding} />
+            </div>
+            {/* Bottom nav - height pushes input up, transform slides nav in (GPU) */}
+            <div className="shrink-0 relative" style={{ height: chatExpanding ? 96 : 0, transition: 'height 0.4s cubic-bezier(0.25, 0.1, 0.25, 1)', overflow: 'visible', background: '#FFFFFF' }}>
+              {/* Gradient overlays matching AppLayout's BottomNav area exactly */}
+              <div className="absolute bottom-0 left-0 right-0 h-[83px] pointer-events-none" style={{ opacity: chatExpanding ? 1 : 0, transition: 'opacity 0.4s ease', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)', maskImage: 'linear-gradient(to bottom, transparent, black)', WebkitMaskImage: 'linear-gradient(to bottom, transparent, black)' }} />
+              <div className="absolute bottom-0 left-0 right-0 h-[83px] pointer-events-none" style={{ opacity: chatExpanding ? 1 : 0, transition: 'opacity 0.4s ease', background: 'linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,1))' }} />
+              <div
+                className="absolute bottom-0 left-0 right-0 z-10"
+                style={{ transform: chatExpanding ? 'none' : 'translateY(100%)', opacity: chatExpanding ? 1 : 0, transition: 'transform 0.4s cubic-bezier(0.25, 0.1, 0.25, 1), opacity 0.3s ease' }}
+              >
+                <BottomNav activeOverride={1} />
+              </div>
+            </div>
+          </DrawerContent>
+        </Drawer>
       </AppLayout>
 
       {/* Transaction Hash Detail Overlay */}
@@ -311,8 +398,7 @@ export default function TransactionDetail() {
                       style={{ color: '#1c1c1c' }}
                       onClick={() => {
                         setShowMoreDrawer(false);
-                        setToastMessage('已清除缓存');
-                        setTimeout(() => setToastMessage(null), 2000);
+                        toast.success('已清除缓存');
                       }}
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1C1C1C" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="m16 22-1-4"/><path d="M19 14a1 1 0 0 0 1-1v-1a2 2 0 0 0-2-2h-3a1 1 0 0 1-1-1V4a2 2 0 0 0-4 0v5a1 1 0 0 1-1 1H6a2 2 0 0 0-2 2v1a1 1 0 0 0 1 1"/><path d="M19 14H5l-1.973 6.767A1 1 0 0 0 4 22h16a1 1 0 0 0 .973-1.233z"/><path d="m8 22 1-4"/></svg>
@@ -334,8 +420,7 @@ export default function TransactionDetail() {
                       style={{ color: '#1c1c1c' }}
                       onClick={() => {
                         setShowMoreDrawer(false);
-                        setToastMessage('链接已复制');
-                        setTimeout(() => setToastMessage(null), 2000);
+                        toast.success('链接已复制');
                       }}
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1C1C1C" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
@@ -346,22 +431,6 @@ export default function TransactionDetail() {
               </DrawerContent>
             </Drawer>
 
-            {/* Toast */}
-            <AnimatePresence>
-              {toastMessage && (
-                <motion.div
-                  className="absolute inset-0 flex items-center justify-center pointer-events-none z-[200]"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <div className="bg-[#1C1C1C]/80 text-white text-sm px-5 py-2.5 rounded-lg">
-                    {toastMessage}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
           </motion.div>
         )}
       </AnimatePresence>

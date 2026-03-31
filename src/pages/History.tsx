@@ -221,6 +221,12 @@ export default function HistoryPage() {
             <Drawer open={filterDrawerOpen} onOpenChange={setFilterDrawerOpen}>
               <DrawerContent className="px-0 pb-0">
                 <div>
+                  <div className="px-4 mt-4 flex items-center justify-between">
+                    <h3 className="text-[18px] leading-[28px] font-semibold text-foreground">筛选交易</h3>
+                    <button onClick={() => setFilterDrawerOpen(false)}>
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1C1C1C" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                    </button>
+                  </div>
                   <div className="flex items-center h-6 px-4 mt-4" style={{ fontSize: '16px', lineHeight: '24px', color: '#73798B' }}>资金方向</div>
                   <div className="px-4 mt-3">
                     <div className="flex gap-3 w-full">
@@ -242,7 +248,7 @@ export default function HistoryPage() {
                       ))}
                     </div>
                   </div>
-                  <div className="px-4 mt-6" style={{ paddingBottom: '58px' }}>
+                  <div className="px-4 mt-4" style={{ paddingBottom: '58px' }}>
                     <div className="mb-3" style={{ fontSize: '16px', lineHeight: '24px', color: '#73798B' }}>交易类型</div>
                     <div className="flex gap-3 w-full">
                       {([

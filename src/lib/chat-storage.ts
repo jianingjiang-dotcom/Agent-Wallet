@@ -9,7 +9,13 @@ export function loadSessions(): ChatSession[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return [];
-    return JSON.parse(raw) as ChatSession[];
+    const sessions = JSON.parse(raw) as ChatSession[];
+    // Filter out empty sessions (no messages)
+    const nonEmpty = sessions.filter(s => s.messages.length > 0);
+    if (nonEmpty.length !== sessions.length) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(nonEmpty));
+    }
+    return nonEmpty;
   } catch {
     return [];
   }

@@ -237,7 +237,7 @@ export default function MessageCenter() {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.15 }}
-                className="absolute inset-0 z-40 bg-black/50"
+                className="absolute inset-0 z-40 bg-black/40"
                 style={{ top: 0 }}
                 onClick={() => setWalletFilterOpen(false)}
               />

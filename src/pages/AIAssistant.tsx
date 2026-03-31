@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { Plus, Menu } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -11,11 +11,16 @@ export default function AIAssistant() {
   const [historyOpen, setHistoryOpen] = useState(false);
   const chatHistory = useChatHistory();
 
+  // Clean up empty sessions on mount
+  useEffect(() => {
+    chatHistory.cleanEmptySessions();
+  }, []);
+
   return (
     <ChatHistoryDrawer
       open={historyOpen}
       onOpenChange={setHistoryOpen}
-      sessions={chatHistory.sessions}
+      sessions={chatHistory.sessions.filter(s => s.messages.length > 0)}
       currentSessionId={chatHistory.currentSessionId}
       onSelectSession={chatHistory.switchSession}
       onDeleteSession={chatHistory.deleteSession}
