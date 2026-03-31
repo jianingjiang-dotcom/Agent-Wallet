@@ -4,9 +4,17 @@ import { loadSessions, saveSessions, createSession, clearAllSessions } from '@/l
 import { generateId } from '@/lib/utils';
 
 export function useChatHistory() {
-  const [sessions, setSessions] = useState<ChatSession[]>(() => loadSessions());
-  const [currentSessionId, setCurrentSessionId] = useState<string | null>(() => {
+  const [sessions, setSessions] = useState<ChatSession[]>(() => {
     const loaded = loadSessions();
+    // Filter out empty sessions on init
+    const nonEmpty = loaded.filter(s => s.messages.length > 0);
+    if (nonEmpty.length !== loaded.length) {
+      saveSessions(nonEmpty);
+    }
+    return nonEmpty;
+  });
+  const [currentSessionId, setCurrentSessionId] = useState<string | null>(() => {
+    const loaded = loadSessions().filter(s => s.messages.length > 0);
     return loaded.length > 0 ? loaded[0].id : null;
   });
 
@@ -35,7 +43,7 @@ export function useChatHistory() {
     return session;
   }, []);
 
-  const switchSession = useCallback((id: string) => {
+  const switchSession = useCallback((id: string | null) => {
     setCurrentSessionId(id);
     sessionIdRef.current = id;
   }, []);
@@ -163,7 +171,7 @@ export function useChatHistory() {
       const updated = prev.map(s => {
         if (s.id !== sid) return s;
         const msgs = s.messages.map(m =>
-          m.id === messageId ? { ...m, feedback } : m
+          m.id === messageId ? { ...m, feedback: m.feedback === feedback ? undefined : feedback } : m
         );
         return { ...s, messages: msgs };
       });
@@ -189,6 +197,14 @@ export function useChatHistory() {
     });
   }, []);
 
+  const cleanEmptySessions = useCallback(() => {
+    setSessions(prev => {
+      const next = prev.filter(s => s.messages.length > 0);
+      saveSessions(next);
+      return next;
+    });
+  }, []);
+
   return {
     sessions,
     currentSession,
@@ -203,5 +219,6 @@ export function useChatHistory() {
     setCardOnLastAssistant,
     removeLastAssistantMessage,
     setMessageFeedback,
+    cleanEmptySessions,
   };
 }

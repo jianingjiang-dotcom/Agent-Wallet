@@ -31,12 +31,13 @@ const iconData: string[][] = [
 const tabLabels = ['钱包', '助手', '交易', '我的'];
 const navPaths = ['/home', '/assistant', '/history', '/mine'];
 
-export function BottomNav() {
+export function BottomNav({ activeOverride }: { activeOverride?: number } = {}) {
   const navigate = useNavigate();
   const location = useLocation();
   const { resolvedTheme } = useTheme();
 
-  const realIndex = Math.max(0, navPaths.findIndex(p => location.pathname.startsWith(p)));
+  const routeIndex = Math.max(0, navPaths.findIndex(p => location.pathname.startsWith(p)));
+  const realIndex = activeOverride !== undefined ? activeOverride : routeIndex;
   const [displayIndex, setDisplayIndex] = useState(realIndex);
   const [isAnimating, setIsAnimating] = useState(false);
   const [isBouncing, setIsBouncing] = useState(false);

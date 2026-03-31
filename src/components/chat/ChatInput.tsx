@@ -46,8 +46,9 @@ export function ChatInput({ onSend, onStop, disabled, isLoading }: ChatInputProp
     setShowAttachPanel(false);
     if (inputRef.current) {
       inputRef.current.style.height = 'auto';
+      inputRef.current.blur();
     }
-    inputRef.current?.focus();
+    setIsFocused(false);
   }, [text, attachment, disabled, onSend]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -149,50 +150,12 @@ export function ChatInput({ onSend, onStop, disabled, isLoading }: ChatInputProp
         )}
       </AnimatePresence>
 
-      {/* Attachment options panel */}
-      <AnimatePresence>
-        {showAttachPanel && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="overflow-hidden"
-          >
-            <div className="flex items-center justify-center gap-6 px-4 py-3">
-              <button onClick={() => cameraInputRef.current?.click()} className="flex flex-col items-center gap-1.5">
-                <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center transition-colors">
-                  <Camera className="w-5 h-5 text-accent" />
-                </div>
-                <span className="text-[10px] text-muted-foreground">相机</span>
-              </button>
-              <button onClick={() => galleryInputRef.current?.click()} className="flex flex-col items-center gap-1.5">
-                <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center transition-colors">
-                  <ImageIcon className="w-5 h-5 text-accent" />
-                </div>
-                <span className="text-[10px] text-muted-foreground">图库</span>
-              </button>
-              <button onClick={() => fileInputRef.current?.click()} className="flex flex-col items-center gap-1.5">
-                <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center transition-colors">
-                  <FileIcon className="w-5 h-5 text-accent" />
-                </div>
-                <span className="text-[10px] text-muted-foreground">文件</span>
-              </button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Hidden file inputs */}
-      <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" onChange={handleFileSelect} className="hidden" />
-      <input ref={galleryInputRef} type="file" accept="image/*" onChange={handleFileSelect} className="hidden" />
-      <input ref={fileInputRef} type="file" accept="*/*" onChange={handleFileSelect} className="hidden" />
 
       {/* Main input container */}
       <div className="px-4 pt-2 pb-[3px]">
         <div
           className={cn(
-            'bg-white/60 rounded-[12px] border-0 transition-all shadow-[0_2px_20px_0_rgba(0,0,0,0.08),inset_0_0_0_1px_rgba(255,255,255,0.9)] backdrop-blur-xl',
+            'bg-white/60 rounded-[16px] border-0 transition-all shadow-[0_2px_20px_0_rgba(0,0,0,0.08),inset_0_0_0_1px_rgba(255,255,255,0.9)] backdrop-blur-xl',
             isExpanded && '',
             isListening && 'ring-2 ring-destructive/50'
           )}
@@ -229,12 +192,10 @@ export function ChatInput({ onSend, onStop, disabled, isLoading }: ChatInputProp
                 <motion.button
                   whileTap={{ scale: 0.85 }}
                   onClick={toggleAttachPanel}
-                  className={cn(
-                    'shrink-0 flex items-center justify-center w-6 h-6 rounded-full transition-colors text-foreground'
-                  )}
+                  className="shrink-0"
                 >
                   <motion.div animate={{ rotate: showAttachPanel ? 45 : 0 }} transition={{ duration: 0.2 }}>
-                    <Plus className="w-5 h-5" />
+                    <Plus className="w-6 h-6" />
                   </motion.div>
                 </motion.button>
 
@@ -243,7 +204,7 @@ export function ChatInput({ onSend, onStop, disabled, isLoading }: ChatInputProp
                   {isLoading ? (
                     <motion.button whileTap={{ scale: 0.85 }}
                       onClick={onStop}
-                      className="w-6 h-6 rounded-full bg-destructive flex items-center justify-center"
+                      className="w-7 h-7 rounded-full bg-[#1F32D6] flex items-center justify-center"
                     >
                       <Square className="w-3 h-3 fill-white text-white" />
                     </motion.button>
@@ -255,24 +216,18 @@ export function ChatInput({ onSend, onStop, disabled, isLoading }: ChatInputProp
                           whileTap={{ scale: 0.85 }}
                           onClick={handleSend}
                           disabled={(!text.trim() && !attachment) || disabled}
-                          className="w-6 h-6 rounded-full bg-accent flex items-center justify-center disabled:opacity-50"
+                          className="w-7 h-7 rounded-full bg-accent flex items-center justify-center disabled:opacity-50"
                         >
-                          <ArrowUp className="w-3.5 h-3.5 text-white [&]:!stroke-[2px]" />
+                          <ArrowUp className="w-4 h-4 text-white [&]:!stroke-[2px]" />
                         </motion.button>
                       )}
                       {/* Voice wave / send when no text */}
                       {!hasText && !isListening && (
                         <button
-                          onPointerDown={handleVoiceDown}
-                          onPointerUp={handleVoiceUp}
-                          onPointerLeave={handleVoiceUp}
-                          disabled={!voiceSupported || disabled}
-                          className={cn(
-                            'flex items-center justify-center w-6 h-6 rounded-full transition-colors bg-accent',
-                            (!voiceSupported || disabled) && 'opacity-50'
-                          )}
+                          disabled
+                          className="flex items-center justify-center w-7 h-7 rounded-full transition-colors bg-accent opacity-30"
                         >
-                          <ArrowUp className="w-3.5 h-3.5 text-white [&]:!stroke-[2px]" />
+                          <ArrowUp className="w-4 h-4 text-white [&]:!stroke-[2px]" />
                         </button>
                       )}
                     </>
@@ -290,9 +245,9 @@ export function ChatInput({ onSend, onStop, disabled, isLoading }: ChatInputProp
                   e.stopPropagation();
                   toggleAttachPanel();
                 }}
-                className="shrink-0 flex items-center justify-center w-6 h-6 rounded-full text-foreground transition-colors"
+                className="shrink-0"
               >
-                <Plus className="w-5 h-5" />
+                <Plus className="w-6 h-6" />
               </motion.button>
 
               {/* Placeholder text */}
@@ -300,22 +255,25 @@ export function ChatInput({ onSend, onStop, disabled, isLoading }: ChatInputProp
                 {isListening ? '正在聆听...' : '发消息...'}
               </span>
 
-              {/* Mic button */}
-              <motion.div whileTap={{ scale: 0.85 }} transition={{ duration: 0.1 }} className="shrink-0">
-                <button
-                  onPointerDown={handleVoiceDown}
-                  onPointerUp={handleVoiceUp}
-                  onPointerLeave={handleVoiceUp}
-                  disabled={!voiceSupported || disabled}
-                  className={cn(
-                    'flex items-center justify-center w-6 h-6 rounded-full transition-colors',
-                    isListening ? 'bg-destructive animate-pulse' : 'bg-accent',
-                    (!voiceSupported || disabled) && 'opacity-50'
-                  )}
-                >
-                  <ArrowUp className="w-3.5 h-3.5 text-white [&]:!stroke-[2px]" />
-                </button>
-              </motion.div>
+              {/* Right button */}
+              <div className="shrink-0">
+                {isLoading ? (
+                  <motion.button
+                    whileTap={{ scale: 0.85 }}
+                    onClick={onStop}
+                    className="flex items-center justify-center w-7 h-7 rounded-full bg-[#1F32D6]"
+                  >
+                    <Square className="w-3 h-3 fill-white text-white" />
+                  </motion.button>
+                ) : (
+                  <button
+                    disabled
+                    className="flex items-center justify-center w-7 h-7 rounded-full transition-colors bg-accent opacity-30"
+                  >
+                    <ArrowUp className="w-4 h-4 text-white [&]:!stroke-[2px]" />
+                  </button>
+                )}
+              </div>
             </div>
           )}
         </div>

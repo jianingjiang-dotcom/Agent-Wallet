@@ -110,6 +110,8 @@ export function AppLayout({
       {showNav && (
         <div className="absolute bottom-0 left-0 right-0 z-20">
           <BottomNav />
+          <div className="absolute bottom-0 left-0 right-0 h-[83px] pointer-events-none z-[-1]" style={{ backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)', maskImage: 'linear-gradient(to bottom, transparent, black)', WebkitMaskImage: 'linear-gradient(to bottom, transparent, black)' }} />
+          <div className="absolute bottom-0 left-0 right-0 h-[83px] pointer-events-none z-[-1]" style={{ background: 'linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,1))' }} />
         </div>
       )}
     </div>

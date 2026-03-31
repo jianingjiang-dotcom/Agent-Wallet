@@ -28,10 +28,17 @@ export interface AssistantViewHandle {
 interface AssistantViewProps {
   className?: string;
   chatHistory: ReturnType<typeof useChatHistory>;
+  hideNav?: boolean;
+  /** Override the safe-area bottom padding on the input (px). When provided, transitions smoothly. */
+  inputPaddingBottom?: number;
+  /** Extend scroll area below by this many px (used to match page-mode layout during expand transition). */
+  scrollBottomOffset?: number;
+  /** Hide the gradient behind the input (used during expand transition when the nav wrapper provides its own gradient). */
+  hideInputGradient?: boolean;
 }
 
 export const AssistantView = forwardRef<AssistantViewHandle, AssistantViewProps>(
-  function AssistantView({ className, chatHistory }, ref) {
+  function AssistantView({ className, chatHistory, hideNav = false, inputPaddingBottom, scrollBottomOffset, hideInputGradient }, ref) {
     const {
       currentSession, currentSessionId,
       startNewSession, addMessage,
@@ -40,7 +47,8 @@ export const AssistantView = forwardRef<AssistantViewHandle, AssistantViewProps>
       removeLastAssistantMessage, setMessageFeedback,
     } = chatHistory;
 
-    const { currentWallet, assets, transactions } = useWallet();
+    const { currentWallet, assets, transactions, userInfo } = useWallet();
+    const userName = userInfo?.nickname || userInfo?.email?.split('@')[0] || '用户';
     const [isLoading, setIsLoading] = useState(false);
     const [showScrollBtn, setShowScrollBtn] = useState(false);
     const [inputHeight, setInputHeight] = useState(59);
@@ -211,27 +219,32 @@ export const AssistantView = forwardRef<AssistantViewHandle, AssistantViewProps>
       addMessage(userMsg);
       setIsLoading(true);
 
-      // Mock streaming response
-      const response = mockResponses[text.trim()] || getDefaultResponse(text);
-      const chars = Array.from(response);
-      let assistantContent = '';
-      let i = 0;
+      // Show typing indicator for a brief moment before streaming
+      const thinkingDelay = setTimeout(() => {
+        // Mock streaming response
+        const response = mockResponses[text.trim()] || getDefaultResponse(text);
+        const chars = Array.from(response);
+        let assistantContent = '';
+        let i = 0;
 
-      const streamInterval = setInterval(() => {
-        if (i < chars.length) {
-          const chunkSize = Math.floor(Math.random() * 3) + 1;
-          const chunk = chars.slice(i, i + chunkSize).join('');
-          assistantContent += chunk;
-          updateLastAssistantMessage(assistantContent);
-          i += chunkSize;
-        } else {
-          clearInterval(streamInterval);
-          setIsLoading(false);
-          persistCurrent();
-        }
-      }, 30);
+        const streamInterval = setInterval(() => {
+          if (i < chars.length) {
+            const chunkSize = Math.floor(Math.random() * 3) + 1;
+            const chunk = chars.slice(i, i + chunkSize).join('');
+            assistantContent += chunk;
+            updateLastAssistantMessage(assistantContent);
+            i += chunkSize;
+          } else {
+            clearInterval(streamInterval);
+            setIsLoading(false);
+            persistCurrent();
+          }
+        }, 30);
 
-      abortRef.current = { abort: () => { clearInterval(streamInterval); setIsLoading(false); } } as unknown as AbortController;
+        abortRef.current = { abort: () => { clearInterval(streamInterval); setIsLoading(false); } } as unknown as AbortController;
+      }, 1200);
+
+      abortRef.current = { abort: () => { clearTimeout(thinkingDelay); setIsLoading(false); } } as unknown as AbortController;
     }, [currentSession, currentSessionId, startNewSession, addMessage, updateLastAssistantMessage, persistCurrent, buildWalletContext, handleToolCall]);
 
     const handleStop = useCallback(() => {
@@ -257,46 +270,34 @@ export const AssistantView = forwardRef<AssistantViewHandle, AssistantViewProps>
 
       // Remove the last assistant message and re-send
       removeLastAssistantMessage();
-
-      // Re-send using the last user message content
       setIsLoading(true);
 
-      const historyMsgs = msgs
-        .filter(m => m.role === 'user' || (m.role === 'assistant' && m !== msgs[msgs.length - 1]))
-        .slice(-20)
-        .map(m => ({ role: m.role as 'user' | 'assistant', content: m.content }));
+      const thinkingDelay = setTimeout(() => {
+        // Mock streaming response
+        const response = mockResponses[lastUserMsg!.content.trim()] || getDefaultResponse(lastUserMsg!.content);
+        const chars = Array.from(response);
+        let assistantContent = '';
+        let i = 0;
 
-      let assistantContent = '';
+        const streamInterval = setInterval(() => {
+          if (i < chars.length) {
+            const chunkSize = Math.floor(Math.random() * 3) + 1;
+            const chunk = chars.slice(i, i + chunkSize).join('');
+            assistantContent += chunk;
+            updateLastAssistantMessage(assistantContent);
+            i += chunkSize;
+          } else {
+            clearInterval(streamInterval);
+            setIsLoading(false);
+            persistCurrent();
+          }
+        }, 30);
 
-      const controller = streamChat({
-        messages: historyMsgs,
-        walletContext: buildWalletContext(),
-        onDelta: (chunk) => {
-          assistantContent += chunk;
-          updateLastAssistantMessage(assistantContent);
-        },
-        onToolCall: handleToolCall,
-        onDone: () => {
-          setIsLoading(false);
-          abortRef.current = null;
-          persistCurrent();
-        },
-        onError: (err) => {
-          setIsLoading(false);
-          abortRef.current = null;
-          addMessage({
-            id: generateId(),
-            role: 'assistant',
-            content: err,
-            timestamp: Date.now(),
-            error: true,
-          });
-          persistCurrent();
-        },
-      });
+        abortRef.current = { abort: () => { clearInterval(streamInterval); setIsLoading(false); } } as unknown as AbortController;
+      }, 1200);
 
-      abortRef.current = controller;
-    }, [currentSession, addMessage, removeLastAssistantMessage, updateLastAssistantMessage, persistCurrent, buildWalletContext, handleToolCall]);
+      abortRef.current = { abort: () => { clearTimeout(thinkingDelay); setIsLoading(false); } } as unknown as AbortController;
+    }, [currentSession, removeLastAssistantMessage, updateLastAssistantMessage, persistCurrent]);
 
     // Retry: remove the error message and re-send the last user message
     const handleRetry = useCallback(() => {
@@ -313,43 +314,34 @@ export const AssistantView = forwardRef<AssistantViewHandle, AssistantViewProps>
 
       // Remove the error assistant message
       removeLastAssistantMessage();
-
-      // Re-send
       setIsLoading(true);
-      const historyMsgs = msgs
-        .filter(m => !(m.role === 'assistant' && m.error))
-        .slice(-20)
-        .map(m => ({ role: m.role as 'user' | 'assistant', content: m.content }));
 
-      let assistantContent = '';
-      const controller = streamChat({
-        messages: historyMsgs,
-        walletContext: buildWalletContext(),
-        onDelta: (chunk) => {
-          assistantContent += chunk;
-          updateLastAssistantMessage(assistantContent);
-        },
-        onToolCall: handleToolCall,
-        onDone: () => {
-          setIsLoading(false);
-          abortRef.current = null;
-          persistCurrent();
-        },
-        onError: (err) => {
-          setIsLoading(false);
-          abortRef.current = null;
-          addMessage({
-            id: generateId(),
-            role: 'assistant',
-            content: err,
-            timestamp: Date.now(),
-            error: true,
-          });
-          persistCurrent();
-        },
-      });
-      abortRef.current = controller;
-    }, [currentSession, addMessage, removeLastAssistantMessage, updateLastAssistantMessage, persistCurrent, buildWalletContext, handleToolCall]);
+      const thinkingDelay = setTimeout(() => {
+        // Mock streaming response
+        const response = mockResponses[lastUserMsg!.content.trim()] || getDefaultResponse(lastUserMsg!.content);
+        const chars = Array.from(response);
+        let assistantContent = '';
+        let i = 0;
+
+        const streamInterval = setInterval(() => {
+          if (i < chars.length) {
+            const chunkSize = Math.floor(Math.random() * 3) + 1;
+            const chunk = chars.slice(i, i + chunkSize).join('');
+            assistantContent += chunk;
+            updateLastAssistantMessage(assistantContent);
+            i += chunkSize;
+          } else {
+            clearInterval(streamInterval);
+            setIsLoading(false);
+            persistCurrent();
+          }
+        }, 30);
+
+        abortRef.current = { abort: () => { clearInterval(streamInterval); setIsLoading(false); } } as unknown as AbortController;
+      }, 1200);
+
+      abortRef.current = { abort: () => { clearTimeout(thinkingDelay); setIsLoading(false); } } as unknown as AbortController;
+    }, [currentSession, removeLastAssistantMessage, updateLastAssistantMessage, persistCurrent]);
 
     const handleFeedback = useCallback((messageId: string, feedback: 'positive' | 'negative') => {
       setMessageFeedback(messageId, feedback);
@@ -368,16 +360,23 @@ export const AssistantView = forwardRef<AssistantViewHandle, AssistantViewProps>
     return (
       <div className={cn('flex-1 min-h-0 relative', className)}>
         {/* Messages area - extends behind input & nav */}
-        <div ref={scrollRef} className="absolute inset-0 -bottom-[96px] overflow-y-auto scroll-smooth">
+        <div
+          ref={scrollRef}
+          className="absolute inset-0 overflow-y-auto scroll-smooth"
+          style={{ bottom: hideNav ? -(scrollBottomOffset ?? 0) : -96, transition: scrollBottomOffset !== undefined ? 'bottom 0.4s cubic-bezier(0.25, 0.1, 0.25, 1)' : undefined }}
+        >
           {showWelcome && (
-            <div className="flex flex-col items-center justify-center h-full gap-[16px]">
-              <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center">
-                <Bot className="w-6 h-6 text-accent" />
-              </div>
-              <span className="text-[24px] leading-[32px] font-bold text-foreground">有什么可以帮您？</span>
+            <div className="flex flex-col items-center justify-center h-full" style={{ marginTop: '-20%' }}>
+              <span className="text-[24px] leading-[32px] font-bold text-foreground">
+                {(() => {
+                  const hour = new Date().getHours();
+                  const greeting = hour < 12 ? '上午好' : hour < 18 ? '下午好' : '晚上好';
+                  return `${greeting}，${userName}`;
+                })()}
+              </span>
             </div>
           )}
-          {!showWelcome && <div className="pt-4 space-y-[16px]" style={{ paddingBottom: inputHeight + 48 + 88 }}>
+          {!showWelcome && <div className="pt-4 space-y-[24px]" style={{ paddingBottom: inputHeight + 48 + (hideNav ? 34 : 88) }}>
             {messages.map((msg, idx) => {
               const next = messages[idx + 1];
               const showTs = !next || next.role !== msg.role ||
@@ -398,10 +397,8 @@ export const AssistantView = forwardRef<AssistantViewHandle, AssistantViewProps>
               );
             })}
             {isLoading && messages[messages.length - 1]?.role !== 'assistant' && (
-              <div className="flex justify-start px-4">
-                <div className="bg-muted rounded-xl rounded-bl-md">
-                  <TypingIndicator />
-                </div>
+              <div className="flex justify-start px-6">
+                <TypingIndicator />
               </div>
             )}
           </div>}
@@ -409,18 +406,29 @@ export const AssistantView = forwardRef<AssistantViewHandle, AssistantViewProps>
 
         {/* Scroll to bottom button */}
         {showScrollBtn && !showWelcome && (
-          <div className="absolute left-1/2 -translate-x-1/2 z-20" style={{ bottom: inputHeight + 8 }}>
+          <div className="absolute left-1/2 -translate-x-1/2 z-20" style={{ bottom: inputHeight + (hideNav ? 34 : 0) + 8 }}>
             <button
               onClick={() => scrollToBottom()}
-              className="w-8 h-8 rounded-full bg-white/60 backdrop-blur-xl shadow-[0_2px_20px_0_rgba(0,0,0,0.08),inset_0_0_0_1px_rgba(255,255,255,0.9)] flex items-center justify-center transition-colors"
+              className="w-9 h-9 rounded-full bg-white/60 backdrop-blur-xl shadow-[0_2px_20px_0_rgba(0,0,0,0.08),inset_0_0_0_1px_rgba(255,255,255,0.9)] flex items-center justify-center transition-colors"
             >
-              <ArrowDown className="w-4 h-4 [&]:!stroke-[2px]" />
+              <ArrowDown className="w-[18px] h-[18px] [&]:!stroke-[2px]" />
             </button>
           </div>
         )}
 
         {/* Input - floating at bottom above content */}
-        <div ref={inputWrapperRef} className="absolute bottom-0 left-0 right-0 z-10">
+        <div
+          ref={inputWrapperRef}
+          className="absolute bottom-0 left-0 right-0 z-10"
+          style={hideNav ? { paddingBottom: inputPaddingBottom ?? 34, transition: inputPaddingBottom !== undefined ? 'padding-bottom 0.4s cubic-bezier(0.25, 0.1, 0.25, 1)' : undefined } : undefined}
+        >
+          {/* Gradient background with blur behind input */}
+          {hideNav && !hideInputGradient && (
+            <div className="absolute bottom-0 left-0 right-0 h-[97px] -z-10 pointer-events-none">
+              <div className="absolute inset-0 backdrop-blur-xl" style={{ maskImage: 'linear-gradient(to bottom, transparent, black)', WebkitMaskImage: 'linear-gradient(to bottom, transparent, black)' }} />
+              <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,1))' }} />
+            </div>
+          )}
           <ChatInput
             onSend={sendMessage}
             onStop={handleStop}

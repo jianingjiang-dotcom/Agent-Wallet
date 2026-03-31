@@ -156,7 +156,7 @@ export function ChatHistoryDrawer({
       <div
         className={cn(
           "fixed inset-0 z-30 bg-black transition-opacity duration-300 ease-in-out",
-          open ? "opacity-50 pointer-events-auto" : "opacity-0 pointer-events-none"
+          open ? "opacity-[0.4] pointer-events-auto" : "opacity-0 pointer-events-none"
         )}
         onClick={() => onOpenChange(false)}
       />
@@ -181,7 +181,7 @@ export function ChatHistoryDrawer({
               </div>
             </div>
           ) : (
-            <div className="px-2 py-2 space-y-4">
+            <div className="px-2 py-2 space-y-1">
               {groups.map(g => (
                 <div key={g.label}>
                   <div className="space-y-1">
@@ -190,7 +190,7 @@ export function ChatHistoryDrawer({
                         key={s.id}
                         className={cn(
                           'group flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer transition-all select-none',
-                          (contextMenu ? contextMenu.sessionId === s.id : isSelected(s.id)) ? 'bg-[#F4F5FD]' : ''
+                          (contextMenu ? contextMenu.sessionId === s.id : isSelected(s.id)) ? 'bg-[rgba(31,50,214,0.1)]' : ''
                         )}
                         onClick={() => {
                           if (!contextMenu) {

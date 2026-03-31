@@ -28,7 +28,7 @@ function showToast(message: string, duration = 2000) {
     font-size: 14px;
     line-height: 20px;
     padding: 8px 16px;
-    border-radius: 999px;
+    border-radius: 12px;
     white-space: nowrap;
     pointer-events: none;
     transition: opacity 0.3s ease;
