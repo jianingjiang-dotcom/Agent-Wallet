@@ -43,7 +43,7 @@ export default function DelegateAgent() {
   const preSelectedWalletId = searchParams.get('wallet') || null;
 
   const {
-    humanAgents, delegatedAgents, wallets,
+    humanAgents, delegatedAgents, wallets, currentWallet,
     fetchHumanAgents, generateSetupToken, currentSetupToken, addMockHumanAgent,
   } = useWallet();
 
@@ -54,6 +54,7 @@ export default function DelegateAgent() {
   // --- Create Agent drawer state ---
   const [createDrawerOpen, setCreateDrawerOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [tokenCopied, setTokenCopied] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
 
   // --- List state ---
@@ -123,15 +124,55 @@ export default function DelegateAgent() {
     return revokedDelegated.filter(da => da.walletId === selectedWalletFilter);
   }, [revokedDelegated, selectedWalletFilter]);
 
+  // --- Build the full prompt text to copy ---
+  const buildAgentPrompt = useCallback(() => {
+    if (!currentSetupToken) return '';
+    const walletName = currentWallet?.name || '我的钱包';
+    const walletAddresses = currentWallet?.walletAddresses
+      ?.map(a => `  - ${a.system.toUpperCase()}: ${a.address}`)
+      .join('\n') || '';
+
+    return [
+      `我想将你设置为我的 Cobo 商户钱包的自动交易 Agent。`,
+      ``,
+      `钱包名称：${walletName}`,
+      walletAddresses ? `钱包地址：\n${walletAddresses}` : '',
+      ``,
+      `请使用以下 Setup Token 完成关联：`,
+      ``,
+      `${currentSetupToken.token}`,
+      ``,
+      `Token 有效期 15 分钟，请尽快使用。`,
+      ``,
+      `关联成功后，你将可以：`,
+      `1. 查询该钱包的资产余额和交易记录`,
+      `2. 在授权策略范围内发起转账交易`,
+      `3. 所有交易将经过风控审批后执行`,
+    ].filter(Boolean).join('\n');
+  }, [currentSetupToken, currentWallet]);
+
   // --- Handlers ---
 
   const handleCopy = async () => {
     if (!currentSetupToken || isExpired) return;
-    const ok = await copyToClipboard(currentSetupToken.token);
+    const promptText = buildAgentPrompt();
+    const ok = await copyToClipboard(promptText);
     if (ok) {
       setCopied(true);
-      toast.success('Token 已复制');
+      toast.success('Prompt 已复制，可直接粘贴给 Agent');
       setTimeout(() => setCopied(false), 2000);
+    } else {
+      toast.error('复制失败');
+    }
+  };
+
+  const handleCopyToken = async () => {
+    if (!currentSetupToken || isExpired) return;
+    const ok = await copyToClipboard(currentSetupToken.token);
+    if (ok) {
+      setTokenCopied(true);
+      toast.success('Token 已复制');
+      setTimeout(() => setTokenCopied(false), 2000);
     } else {
       toast.error('复制失败');
     }
@@ -429,21 +470,21 @@ export default function DelegateAgent() {
             {/* How-to steps */}
             <div className="space-y-3">
               <p className="text-sm text-muted-foreground">
-                通过 Setup Token 将外部 Agent 关联到您的钱包
+                复制以下 Prompt 发送给 AI Agent，即可完成钱包关联
               </p>
               <ol className="space-y-2.5">
                 <li className="flex items-start gap-3">
                   <span className="w-6 h-6 rounded-full bg-accent/10 text-accent flex items-center justify-center shrink-0 text-xs font-bold mt-0.5">1</span>
                   <div>
-                    <p className="text-sm font-medium">下载 Agent Skill</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">获取对应平台的 Agent 插件</p>
+                    <p className="text-sm font-medium">复制 Prompt</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">包含钱包信息、Setup Token 和权限说明</p>
                   </div>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="w-6 h-6 rounded-full bg-accent/10 text-accent flex items-center justify-center shrink-0 text-xs font-bold mt-0.5">2</span>
                   <div>
-                    <p className="text-sm font-medium">复制 Setup Token</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">将下方的 Token 发送给 Agent</p>
+                    <p className="text-sm font-medium">发送给 Agent</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">在对应 AI 平台的对话框中粘贴发送</p>
                   </div>
                 </li>
                 <li className="flex items-start gap-3">
@@ -456,31 +497,30 @@ export default function DelegateAgent() {
               </ol>
             </div>
 
-            {/* Token display */}
+            {/* Prompt preview */}
             <div className="space-y-2.5">
-              <p className="text-sm font-medium">Setup Token</p>
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-medium">Prompt 预览</p>
+                {!isExpired && currentSetupToken && (
+                  <button
+                    onClick={handleCopyToken}
+                    className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    {tokenCopied ? (
+                      <><Check className="w-3.5 h-3.5 text-emerald-500" /> 已复制 Token</>
+                    ) : (
+                      <><Copy className="w-3.5 h-3.5" /> 仅复制 Token</>
+                    )}
+                  </button>
+                )}
+              </div>
               <div className={cn(
-                'flex items-center gap-2 p-3 rounded-xl border font-mono text-xs',
+                'p-3 rounded-xl border text-xs leading-relaxed whitespace-pre-wrap max-h-48 overflow-y-auto',
                 isExpired
                   ? 'bg-muted/50 border-border text-muted-foreground'
                   : 'bg-muted/30 border-border'
               )}>
-                <span className="flex-1 truncate select-all">
-                  {currentSetupToken?.token || '生成中...'}
-                </span>
-                {!isExpired && currentSetupToken && (
-                  <button
-                    onClick={handleCopy}
-                    className="shrink-0 p-1.5 rounded-lg transition-colors"
-                    title="复制 Token"
-                  >
-                    {copied ? (
-                      <Check className="w-4 h-4 text-emerald-500" />
-                    ) : (
-                      <Copy className="w-4 h-4 text-muted-foreground" />
-                    )}
-                  </button>
-                )}
+                {currentSetupToken ? buildAgentPrompt() : '生成中...'}
               </div>
 
               {/* Timer / Expired */}
@@ -496,7 +536,7 @@ export default function DelegateAgent() {
                       onClick={handleNewToken}
                       disabled={isGenerating}
                     >
-                      获取新 Token
+                      重新生成
                     </button>
                   </>
                 ) : (
@@ -523,7 +563,7 @@ export default function DelegateAgent() {
               ) : (
                 <>
                   <Copy className="w-4 h-4 mr-1.5" />
-                  复制 Token
+                  复制 Prompt
                 </>
               )}
             </Button>
