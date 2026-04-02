@@ -118,7 +118,7 @@ export default function AuditLog() {
   };
 
   return (
-    <AppLayout title="审计日志" showBack>
+    <AppLayout title="审计日志" showBack showNav showSecurityBanner={false}>
       <div className="px-4 py-4 space-y-4">
         {/* Header */}
         <div className="flex items-center justify-between">

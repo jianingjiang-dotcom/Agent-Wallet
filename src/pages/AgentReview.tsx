@@ -58,7 +58,7 @@ export default function AgentReview() {
   };
 
   return (
-    <AppLayout title="Agent 审核" showBack>
+    <AppLayout title="Agent 审核" showBack showNav showSecurityBanner={false}>
       <div className="px-4 py-4 space-y-4">
         {/* Tabs */}
         <div className="flex border-b border-border">

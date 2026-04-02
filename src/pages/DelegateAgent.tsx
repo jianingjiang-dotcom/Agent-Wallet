@@ -170,7 +170,7 @@ export default function DelegateAgent() {
   const isEmpty = humanAgents.length === 0 && delegatedAgents.length === 0;
 
   return (
-    <AppLayout title="Agent 授权管理" showBack showNav={false}>
+    <AppLayout title="Agent 授权管理" showBack showNav showSecurityBanner={false}>
       <div className="px-4 py-4 space-y-4 overflow-auto h-full">
 
         {/* ============================================ */}
