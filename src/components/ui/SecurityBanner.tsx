@@ -10,6 +10,9 @@ export function SecurityBanner() {
   const { walletStatus, currentWallet } = useWallet();
   const navigate = useNavigate();
 
+  // No wallet yet — nothing to back up
+  if (!currentWallet) return null;
+
   // Agent-linked wallets don't need MPC backup
   if (isAgentLinked(currentWallet)) return null;
 

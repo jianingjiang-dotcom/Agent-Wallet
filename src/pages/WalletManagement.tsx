@@ -126,10 +126,10 @@ export default function WalletManagementPage() {
                     variant="ghost"
                     size="sm"
                     className="text-accent h-8 gap-1"
-                    onClick={() => navigate('/create-wallet')}
+                    onClick={() => navigate('/claim-wallet')}
                   >
                     <Plus className="w-4 h-4" />
-                    创建
+                    认领
                   </Button>
                 </div>
 
@@ -137,11 +137,11 @@ export default function WalletManagementPage() {
                   <EmptyState
                     icon={Wallet}
                     title="暂无钱包"
-                    description="创建你的第一个 MPC 钱包"
+                    description="使用认领码接管 Agent 创建的钱包"
                     action={{
-                      label: '创建钱包',
+                      label: '认领钱包',
                       icon: Plus,
-                      onClick: () => navigate('/create-wallet'),
+                      onClick: () => navigate('/claim-wallet'),
                     }}
                   />
                 ) : (

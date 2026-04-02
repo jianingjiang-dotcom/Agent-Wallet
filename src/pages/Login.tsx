@@ -257,7 +257,7 @@ export default function LoginPage() {
       
       // New user: skip success state, go directly to set password
       if (result.userType === 'new') {
-        navigate('/set-password?onboarding=true');
+        navigate('/claim-intro');
         return;
       }
       
@@ -269,7 +269,7 @@ export default function LoginPage() {
         if (result.hasExistingWallets) {
           navigate('/home');
         } else {
-          navigate('/create-wallet');
+          navigate('/claim-intro');
         }
       }, 1500);
     } catch (error) {
@@ -299,7 +299,7 @@ export default function LoginPage() {
       
       // New user from social login: skip success state, go directly to set password
       if (result.userType === 'new') {
-        navigate('/set-password?onboarding=true');
+        navigate('/claim-intro');
         return;
       }
       
@@ -311,7 +311,7 @@ export default function LoginPage() {
         if (result.hasExistingWallets) {
           navigate('/home');
         } else {
-          navigate('/create-wallet');
+          navigate('/claim-intro');
         }
       }, 1500);
     } catch (error) {
@@ -359,11 +359,11 @@ export default function LoginPage() {
       setTimeout(() => {
         // Password login for new user: also go through mandatory password setup
         if (result.userType === 'new') {
-          navigate('/set-password?onboarding=true');
+          navigate('/claim-intro');
         } else if (result.hasExistingWallets) {
           navigate('/home');
         } else {
-          navigate('/create-wallet');
+          navigate('/claim-intro');
         }
       }, 1500);
     } catch (error) {

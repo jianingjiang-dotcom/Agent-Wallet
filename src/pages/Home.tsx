@@ -4,7 +4,7 @@ import {
   Eye, EyeOff, ChevronRight, Send, QrCode,
   TrendingDown, Wallet, Plus, Shield, AlertTriangle,
   CheckCircle2, Sparkles, Lock, ChevronDown, Clock, Bell, Bot, ClipboardCheck,
-  LayoutGrid
+  LayoutGrid, Key, BookOpen
 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -30,110 +30,71 @@ import { TokenInfo } from '@/lib/tokens';
 import { toast } from '@/lib/toast';
 import { getChainShortName } from '@/lib/chain-utils';
 
-// Empty state component when no wallet exists - guides user to create first wallet
+// Empty state component when no wallet exists - dashboard-style with claim card
 function EmptyWalletState() {
   const navigate = useNavigate();
 
   return (
-    <AppLayout showNav={false}>
-      <div className="h-full flex flex-col items-center justify-center px-4">
+    <AppLayout showNav>
+      <div className="flex flex-col px-4 pt-6 pb-24">
+        {/* Balance placeholder */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5 }}
-          className="text-center max-w-sm w-full"
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-6"
         >
-          {/* Wallet icon */}
-          <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 0.4 }}
-            className="w-20 h-20 mx-auto mb-6 rounded-xl gradient-primary flex items-center justify-center shadow-xl"
-          >
-            <Wallet className="w-10 h-10 text-primary-foreground" />
-          </motion.div>
+          <p className="text-xs text-muted-foreground mb-1">总资产</p>
+          <p className="text-3xl font-bold text-muted-foreground/30">$0.00</p>
+        </motion.div>
 
-          <h1 className="text-xl font-bold text-foreground mb-2">
-            开始创建您的钱包
-          </h1>
-          <p className="text-muted-foreground text-sm mb-1">
-            只需 1 分钟完成安全设置
-          </p>
-          <p className="text-xs text-muted-foreground mb-8">
-            您的资产由多重签名技术保护，安全可靠
-          </p>
-
-          {/* Feature highlights */}
-          <div className="space-y-3 mb-8">
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2 }}
-              className="flex items-center gap-4 p-3 rounded-xl bg-background"
-            >
-              <div className="w-10 h-10 rounded-full bg-success/10 flex items-center justify-center shrink-0">
-                <Shield className="w-5 h-5 text-success" />
-              </div>
-              <div className="text-left">
-                <p className="font-medium text-foreground text-sm">银行级安全</p>
-                <p className="text-xs text-muted-foreground">MPC 多重签名保护</p>
-              </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.3 }}
-              className="flex items-center gap-4 p-3 rounded-xl bg-background"
-            >
-              <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center shrink-0">
-                <Lock className="w-5 h-5 text-accent" />
-              </div>
-              <div className="text-left">
-                <p className="font-medium text-foreground text-sm">完全掌控</p>
-                <p className="text-xs text-muted-foreground">只有您能控制资产</p>
-              </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.4 }}
-              className="flex items-center gap-4 p-3 rounded-xl bg-background"
-            >
-              <div className="w-10 h-10 rounded-full bg-warning/10 flex items-center justify-center shrink-0">
-                <Sparkles className="w-5 h-5 text-warning" />
-              </div>
-              <div className="text-left">
-                <p className="font-medium text-foreground text-sm">可恢复</p>
-                <p className="text-xs text-muted-foreground">换机丢机不丢资产</p>
-              </div>
-            </motion.div>
+        {/* Claim card */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 }}
+          className="border-2 border-dashed border-border rounded-2xl p-6 text-center mb-4"
+        >
+          <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-accent/10 flex items-center justify-center">
+            <Wallet className="w-7 h-7 text-accent" />
           </div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-            className="space-y-3"
+          <h3 className="font-semibold text-foreground mb-1">还没有钱包</h3>
+          <p className="text-sm text-muted-foreground mb-5">
+            认领 Agent 创建的钱包，开始管理您的加密资产
+          </p>
+          <Button
+            className="gradient-primary"
+            size="lg"
+            onClick={() => navigate('/claim-wallet')}
           >
-            <Button
-              size="lg"
-              className="w-full text-base gradient-primary"
-              onClick={() => navigate('/onboarding')}
-            >
-              创建钱包
-            </Button>
-            <p className="text-xs text-muted-foreground">
-              已有备份？
-              <button 
-                className="text-primary ml-1"
-                onClick={() => navigate('/onboarding?recover=true')}
-              >
-                恢复钱包
-              </button>
-            </p>
-          </motion.div>
+            认领钱包
+          </Button>
+        </motion.div>
+
+        {/* Explore cards */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="grid grid-cols-2 gap-3"
+        >
+          <button
+            onClick={() => navigate('/assistant')}
+            className="flex flex-col items-center gap-2 p-4 rounded-xl bg-card border border-border text-center"
+          >
+            <div className="w-9 h-9 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
+              <Bot className="w-4.5 h-4.5 text-purple-600 dark:text-purple-400" />
+            </div>
+            <span className="text-xs font-medium text-foreground">了解产品</span>
+          </button>
+          <button
+            onClick={() => navigate('/claim-intro')}
+            className="flex flex-col items-center gap-2 p-4 rounded-xl bg-card border border-border text-center"
+          >
+            <div className="w-9 h-9 rounded-full bg-accent/10 flex items-center justify-center">
+              <BookOpen className="w-4.5 h-4.5 text-accent" />
+            </div>
+            <span className="text-xs font-medium text-foreground">使用指南</span>
+          </button>
         </motion.div>
       </div>
     </AppLayout>

@@ -14,6 +14,7 @@ import {
   AgentTransferRequest, WalletBackupInfo,
   HumanAgent, SetupToken, SETUP_TOKEN_VALIDITY_MS,
   AgentPolicy, DefaultPolicyAction,
+  ClaimWalletInfo,
 } from '@/types/wallet';
 import {
   MOCK_WALLET_ADDRESSES,
@@ -1343,6 +1344,11 @@ interface WalletContextType extends WalletState {
 
   // Agent-linked wallet (Mode 2)
   linkAgentWallet: (token: string) => Promise<Wallet>;
+
+  // Claim wallet (new flow)
+  validateClaimCode: (code: string) => Promise<ClaimWalletInfo>;
+  claimWallet: (code: string) => Promise<Wallet>;
+
   agentTransferRequests: AgentTransferRequest[];
   submitAgentRequest: (request: Omit<AgentTransferRequest, 'id' | 'createdAt' | 'status' | 'walletName'>) => Promise<AgentTransferRequest>;
   getAgentRequestsForWallet: (walletId: string) => AgentTransferRequest[];
@@ -1407,7 +1413,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
 
   // Mock user data - can be toggled for testing different user types
   // Set to false to test existing user with wallets, true for new user onboarding
-  const [mockIsNewUser] = useState(false);
+  const [mockIsNewUser] = useState(true);
   
   const setupExistingUser = useCallback(() => {
     const mockUserInfo: UserInfo = {
@@ -2106,11 +2112,12 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     }
   }, [mockIsNewUser, setupExistingUser]);
 
-  // Dev mode login - instant login with existing user data for testing
+  // Dev mode login - instant login with no wallet state for testing claim flow
   const devModeLogin = useCallback(() => {
     setIsAuthenticated(true);
-    setupExistingUser();
-  }, [setupExistingUser]);
+    setUserInfo({ email: 'dev@cobo.com', nickname: 'Dev User' });
+    setWalletStatus('not_created');
+  }, []);
 
   const logout = useCallback(() => {
     setIsAuthenticated(false);
@@ -2302,6 +2309,70 @@ export function WalletProvider({ children }: { children: ReactNode }) {
 
     setWallets(prev => [...prev, newWallet]);
     setCurrentWallet(newWallet);
+    setAssets(getAssetsForWallet(newWallet.id));
+    setTransactions(getTransactionsForWallet(newWallet.id));
+    return newWallet;
+  }, [hasBiometric]);
+
+  // Validate a claim code (CAW-XXXXX) and return wallet info
+  const validateClaimCode = useCallback(async (code: string): Promise<ClaimWalletInfo> => {
+    await new Promise(resolve => setTimeout(resolve, 1200));
+    const normalized = code.trim().toUpperCase();
+    if (!/^CAW-[A-Z0-9]{5}$/.test(normalized)) {
+      throw new Error('认领码格式无效，请输入 CAW-XXXXX 格式的认领码');
+    }
+    // Return mock wallet info
+    return {
+      walletId: `wallet-claim-${normalized.slice(4)}`,
+      walletName: 'Trading Wallet',
+      balance: 2847.53,
+      createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), // 3 days ago
+      agentName: 'OpenClaw Trading Agent',
+      agentId: 'agent-0x7a25…3f8d',
+      chains: ['Base', 'Ethereum', 'Solana'],
+      addresses: [
+        { chain: 'Base', address: '0x7a25...3f8d' },
+        { chain: 'Ethereum', address: '0x7a25...3f8d' },
+        { chain: 'Solana', address: '4kNp...xR2m' },
+      ],
+    };
+  }, []);
+
+  // Claim a wallet using a claim code — generates keyshare and creates wallet
+  const claimWallet = useCallback(async (code: string): Promise<Wallet> => {
+    // Simulate MPC keyshare generation (Mobile + Cobo 2/2)
+    await new Promise(resolve => setTimeout(resolve, 3000));
+
+    const timestamp = Date.now();
+    const claimAddresses = generateWalletAddresses();
+    const newWallet: Wallet = {
+      id: `wallet-${timestamp}`,
+      name: '已认领钱包',
+      walletAddresses: claimAddresses,
+      addresses: buildLegacyAddresses(claimAddresses),
+      createdAt: new Date(),
+      isBackedUp: false,
+      isBiometricEnabled: hasBiometric,
+      origin: 'claimed',
+      controlMode: 'manual_review',
+    };
+
+    // Map placeholder addressIds for assets
+    const evmId = claimAddresses.find(a => a.system === 'evm')?.id || '';
+    const tronId = claimAddresses.find(a => a.system === 'tron')?.id || '';
+    const solId = claimAddresses.find(a => a.system === 'solana')?.id || '';
+    walletAssetsMap[newWallet.id] = mockAssetsNewWallet.map(a => ({
+      ...a,
+      addressId: a.addressId === 'new-evm-1' ? evmId
+        : a.addressId === 'new-tron-1' ? tronId
+        : a.addressId === 'new-sol-1' ? solId
+        : a.addressId,
+    }));
+    walletTransactionsMap[newWallet.id] = [];
+
+    setWallets(prev => [...prev, newWallet]);
+    setCurrentWallet(newWallet);
+    setWalletStatus('created_no_backup');
     setAssets(getAssetsForWallet(newWallet.id));
     setTransactions(getTransactionsForWallet(newWallet.id));
     return newWallet;
@@ -3145,6 +3216,9 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     addMockHumanAgent,
     // Agent-linked wallet (Mode 2)
     linkAgentWallet,
+    // Claim wallet
+    validateClaimCode,
+    claimWallet,
     agentTransferRequests,
     submitAgentRequest,
     getAgentRequestsForWallet,

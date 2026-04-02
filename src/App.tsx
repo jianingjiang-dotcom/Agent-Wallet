@@ -65,6 +65,8 @@ import ComponentDemo from "./pages/ComponentDemo";
 import Mine from "./pages/Mine";
 import TransactionHashDetail from "./pages/TransactionHashDetail";
 import TssSigning from "./pages/TssSigning";
+import ClaimIntro from "./pages/ClaimIntro";
+import ClaimWallet from "./pages/ClaimWallet";
 
 const queryClient = new QueryClient();
 
@@ -174,7 +176,9 @@ function AppRoutes() {
       <Route path="/device-kicked" element={<DeviceKicked />} />
       <Route path="/security-required" element={<SecurityRequired />} />
       <Route path="/set-password" element={<ProtectedRoute><SetPassword /></ProtectedRoute>} />
-      <Route path="/mode-selection" element={<ProtectedRoute><ModeSelection /></ProtectedRoute>} />
+      <Route path="/claim-intro" element={<ProtectedRoute><ClaimIntro /></ProtectedRoute>} />
+      <Route path="/claim-wallet" element={<ProtectedRoute><ClaimWallet /></ProtectedRoute>} />
+      <Route path="/mode-selection" element={<Navigate to="/claim-intro" replace />} />
       <Route path="/link-agent-wallet" element={<ProtectedRoute><LinkAgentWallet /></ProtectedRoute>} />
       <Route path="/request-agent" element={<ProtectedRoute><RequestAgent /></ProtectedRoute>} />
       <Route path="/bind-email-demo" element={<BindEmailDemo />} />

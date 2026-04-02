@@ -85,8 +85,7 @@ export default function SetPassword() {
   };
 
   const handleSkip = () => {
-    // Allow user to skip and go directly to onboarding (only for non-onboarding flow)
-    navigate('/onboarding?new=true');
+    navigate('/claim-intro');
   };
 
   const handleBack = () => {
@@ -99,7 +98,7 @@ export default function SetPassword() {
   };
 
   const handleContinueToOnboarding = () => {
-    navigate('/mode-selection');
+    navigate('/claim-intro');
   };
 
   // Success state - Show welcome guidance for onboarding flow
@@ -141,16 +140,16 @@ export default function SetPassword() {
                   transition={{ delay: 0.4 }}
                   className="text-muted-foreground text-center mb-2"
                 >
-                  接下来选择您的钱包设置方式
+                  接下来认领您的钱包
                 </motion.p>
-                
+
                 <motion.p
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.5 }}
                   className="text-sm text-muted-foreground/70 text-center"
                 >
-                  您可以创建新钱包或关联 Agent 已有的钱包
+                  您的 AI Agent 已为您创建好钱包，输入认领码即可接管
                 </motion.p>
               </div>
               

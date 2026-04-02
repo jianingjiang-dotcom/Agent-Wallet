@@ -132,24 +132,15 @@ export function WalletSwitcher({ isOpen, onClose, onCreateNew }: WalletSwitcherP
               </div>
             </div>
             
-            {/* Action Buttons */}
-            <div className="space-y-2 shrink-0">
+            {/* Action Button */}
+            <div className="shrink-0">
               <Button
                 size="lg"
                 className="w-full"
-                onClick={() => { onClose(); onCreateNew(); }}
+                onClick={() => { onClose(); navigate('/claim-wallet'); }}
               >
                 <Plus className="w-4 h-4 mr-2" />
-                创建钱包
-              </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                className="w-full"
-                onClick={() => { onClose(); navigate('/link-agent-wallet'); }}
-              >
-                <Link2 className="w-4 h-4 mr-2" />
-                关联 Agent 钱包
+                认领钱包
               </Button>
             </div>
           </motion.div>

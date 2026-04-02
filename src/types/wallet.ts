@@ -122,7 +122,19 @@ export type RecoveryMethod =
   | 'private_key';    // Private key import (advanced)
 
 // Wallet origin - how this wallet was created/linked
-export type WalletOrigin = 'user_created' | 'agent_linked';
+export type WalletOrigin = 'user_created' | 'agent_linked' | 'claimed';
+
+// Info returned when validating a claim code
+export interface ClaimWalletInfo {
+  walletId: string;
+  walletName: string;
+  balance: number;
+  createdAt: Date;
+  agentName: string;
+  agentId: string;
+  chains: string[];
+  addresses: { chain: string; address: string }[];
+}
 
 // Info for wallets linked from an external agent
 export interface AgentLinkedWalletInfo {
