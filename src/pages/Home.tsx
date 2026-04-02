@@ -4,11 +4,15 @@ import {
   Eye, EyeOff, ChevronRight, Send, QrCode,
   TrendingDown, Wallet, Plus, Shield, AlertTriangle,
   CheckCircle2, Sparkles, Lock, ChevronDown, Clock, Bell, Bot, ClipboardCheck,
-  LayoutGrid, Key, BookOpen
+  LayoutGrid, Key, Globe, ShieldCheck, SlidersHorizontal
 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { useWallet, aggregateByChain } from '@/contexts/WalletContext';
 import { cn } from '@/lib/utils';
 import { ChainDropdown } from '@/components/ChainDropdown';
@@ -70,30 +74,51 @@ function EmptyWalletState() {
           </Button>
         </motion.div>
 
-        {/* Explore cards */}
+        {/* Feature cards */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="grid grid-cols-2 gap-3"
+        >
+          <p className="text-xs font-medium text-muted-foreground mb-3">在这里，您将获得</p>
+          <div className="grid grid-cols-2 gap-2.5">
+            {[
+              { icon: Globe, color: 'text-accent', bg: 'bg-accent/10', title: '全链钱包', desc: '80+ 链 · 3000+ 币种' },
+              { icon: ShieldCheck, color: 'text-emerald-500', bg: 'bg-emerald-100 dark:bg-emerald-900/30', title: '资产自主', desc: 'MPC 分片，Cobo 无法动用' },
+              { icon: SlidersHorizontal, color: 'text-purple-500', bg: 'bg-purple-100 dark:bg-purple-900/30', title: 'Pact 管控', desc: '为 Agent 设定行为边界' },
+              { icon: Bot, color: 'text-amber-500', bg: 'bg-amber-100 dark:bg-amber-900/30', title: '内置助手', desc: '不懂就问，随时响应' },
+            ].map((item, i) => (
+              <motion.div
+                key={item.title}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.35 + i * 0.05 }}
+                className="flex items-start gap-2.5 p-3 rounded-xl bg-card border border-border"
+              >
+                <div className={`w-8 h-8 rounded-full ${item.bg} flex items-center justify-center shrink-0`}>
+                  <item.icon className={`w-4 h-4 ${item.color}`} />
+                </div>
+                <div>
+                  <p className="text-xs font-medium text-foreground">{item.title}</p>
+                  <p className="text-[11px] text-muted-foreground mt-0.5">{item.desc}</p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
+
+        {/* Learn more link */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5 }}
+          className="text-center mt-4"
         >
           <button
+            className="text-xs text-primary"
             onClick={() => navigate('/assistant')}
-            className="flex flex-col items-center gap-2 p-4 rounded-xl bg-card border border-border text-center"
           >
-            <div className="w-9 h-9 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
-              <Bot className="w-4.5 h-4.5 text-purple-600 dark:text-purple-400" />
-            </div>
-            <span className="text-xs font-medium text-foreground">了解产品</span>
-          </button>
-          <button
-            onClick={() => navigate('/claim-intro')}
-            className="flex flex-col items-center gap-2 p-4 rounded-xl bg-card border border-border text-center"
-          >
-            <div className="w-9 h-9 rounded-full bg-accent/10 flex items-center justify-center">
-              <BookOpen className="w-4.5 h-4.5 text-accent" />
-            </div>
-            <span className="text-xs font-medium text-foreground">使用指南</span>
+            了解更多
           </button>
         </motion.div>
       </div>
@@ -126,6 +151,7 @@ export default function HomePage() {
   const [showProfileDrawer, setShowProfileDrawer] = useState(false);
   const [showAllAssets, setShowAllAssets] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [showSetupDialog, setShowSetupDialog] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const handledSidebarOpen = useRef(false);
@@ -140,6 +166,11 @@ export default function HomePage() {
     }
   }, [location.state]);
   const { assets, transactions, currentWallet, walletStatus, addToken, removeToken, unreadNotificationCount, getAgentTxByWallet, agentTransactions } = useWallet();
+
+  // Claimed wallet states
+  const needsKeyGen = walletStatus === 'claimed_no_key';
+  const needsBackup = currentWallet?.origin === 'claimed' && walletStatus === 'created_no_backup';
+  const needsSetup = needsKeyGen || needsBackup;
 
   // Simulate initial loading
   useEffect(() => {
@@ -323,8 +354,15 @@ export default function HomePage() {
                   Agent
                 </span>
               )}
-              {currentWallet?.controlMode && !isAgentLinked(currentWallet) && (
-                <WalletModeBadge mode={currentWallet.controlMode} />
+              {needsKeyGen && (
+                <span className="text-[10px] px-1.5 py-0.5 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded ml-1">
+                  MPC分片未生成
+                </span>
+              )}
+              {needsBackup && !needsKeyGen && (
+                <span className="text-[10px] px-1.5 py-0.5 bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded ml-1">
+                  未备份
+                </span>
               )}
               <ChevronDown className="w-4 h-4 text-muted-foreground" />
             </div>
@@ -409,7 +447,13 @@ export default function HomePage() {
               <div className="flex gap-3">
                 <Button
                   className="flex-1 h-10 bg-white/20 backdrop-blur-sm text-white border border-white/20 transition-colors"
-                  onClick={() => navigate(isAgentLinked(currentWallet) ? '/request-agent' : '/send')}
+                  onClick={() => {
+                    if (needsSetup) {
+                      setShowSetupDialog(true);
+                    } else {
+                      navigate(isAgentLinked(currentWallet) ? '/request-agent' : '/send');
+                    }
+                  }}
                 >
                   {isAgentLinked(currentWallet) ? (
                     <Bot className="w-4 h-4 mr-2" strokeWidth={1.5} />
@@ -727,6 +771,29 @@ export default function HomePage() {
           navigate('/create-wallet');
         }}
       />
+
+      {/* Setup required dialog — blocks transfers for incomplete claimed wallets */}
+      <AlertDialog open={showSetupDialog} onOpenChange={setShowSetupDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {needsKeyGen ? '请先生成 MPC 密钥分片' : '请先完成密钥备份'}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {needsKeyGen
+                ? '您的钱包尚未生成 MPC 密钥分片，无法签名交易。请先完成密钥生成。'
+                : '您的钱包尚未完成密钥备份，无法发起转账。请先完成备份以确保资产安全。'
+              }
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>取消</AlertDialogCancel>
+            <AlertDialogAction onClick={() => navigate(needsKeyGen ? '/claim-wallet?resume=keygen' : '/claim-wallet?resume=backup')}>
+              去完成
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
     </AppLayout>
   );

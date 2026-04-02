@@ -32,9 +32,12 @@ const steps = [
 ];
 
 export default function ClaimWallet() {
-  const [currentStep, setCurrentStep] = useState(1);
-  const [claimInfo, setClaimInfo] = useState<ClaimWalletInfo | null>(null);
   const navigate = useNavigate();
+  // Support resuming from a specific step via URL param
+  const resumeParam = new URLSearchParams(window.location.search).get('resume');
+  const initialStep = resumeParam === 'keygen' ? 3 : resumeParam === 'backup' ? 4 : 1;
+  const [currentStep, setCurrentStep] = useState(initialStep);
+  const [claimInfo, setClaimInfo] = useState<ClaimWalletInfo | null>(null);
 
   const currentComponent = steps[currentStep - 1]?.component;
 
@@ -136,7 +139,6 @@ export default function ClaimWallet() {
           {currentComponent === 'keygen' && (
             <KeyShareGenStep
               key="keygen"
-              claimCode={claimInfo?.walletId || ''}
               onComplete={() => handleStepComplete()}
             />
           )}
@@ -295,10 +297,12 @@ function ConfirmClaimStep({
   claimInfo: ClaimWalletInfo;
   onComplete: () => void;
 }) {
+  const { confirmClaim } = useWallet();
   const [showBiometric, setShowBiometric] = useState(false);
   const [verified, setVerified] = useState(false);
 
-  const handleVerified = () => {
+  const handleVerified = async () => {
+    await confirmClaim(claimInfo.walletId);
     setVerified(true);
   };
 
@@ -404,13 +408,12 @@ function ConfirmClaimStep({
 
 // ─── Step 3: KeyShare Generation ───────────────────────────
 function KeyShareGenStep({
-  claimCode,
   onComplete,
 }: {
-  claimCode: string;
   onComplete: () => void;
 }) {
-  const { claimWallet } = useWallet();
+  const { generateKeyShare } = useWallet();
+  const navigate = useNavigate();
   const [started, setStarted] = useState(false);
   const [done, setDone] = useState(false);
   const [error, setError] = useState('');
@@ -423,7 +426,7 @@ function KeyShareGenStep({
   useEffect(() => {
     if (!started) return;
 
-    claimWallet(claimCode)
+    generateKeyShare()
       .then(() => {
         setDone(true);
       })
@@ -513,10 +516,16 @@ function KeyShareGenStep({
           </div>
         </div>
 
-        <div className="pb-8">
+        <div className="pb-8 space-y-3">
           <Button size="lg" className="w-full h-12 text-base font-medium gradient-primary" onClick={handleStart}>
             开始生成
           </Button>
+          <button
+            className="w-full text-center text-sm text-muted-foreground py-2"
+            onClick={() => navigate('/home')}
+          >
+            稍后再说
+          </button>
         </div>
       </motion.div>
     );

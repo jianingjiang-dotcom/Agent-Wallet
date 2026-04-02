@@ -4,6 +4,7 @@ import { Bot, Smartphone, Rocket, ChevronDown, HelpCircle, Copy } from 'lucide-r
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { AppLayout } from '@/components/layout/AppLayout';
+import CoboLogo from '@/assets/cobo-logo.svg';
 
 const steps = [
   {
@@ -43,19 +44,14 @@ export default function ClaimIntro() {
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
-            className="mb-2"
+            className="flex items-center gap-3 mb-2"
           >
-            <p className="text-sm font-medium text-accent tracking-wide">COBO AGENTIC WALLET</p>
+            <h1 className="text-2xl font-bold text-foreground">欢迎使用</h1>
+            <div className="flex items-center gap-2">
+              <img src={CoboLogo} alt="Cobo" className="h-5" />
+              <span className="text-xs font-bold text-foreground tracking-wide leading-none">AGENTIC<br/>WALLET</span>
+            </div>
           </motion.div>
-
-          <motion.h1
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.1 }}
-            className="text-2xl font-bold text-foreground mb-2"
-          >
-            欢迎使用
-          </motion.h1>
 
           <motion.p
             initial={{ opacity: 0 }}

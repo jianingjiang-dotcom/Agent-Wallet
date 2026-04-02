@@ -31,8 +31,9 @@ export interface DeviceKickInfo {
   reason: 'new_device_login' | 'security_revoke';
 }
 
-export type WalletStatus = 
+export type WalletStatus =
   | 'not_created'      // S0: No wallet exists
+  | 'claimed_no_key'   // S0.5: Claimed but MPC key not yet generated
   | 'created_no_backup' // S1: Created but backup incomplete
   | 'backup_complete'   // S2: Backup done, may need biometric
   | 'fully_secure'      // S3: All security measures complete

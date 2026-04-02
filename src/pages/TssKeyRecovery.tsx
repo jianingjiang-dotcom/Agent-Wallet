@@ -276,19 +276,14 @@ export default function TSSRecoveryPage() {
 
       {/* Contact Support - only show on method selection step */}
       {step === 'method' && (
-        <div className="px-4 pb-6 pt-2 space-y-3">
-          <Button
-            variant="outline"
-            size="lg"
-            className="w-full text-base"
+        <div className="px-4 pb-6 pt-2 text-center">
+          <button
+            className="text-xs text-primary inline-flex items-center gap-1"
             onClick={() => navigate('/help')}
           >
-            <MessageCircle className="w-5 h-5 mr-2" />
-            联系客服
-          </Button>
-          <p className="text-xs text-center text-muted-foreground">
-            遇到问题？联系客服获取帮助
-          </p>
+            <MessageCircle className="w-3.5 h-3.5" />
+            遇到问题？联系客服
+          </button>
         </div>
       )}
     </div>
@@ -328,10 +323,10 @@ function MethodSelectionStep({
           <Shield className="w-8 h-8 text-accent" />
         </motion.div>
         <h2 className="text-lg font-bold text-foreground mb-2">
-          检测到已有安全账户
+          恢复您的密钥
         </h2>
         <p className="text-sm text-muted-foreground max-w-[280px]">
-          您已在其他设备创建过钱包，请选择恢复方式以继续使用
+          检测到您之前已认领过钱包，请恢复手机端密钥以继续使用
         </p>
       </div>
 
@@ -366,7 +361,7 @@ function MethodSelectionStep({
                 )}
               </div>
               <p className="text-sm text-muted-foreground mt-1">
-                从 {cloudProvider === 'icloud' ? 'iCloud' : 'Google Drive'} 恢复
+                从 {cloudProvider === 'icloud' ? 'iCloud' : 'Google Drive'} 恢复密钥分片
               </p>
               <p className={`text-xs mt-1 ${hasCloudBackup ? 'text-muted-foreground' : 'text-warning'}`}>
                 {hasCloudBackup ? `上次备份：${lastBackupTime}` : '无备份记录'}
@@ -390,7 +385,7 @@ function MethodSelectionStep({
             <div className="flex-1">
               <span className="font-medium text-foreground">本地文件恢复</span>
               <p className="text-sm text-muted-foreground mt-1">
-                导入之前导出的 .backup 文件
+                从备份文件恢复密钥分片
               </p>
             </div>
           </div>
@@ -633,16 +628,16 @@ function SuccessStep({ onEnter }: { onEnter: () => void }) {
         transition={{ delay: 0.2 }}
         className="text-xl font-bold text-foreground mb-2"
       >
-        TSS Node 恢复成功
+        密钥恢复成功
       </motion.h2>
-      
+
       <motion.p
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
         className="text-sm text-muted-foreground max-w-[280px] mb-8"
       >
-        您的安全账户已成功恢复到此设备，可以继续使用钱包了
+        您的手机端密钥分片已恢复，之前认领的钱包可以继续使用
       </motion.p>
 
       {/* Recovered Wallets Preview */}

@@ -28,10 +28,32 @@ export function SecurityBanner() {
     const isFullyBackedUp = hasTSSNodeBackup || isWalletBackedUp;
 
     switch (walletStatus) {
+      case 'claimed_no_key':
+        return {
+          type: 'error' as const,
+          icon: ShieldAlert,
+          title: '请完成密钥生成',
+          description: '生成 MPC 密钥分片后即可正常使用',
+          action: '去完成',
+          actionPath: '/claim-wallet?resume=keygen',
+          show: true,
+        };
       case 'created_no_backup':
         // Only show if neither TSS Node nor wallet is backed up
         if (isFullyBackedUp) {
           return { show: false };
+        }
+        // Claimed wallets: more urgent messaging
+        if (currentWallet?.origin === 'claimed') {
+          return {
+            type: 'error' as const,
+            icon: ShieldAlert,
+            title: '请完成钱包备份',
+            description: '备份密钥后可防止手机丢失导致资产无法恢复',
+            action: '去备份',
+            actionPath: '/claim-wallet?resume=backup',
+            show: true,
+          };
         }
         return {
           type: 'error' as const,

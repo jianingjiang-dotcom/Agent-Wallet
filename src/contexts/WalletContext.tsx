@@ -1347,7 +1347,8 @@ interface WalletContextType extends WalletState {
 
   // Claim wallet (new flow)
   validateClaimCode: (code: string) => Promise<ClaimWalletInfo>;
-  claimWallet: (code: string) => Promise<Wallet>;
+  confirmClaim: (code: string) => Promise<Wallet>;
+  generateKeyShare: () => Promise<void>;
 
   agentTransferRequests: AgentTransferRequest[];
   submitAgentRequest: (request: Omit<AgentTransferRequest, 'id' | 'createdAt' | 'status' | 'walletName'>) => Promise<AgentTransferRequest>;
@@ -2338,10 +2339,9 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  // Claim a wallet using a claim code — generates keyshare and creates wallet
-  const claimWallet = useCallback(async (code: string): Promise<Wallet> => {
-    // Simulate MPC keyshare generation (Mobile + Cobo 2/2)
-    await new Promise(resolve => setTimeout(resolve, 3000));
+  // Confirm claim — creates wallet object (no key yet)
+  const confirmClaim = useCallback(async (code: string): Promise<Wallet> => {
+    await new Promise(resolve => setTimeout(resolve, 500));
 
     const timestamp = Date.now();
     const claimAddresses = generateWalletAddresses();
@@ -2372,11 +2372,18 @@ export function WalletProvider({ children }: { children: ReactNode }) {
 
     setWallets(prev => [...prev, newWallet]);
     setCurrentWallet(newWallet);
-    setWalletStatus('created_no_backup');
+    setWalletStatus('claimed_no_key');
     setAssets(getAssetsForWallet(newWallet.id));
     setTransactions(getTransactionsForWallet(newWallet.id));
     return newWallet;
   }, [hasBiometric]);
+
+  // Generate MPC keyshare — called after confirmClaim
+  const generateKeyShare = useCallback(async (): Promise<void> => {
+    // Simulate MPC keyshare generation (Mobile + Cobo 2/2)
+    await new Promise(resolve => setTimeout(resolve, 3000));
+    setWalletStatus('created_no_backup');
+  }, []);
 
   // Submit a transfer request to agent (Mode 2)
   const submitAgentRequest = useCallback(async (
@@ -3218,7 +3225,8 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     linkAgentWallet,
     // Claim wallet
     validateClaimCode,
-    claimWallet,
+    confirmClaim,
+    generateKeyShare,
     agentTransferRequests,
     submitAgentRequest,
     getAgentRequestsForWallet,
