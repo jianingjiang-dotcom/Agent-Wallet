@@ -2315,12 +2315,12 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     return newWallet;
   }, [hasBiometric]);
 
-  // Validate a claim code (CAW-XXXXX) and return wallet info
+  // Validate a pairing code (8-digit) and return wallet info
   const validateClaimCode = useCallback(async (code: string): Promise<ClaimWalletInfo> => {
     await new Promise(resolve => setTimeout(resolve, 1200));
-    const normalized = code.trim().toUpperCase();
-    if (!/^CAW-[A-Z0-9]{5}$/.test(normalized)) {
-      throw new Error('认领码格式无效，请输入 CAW-XXXXX 格式的认领码');
+    const normalized = code.trim();
+    if (!/^\d{8}$/.test(normalized)) {
+      throw new Error('配对口令格式无效，请输入 8 位数字');
     }
     // Return mock wallet info
     return {

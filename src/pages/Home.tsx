@@ -4,7 +4,7 @@ import {
   Eye, EyeOff, ChevronRight, Send, QrCode,
   TrendingDown, Wallet, Plus, Shield, AlertTriangle,
   CheckCircle2, Sparkles, Lock, ChevronDown, Clock, Bell, Bot, ClipboardCheck,
-  LayoutGrid, Key, Globe, ShieldCheck, SlidersHorizontal
+  LayoutGrid, Key, HelpCircle, Copy
 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -34,92 +34,81 @@ import { TokenInfo } from '@/lib/tokens';
 import { toast } from '@/lib/toast';
 import { getChainShortName } from '@/lib/chain-utils';
 
-// Empty state component when no wallet exists - dashboard-style with claim card
+// Empty state component when no wallet exists
 function EmptyWalletState() {
   const navigate = useNavigate();
+  const [showHelp, setShowHelp] = useState(false);
 
   return (
     <AppLayout showNav>
-      <div className="flex flex-col px-4 pt-6 pb-24">
-        {/* Balance placeholder */}
+      <div className="h-full flex flex-col items-center px-6 pb-24 pt-[30%]">
         <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-6"
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.4 }}
+          className="text-center w-full max-w-sm"
         >
-          <p className="text-xs text-muted-foreground mb-1">总资产</p>
-          <p className="text-3xl font-bold text-muted-foreground/30">$0.00</p>
-        </motion.div>
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="w-16 h-16 mx-auto mb-5 rounded-full bg-accent/10 flex items-center justify-center"
+          >
+            <Wallet className="w-8 h-8 text-accent" />
+          </motion.div>
 
-        {/* Claim card */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.15 }}
-          className="border-2 border-dashed border-border rounded-2xl p-6 text-center mb-4"
-        >
-          <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-accent/10 flex items-center justify-center">
-            <Wallet className="w-7 h-7 text-accent" />
-          </div>
-          <h3 className="font-semibold text-foreground mb-1">还没有钱包</h3>
-          <p className="text-sm text-muted-foreground mb-5">
-            认领 Agent 创建的钱包，开始管理您的加密资产
+          <h2 className="text-lg font-bold text-foreground mb-1">还没有钱包</h2>
+          <p className="text-sm text-muted-foreground mb-6">
+            输入配对口令，接管 Agent 创建的钱包
           </p>
+
           <Button
             className="gradient-primary"
             size="lg"
-            onClick={() => navigate('/claim-wallet')}
+            onClick={() => navigate('/claim-intro')}
           >
-            认领钱包
+            配对钱包
           </Button>
-        </motion.div>
 
-        {/* Feature cards */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-        >
-          <p className="text-xs font-medium text-muted-foreground mb-3">在这里，您将获得</p>
-          <div className="grid grid-cols-2 gap-2.5">
-            {[
-              { icon: Globe, color: 'text-accent', bg: 'bg-accent/10', title: '全链钱包', desc: '80+ 链 · 3000+ 币种' },
-              { icon: ShieldCheck, color: 'text-emerald-500', bg: 'bg-emerald-100 dark:bg-emerald-900/30', title: '资产自主', desc: 'MPC 分片，Cobo 无法动用' },
-              { icon: SlidersHorizontal, color: 'text-purple-500', bg: 'bg-purple-100 dark:bg-purple-900/30', title: 'Pact 管控', desc: '为 Agent 设定行为边界' },
-              { icon: Bot, color: 'text-amber-500', bg: 'bg-amber-100 dark:bg-amber-900/30', title: '内置助手', desc: '不懂就问，随时响应' },
-            ].map((item, i) => (
-              <motion.div
-                key={item.title}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.35 + i * 0.05 }}
-                className="flex items-start gap-2.5 p-3 rounded-xl bg-card border border-border"
-              >
-                <div className={`w-8 h-8 rounded-full ${item.bg} flex items-center justify-center shrink-0`}>
-                  <item.icon className={`w-4 h-4 ${item.color}`} />
-                </div>
-                <div>
-                  <p className="text-xs font-medium text-foreground">{item.title}</p>
-                  <p className="text-[11px] text-muted-foreground mt-0.5">{item.desc}</p>
-                </div>
+          {/* Help section */}
+          <div className="mt-6">
+            <button
+              className="inline-flex items-center gap-1 text-xs text-primary py-1"
+              onClick={() => setShowHelp(!showHelp)}
+            >
+              <HelpCircle className="w-3.5 h-3.5" />
+              还没有配对口令？
+              <motion.div animate={{ rotate: showHelp ? 180 : 0 }} transition={{ duration: 0.2 }}>
+                <ChevronDown className="w-3.5 h-3.5" />
               </motion.div>
-            ))}
+            </button>
+            <AnimatePresence>
+              {showHelp && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="overflow-hidden"
+                >
+                  <div className="mt-2 p-3 bg-muted/50 rounded-xl text-xs leading-relaxed space-y-2 text-left">
+                    <p className="font-medium text-foreground">在 Agent 环境执行以下指令</p>
+                    <div className="relative">
+                      <pre className="bg-background rounded-lg p-2.5 pr-9 text-[11px] font-mono text-foreground overflow-x-auto whitespace-pre-wrap break-all leading-relaxed">npx skills add cobosteven/cobo-agent-wallet-manual --skill cobo-agentic-wallet-sandbox --yes --global</pre>
+                      <button
+                        onClick={() => {
+                          navigator.clipboard.writeText('npx skills add cobosteven/cobo-agent-wallet-manual --skill cobo-agentic-wallet-sandbox --yes --global');
+                          toast.success('已复制');
+                        }}
+                        className="absolute right-1.5 top-1.5 p-1 rounded text-muted-foreground hover:text-foreground transition-colors"
+                      >
+                        <Copy className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
-        </motion.div>
-
-        {/* Learn more link */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5 }}
-          className="text-center mt-4"
-        >
-          <button
-            className="text-xs text-primary"
-            onClick={() => navigate('/assistant')}
-          >
-            了解更多
-          </button>
         </motion.div>
       </div>
     </AppLayout>

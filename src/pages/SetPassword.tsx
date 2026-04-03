@@ -149,7 +149,7 @@ export default function SetPassword() {
                   transition={{ delay: 0.5 }}
                   className="text-sm text-muted-foreground/70 text-center"
                 >
-                  您的 AI Agent 已为您创建好钱包，输入认领码即可接管
+                  您的 AI Agent 已为您创建好钱包，输入配对口令即可接管
                 </motion.p>
               </div>
               

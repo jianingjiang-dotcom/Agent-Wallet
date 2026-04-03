@@ -1,11 +1,11 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Link2, CheckCircle2, AlertTriangle, Clipboard,
-  ChevronLeft, Shield, Sparkles, Key, CloudUpload,
-  Bot, Clock, Wallet, Eye, EyeOff, Info, HelpCircle, ChevronDown,
+  CheckCircle2, AlertTriangle,
+  ChevronLeft, Shield, Key, CloudUpload,
+  Bot, Wallet, Eye, EyeOff, Info,
 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useWallet } from '@/contexts/WalletContext';
@@ -25,19 +25,21 @@ import {
 import { BiometricVerifyDrawer } from '@/components/BiometricVerifyDrawer';
 
 const steps = [
-  { id: 1, title: '输入认领码', icon: Link2, component: 'code-input' },
-  { id: 2, title: '确认钱包', icon: Shield, component: 'confirm' },
-  { id: 3, title: '密钥生成', icon: Key, component: 'keygen' },
-  { id: 4, title: '备份', icon: CloudUpload, component: 'backup' },
+  { id: 1, title: '确认钱包', icon: Shield, component: 'confirm' },
+  { id: 2, title: '密钥生成', icon: Key, component: 'keygen' },
+  { id: 3, title: '备份', icon: CloudUpload, component: 'backup' },
 ];
 
 export default function ClaimWallet() {
   const navigate = useNavigate();
+  const location = useLocation();
+  // Accept claimInfo from ClaimIntro navigation state
+  const passedClaimInfo = (location.state as { claimInfo?: ClaimWalletInfo })?.claimInfo || null;
   // Support resuming from a specific step via URL param
   const resumeParam = new URLSearchParams(window.location.search).get('resume');
-  const initialStep = resumeParam === 'keygen' ? 3 : resumeParam === 'backup' ? 4 : 1;
+  const initialStep = resumeParam === 'keygen' ? 2 : resumeParam === 'backup' ? 3 : 1;
   const [currentStep, setCurrentStep] = useState(initialStep);
-  const [claimInfo, setClaimInfo] = useState<ClaimWalletInfo | null>(null);
+  const [claimInfo] = useState<ClaimWalletInfo | null>(passedClaimInfo);
 
   const currentComponent = steps[currentStep - 1]?.component;
 
@@ -50,8 +52,8 @@ export default function ClaimWallet() {
   };
 
   const handleBack = () => {
-    // Don't allow going back during keygen or after completion
-    if (currentStep === 3) return;
+    // Don't allow going back during keygen
+    if (currentStep === 2) return;
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
     } else {
@@ -69,9 +71,9 @@ export default function ClaimWallet() {
               onClick={handleBack}
               className={cn(
                 'p-1 -ml-1 transition-colors',
-                currentStep === 3 ? 'text-muted-foreground/30' : 'text-muted-foreground'
+                currentStep === 2 ? 'text-muted-foreground/30' : 'text-muted-foreground'
               )}
-              disabled={currentStep === 3}
+              disabled={currentStep === 2}
             >
               <ChevronLeft className="w-6 h-6" />
             </button>
@@ -120,15 +122,6 @@ export default function ClaimWallet() {
       {/* Step Content */}
       <div className="flex-1 px-4 overflow-auto">
         <AnimatePresence mode="wait">
-          {currentComponent === 'code-input' && (
-            <ClaimCodeStep
-              key="code-input"
-              onComplete={(info) => {
-                setClaimInfo(info);
-                handleStepComplete();
-              }}
-            />
-          )}
           {currentComponent === 'confirm' && claimInfo && (
             <ConfirmClaimStep
               key="confirm"
@@ -154,140 +147,6 @@ export default function ClaimWallet() {
   );
 }
 
-// ─── Shared: Expandable help for claim code ────────────────
-function ClaimCodeHelp() {
-  const [open, setOpen] = useState(false);
-  return (
-    <div>
-      <button
-        className="flex items-center justify-center gap-1 text-xs text-primary mx-auto py-1"
-        onClick={() => setOpen(!open)}
-      >
-        <HelpCircle className="w-3.5 h-3.5" />
-        认领码从哪来？
-        <motion.div animate={{ rotate: open ? 180 : 0 }} transition={{ duration: 0.2 }}>
-          <ChevronDown className="w-3.5 h-3.5" />
-        </motion.div>
-      </button>
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="overflow-hidden"
-          >
-            <div className="mt-1 p-3 bg-muted/50 rounded-xl text-xs leading-relaxed space-y-2">
-              <p className="font-medium text-foreground">在 Agent 环境执行以下指令</p>
-              <div className="relative">
-                <pre className="bg-background rounded-lg p-2.5 pr-9 text-[11px] font-mono text-foreground overflow-x-auto whitespace-pre-wrap break-all leading-relaxed">npx skills add cobosteven/cobo-agent-wallet-manual --skill cobo-agentic-wallet-sandbox --yes --global</pre>
-                <button
-                  onClick={() => {
-                    navigator.clipboard.writeText('npx skills add cobosteven/cobo-agent-wallet-manual --skill cobo-agentic-wallet-sandbox --yes --global');
-                    toast.success('已复制');
-                  }}
-                  className="absolute right-1.5 top-1.5 p-1 rounded text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  <Clipboard className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-}
-
-// ─── Step 1: Enter Claim Code ──────────────────────────────
-function ClaimCodeStep({
-  onComplete,
-}: {
-  onComplete: (info: ClaimWalletInfo) => void;
-}) {
-  const { validateClaimCode } = useWallet();
-  const [code, setCode] = useState('');
-  const [isValidating, setIsValidating] = useState(false);
-  const [error, setError] = useState('');
-
-  const handlePaste = async () => {
-    try {
-      const text = await navigator.clipboard.readText();
-      setCode(text.trim());
-      setError('');
-    } catch {
-      toast.error('无法访问剪贴板');
-    }
-  };
-
-  const handleValidate = async () => {
-    if (!code.trim()) {
-      setError('请输入认领码');
-      return;
-    }
-    setIsValidating(true);
-    setError('');
-    try {
-      const info = await validateClaimCode(code);
-      onComplete(info);
-    } catch (e: any) {
-      setError(e.message || '认领码验证失败');
-    } finally {
-      setIsValidating(false);
-    }
-  };
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, x: 20 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: -20 }}
-      className="space-y-5 pt-6"
-    >
-      <div className="flex flex-col items-center mb-2">
-        <div className="w-20 h-20 rounded-full bg-accent/10 flex items-center justify-center mb-4">
-          <Link2 className="w-10 h-10 text-accent" />
-        </div>
-        <h3 className="font-semibold text-lg text-center">输入认领码</h3>
-        <p className="text-sm text-muted-foreground text-center mt-1">
-          输入 AI 助手提供的认领码
-        </p>
-      </div>
-
-      <div className="space-y-2">
-        <div>
-          <Input
-            value={code}
-            onChange={(e) => {
-              setCode(e.target.value.toUpperCase());
-              setError('');
-            }}
-            placeholder="CAW-XXXXX"
-            className="h-12 font-mono text-sm tracking-wider text-center"
-            maxLength={9}
-          />
-        </div>
-        {error && (
-          <div className="flex items-center gap-1.5 text-destructive text-xs">
-            <AlertTriangle className="w-3.5 h-3.5" />
-            {error}
-          </div>
-        )}
-        <ClaimCodeHelp />
-      </div>
-
-      <Button
-        onClick={handleValidate}
-        disabled={!code.trim() || isValidating}
-        className="w-full gradient-primary"
-        size="lg"
-      >
-        {isValidating ? '验证中...' : '验证认领码'}
-      </Button>
-    </motion.div>
-  );
-}
 
 // ─── Step 2: Confirm Claim ─────────────────────────────────
 function ConfirmClaimStep({

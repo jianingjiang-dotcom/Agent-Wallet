@@ -203,7 +203,7 @@ export const AssistantView = forwardRef<AssistantViewHandle, AssistantViewProps>
       '你好': '你好！我是你的智能钱包助手 🤖\n\n我可以帮你：\n- 查询钱包余额和资产\n- 发起转账和收款\n- 查看交易记录\n- 管理钱包安全设置\n\n请问有什么可以帮你的？',
       '余额': '根据当前钱包数据，你的资产概况如下：\n\n**USDT** — 12,500.00 USDT（≈ $12,500）\n**ETH** — 3.25 ETH（≈ $6,175）\n**BTC** — 0.15 BTC（≈ $9,450）\n\n总资产约 **$28,125**。如需查看更多详情，可以前往钱包页面。',
       '转账': '好的，请提供以下信息来发起转账：\n\n1. **收款地址** — 对方的钱包地址\n2. **转账金额** — 如 100 USDT\n3. **网络** — 如 Ethereum、Tron 等\n\n或者你可以直接前往转账页面操作。需要我引导你去转账页面吗？',
-      '创建': '## 如何让 AI Agent 创建钱包\n\nCobo Agentic Wallet 的钱包由 AI Agent 通过 CLI 工具创建。以下是完整步骤：\n\n### 1. 安装 CLI 工具\n\n让您的 AI Agent 安装 `cobo-agentic-wallet` skill，Agent 会自动下载 `caw` CLI 工具。\n\n### 2. 创建钱包\n\nAgent 执行以下命令即可创建钱包：\n\n```bash\ncaw onboard\n```\n\n此命令会自动创建 Principal、TSS Node 和钱包，**无需任何账号注册**。\n\n### 3. 获取认领码\n\n钱包创建后，Agent 执行：\n\n```bash\ncaw claim\n```\n\n将生成一个格式为 `CAW-XXXXX` 的认领码（30 分钟有效）。\n\n### 4. 在 App 中认领\n\n回到本 App，点击「认领钱包」，输入认领码即可接管钱包控制权。认领后：\n\n- **您** 成为钱包的 Owner，拥有完全控制权\n- **Agent** 自动成为 Delegate，在您设定的规则内自主执行操作\n- 手机会生成专属的 MPC 密钥分片，保障资产安全\n\n---\n\n💡 **提示**：如果您的 Agent 已经创建好钱包并提供了认领码，可以直接返回钱包页面点击「认领钱包」开始认领。',
+      '创建': '## 如何让 AI Agent 创建钱包\n\nCobo Agentic Wallet 的钱包由 AI Agent 通过 CLI 工具创建。以下是完整步骤：\n\n### 1. 安装 CLI 工具\n\n让您的 AI Agent 安装 `cobo-agentic-wallet` skill，Agent 会自动下载 `caw` CLI 工具。\n\n### 2. 创建钱包\n\nAgent 执行以下命令即可创建钱包：\n\n```bash\ncaw onboard\n```\n\n此命令会自动创建 Principal、TSS Node 和钱包，**无需任何账号注册**。\n\n### 3. 获取配对口令\n\n钱包创建后，Agent 执行：\n\n```bash\ncaw claim\n```\n\n将生成一个 8 位数字的配对口令（30 分钟有效）。\n\n### 4. 在 App 中配对\n\n回到本 App，在欢迎页输入配对口令即可接管钱包控制权。配对后：\n\n- **您** 拥有钱包的完全控制权\n- **Agent** 在您设定的规则内自主执行操作\n- 手机会生成专属的 MPC 密钥分片，保障资产安全',
     };
 
     const getDefaultResponse = (input: string) => {

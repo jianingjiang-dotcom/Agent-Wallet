@@ -137,7 +137,7 @@ export default function WalletManagementPage() {
                   <EmptyState
                     icon={Wallet}
                     title="暂无钱包"
-                    description="使用认领码接管 Agent 创建的钱包"
+                    description="使用配对口令接管 Agent 创建的钱包"
                     action={{
                       label: '认领钱包',
                       icon: Plus,
