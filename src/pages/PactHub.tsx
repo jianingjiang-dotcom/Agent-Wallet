@@ -69,8 +69,6 @@ export default function PactHub() {
             <PendingCarousel
               pacts={pendingPacts}
               onTap={(id) => navigate(`/pact/${id}`)}
-              onApprove={handleApproveConfirm}
-              onReject={handleRejectConfirm}
             />
           </div>
         )}
@@ -137,22 +135,12 @@ export default function PactHub() {
 
 // ─── Pending Carousel (horizontal swipe) ────────────────────
 function PendingCarousel({
-  pacts, onTap, onApprove, onReject,
+  pacts, onTap,
 }: {
   pacts: Pact[];
   onTap: (id: string) => void;
-  onApprove: (id: string) => void;
-  onReject: (id: string) => void;
 }) {
   const [activeIndex, setActiveIndex] = useState(0);
-  const [confirmAction, setConfirmAction] = useState<{ action: 'approve' | 'reject'; pact: Pact } | null>(null);
-
-  const handleConfirm = () => {
-    if (!confirmAction) return;
-    if (confirmAction.action === 'approve') onApprove(confirmAction.pact.id);
-    else onReject(confirmAction.pact.id);
-    setConfirmAction(null);
-  };
 
   return (
     <div>
@@ -166,74 +154,29 @@ function PendingCarousel({
           setActiveIndex(Math.min(Math.round(el.scrollLeft / (cardW + 12)), pacts.length - 1));
         }}
       >
-        {pacts.map((pact) => {
-          const remainingMs = pact.createdAt.getTime() + 60 * 60 * 1000 - Date.now();
-          const remainingMin = Math.floor(remainingMs / 60000);
-          const isExpired = remainingMin <= 0;
-          const isUrgent = !isExpired && remainingMin <= 10;
-
-          return (
-            <div key={pact.id} className="snap-start shrink-0" style={{ width: 'calc(100% - 32px)' }}>
-              <div
-                onClick={() => onTap(pact.id)}
-                className={cn(
-                  'rounded-2xl p-4 border shadow-sm cursor-pointer active:scale-[0.98] transition-transform',
-                  isExpired ? 'bg-muted/50 border-border/40 opacity-75' : 'bg-card border-border/60',
-                )}
-              >
-                <div className="flex items-start justify-between gap-3 mb-2">
-                  <div className="flex-1 min-w-0">
-                    <span className={cn(
-                      'text-[11px] font-medium px-2 py-0.5 rounded-full inline-block mb-1',
-                      isExpired
-                        ? 'bg-muted text-muted-foreground'
-                        : 'bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400',
-                    )}>
-                      {isExpired ? '已过期' : '待审批'}
-                    </span>
-                    <h3 className={cn('text-[15px] font-semibold leading-snug', isExpired ? 'text-muted-foreground' : 'text-foreground')}>{pact.title}</h3>
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0 mt-1" strokeWidth={1.5} />
+        {pacts.map((pact) => (
+          <div key={pact.id} className="snap-start shrink-0" style={{ width: 'calc(100% - 32px)' }}>
+            <div
+              onClick={() => onTap(pact.id)}
+              className="bg-card rounded-2xl p-4 border border-border/60 shadow-sm cursor-pointer active:scale-[0.98] transition-transform"
+            >
+              <div className="flex items-start justify-between gap-3 mb-2">
+                <div className="flex-1 min-w-0">
+                  <span className="text-[11px] font-medium px-2 py-0.5 rounded-full inline-block mb-1 bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400">
+                    待审批
+                  </span>
+                  <h3 className="text-[15px] font-semibold text-foreground leading-snug">{pact.title}</h3>
                 </div>
-                <p className="text-[13px] text-muted-foreground leading-relaxed line-clamp-2 mb-3">{pact.description}</p>
-                <div className="flex items-center gap-4 text-[12px] text-muted-foreground">
-                  <div className="flex items-center gap-1"><Bot className="w-3.5 h-3.5" strokeWidth={1.5} /><span>{pact.agentName}</span></div>
-                  <div className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" strokeWidth={1.5} /><span>有效 {pact.validityDays} 天</span></div>
-                </div>
-
-                {/* Countdown / expired status */}
-                <div className={cn(
-                  'mt-2 text-[11px] font-medium flex items-center gap-1',
-                  isExpired ? 'text-muted-foreground mb-2' : isUrgent ? 'text-red-500 mb-4 animate-pulse' : 'text-red-500 mb-4',
-                )}>
-                  <Clock className="w-3 h-3" strokeWidth={1.5} />
-                  {isExpired ? '审批已超时' : `审批剩余 ${remainingMin} 分钟`}
-                </div>
-
-                {/* Actions — only show for non-expired */}
-                {!isExpired ? (
-                  <div className="flex gap-2.5">
-                    <button
-                      onClick={(e) => { e.stopPropagation(); setConfirmAction({ action: 'reject', pact }); }}
-                      className="flex-1 py-2.5 rounded-xl border-[1.5px] border-red-400 text-red-500 text-[14px] font-semibold active:bg-red-50 transition-colors"
-                    >拒绝</button>
-                    <button
-                      onClick={(e) => { e.stopPropagation(); setConfirmAction({ action: 'approve', pact }); }}
-                      className="flex-[2] py-2.5 rounded-xl bg-primary text-white text-[14px] font-semibold shadow-md shadow-primary/30 active:opacity-85 transition-opacity"
-                    >通过</button>
-                  </div>
-                ) : (
-                  <button
-                    onClick={(e) => { e.stopPropagation(); onReject(pact.id); }}
-                    className="w-full py-2.5 text-center text-[13px] text-muted-foreground font-medium rounded-xl bg-muted/50 active:bg-muted transition-colors"
-                  >
-                    已超时，点击移除
-                  </button>
-                )}
+                <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0 mt-1" strokeWidth={1.5} />
+              </div>
+              <p className="text-[13px] text-muted-foreground leading-relaxed line-clamp-2 mb-3">{pact.description}</p>
+              <div className="flex items-center gap-4 text-[12px] text-muted-foreground">
+                <div className="flex items-center gap-1"><Bot className="w-3.5 h-3.5" strokeWidth={1.5} /><span>{pact.agentName}</span></div>
+                <div className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" strokeWidth={1.5} /><span>有效 {pact.validityDays} 天</span></div>
               </div>
             </div>
-          );
-        })}
+          </div>
+        ))}
       </div>
 
       {/* Dots */}
@@ -245,36 +188,6 @@ function PendingCarousel({
         </div>
       )}
 
-      {/* Confirm Drawer */}
-      <Drawer open={confirmAction !== null} onOpenChange={(open) => { if (!open) setConfirmAction(null); }}>
-        <DrawerContent>
-          {confirmAction && (
-            <div className="px-4 pt-2 pb-6">
-              <h3 className="text-[17px] font-bold text-foreground text-center mb-2">
-                {confirmAction.action === 'approve' ? '确认通过此 Pact？' : '确认拒绝此 Pact？'}
-              </h3>
-              <p className="text-sm text-muted-foreground text-center mb-2">{confirmAction.pact.title}</p>
-              <p className="text-xs text-muted-foreground text-center mb-6">
-                {confirmAction.action === 'approve'
-                  ? '通过后，Agent 将获得相应权限并可立即开始执行策略。'
-                  : '拒绝后，Agent 将无法执行此策略。如需重新申请，需提交新的 Pact。'}
-              </p>
-              <div className="flex gap-3">
-                <Button variant="outline" className="flex-1" onClick={() => setConfirmAction(null)}>取消</Button>
-                <Button
-                  className={cn('flex-1', confirmAction.action === 'reject' && 'bg-red-500 hover:bg-red-600')}
-                  onClick={handleConfirm}
-                >
-                  {confirmAction.action === 'approve'
-                    ? <><CheckCircle2 className="w-4 h-4 mr-1.5" />确认通过</>
-                    : <><XCircle className="w-4 h-4 mr-1.5" />确认拒绝</>
-                  }
-                </Button>
-              </div>
-            </div>
-          )}
-        </DrawerContent>
-      </Drawer>
     </div>
   );
 }

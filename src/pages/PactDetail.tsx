@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Bot, Clock, ChevronDown, Shield, FileText, AlertTriangle,
   CheckCircle2, XCircle, Zap, Calendar, LogOut, ShieldOff,
-  Pencil, Eye, Sparkles, Wallet, Timer,
+  Pencil, Eye, Sparkles, Wallet,
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
@@ -64,15 +64,6 @@ export default function PactDetail() {
     rejected: { label: t.common.rejected, color: 'text-red-600', bg: 'bg-red-50', icon: XCircle },
     expired: { label: t.common.expired, color: 'text-muted-foreground', bg: 'bg-muted/50', icon: Clock },
   };
-
-  // Mock approval countdown for pending pacts (1 hour from creation)
-  const approvalDeadline = useMemo(() => {
-    if (!pact || pact.status !== 'pending') return null;
-    const deadline = new Date(pact.createdAt.getTime() + 60 * 60 * 1000);
-    const remaining = Math.max(0, deadline.getTime() - Date.now());
-    const minutes = Math.floor(remaining / 60000);
-    return minutes > 0 ? `${minutes} 分钟` : '即将过期';
-  }, [pact]);
 
   if (!pact) {
     return (
@@ -163,12 +154,6 @@ export default function PactDetail() {
               <span className={cn('text-[12px] font-medium px-2 py-0.5 rounded-full', status.color, status.bg)}>
                 {status.label}
               </span>
-              {isPending && approvalDeadline && (
-                <span className="ml-auto text-[11px] text-red-500 flex items-center gap-1 font-medium">
-                  <Timer className="w-3 h-3" strokeWidth={1.5} />
-                  剩余 {approvalDeadline}
-                </span>
-              )}
             </div>
 
             <h2 className="text-[17px] font-bold text-foreground leading-snug mb-2">{pact.title}</h2>
