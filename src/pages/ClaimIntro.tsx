@@ -45,7 +45,7 @@ export default function ClaimIntro() {
     <AppLayout showNav={false} showSecurityBanner={false}>
       <div className="h-full flex flex-col px-6">
         {/* Top section */}
-        <div className="flex-1 flex flex-col justify-center">
+        <div className="flex-1 flex flex-col pt-[25%]">
           {/* Brand + Welcome */}
           <motion.div
             initial={{ opacity: 0, y: -10 }}
@@ -103,6 +103,47 @@ export default function ClaimIntro() {
                 {error}
               </motion.div>
             )}
+
+            {/* Help section — below OTP input */}
+            <div className="mt-4 w-full flex flex-col items-center">
+              <button
+                className="inline-flex items-center gap-1 text-xs text-primary py-1"
+                onClick={() => setShowHelp(!showHelp)}
+              >
+                <HelpCircle className="w-3.5 h-3.5" />
+                还没有配对口令？
+                <motion.div animate={{ rotate: showHelp ? 180 : 0 }} transition={{ duration: 0.2 }}>
+                  <ChevronDown className="w-3.5 h-3.5" />
+                </motion.div>
+              </button>
+              <AnimatePresence>
+                {showHelp && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="overflow-hidden"
+                  >
+                    <div className="mt-2 p-3 bg-muted/50 rounded-xl text-xs leading-relaxed space-y-2 text-left">
+                      <p className="font-medium text-foreground">在 Agent 环境执行以下指令</p>
+                      <div className="relative">
+                        <pre className="bg-background rounded-lg p-2.5 pr-9 text-[11px] font-mono text-foreground overflow-x-auto whitespace-pre-wrap break-all leading-relaxed">npx skills add cobosteven/cobo-agent-wallet-manual --skill cobo-agentic-wallet-sandbox --yes --global</pre>
+                        <button
+                          onClick={() => {
+                            navigator.clipboard.writeText('npx skills add cobosteven/cobo-agent-wallet-manual --skill cobo-agentic-wallet-sandbox --yes --global');
+                            toast.success('已复制');
+                          }}
+                          className="absolute right-1.5 top-1.5 p-1 rounded text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                          <Copy className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </motion.div>
         </div>
 
@@ -130,47 +171,6 @@ export default function ClaimIntro() {
           >
             先看看
           </button>
-
-          {/* Help section */}
-          <div className="pt-1">
-            <button
-              className="w-full flex items-center justify-center gap-1 text-xs text-primary py-1"
-              onClick={() => setShowHelp(!showHelp)}
-            >
-              <HelpCircle className="w-3.5 h-3.5" />
-              还没有配对口令？
-              <motion.div animate={{ rotate: showHelp ? 180 : 0 }} transition={{ duration: 0.2 }}>
-                <ChevronDown className="w-3.5 h-3.5" />
-              </motion.div>
-            </button>
-            <AnimatePresence>
-              {showHelp && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: 'auto', opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.2 }}
-                  className="overflow-hidden"
-                >
-                  <div className="mt-2 p-3 bg-muted/50 rounded-xl text-xs leading-relaxed space-y-2">
-                    <p className="font-medium text-foreground">在 Agent 环境执行以下指令</p>
-                    <div className="relative">
-                      <pre className="bg-background rounded-lg p-2.5 pr-9 text-[11px] font-mono text-foreground overflow-x-auto whitespace-pre-wrap break-all leading-relaxed">npx skills add cobosteven/cobo-agent-wallet-manual --skill cobo-agentic-wallet-sandbox --yes --global</pre>
-                      <button
-                        onClick={() => {
-                          navigator.clipboard.writeText('npx skills add cobosteven/cobo-agent-wallet-manual --skill cobo-agentic-wallet-sandbox --yes --global');
-                          toast.success('已复制');
-                        }}
-                        className="absolute right-1.5 top-1.5 p-1 rounded text-muted-foreground hover:text-foreground transition-colors"
-                      >
-                        <Copy className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
         </motion.div>
       </div>
     </AppLayout>
