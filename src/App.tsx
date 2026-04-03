@@ -65,6 +65,10 @@ import ComponentDemo from "./pages/ComponentDemo";
 import Mine from "./pages/Mine";
 import TransactionHashDetail from "./pages/TransactionHashDetail";
 import TssSigning from "./pages/TssSigning";
+import PactHub from "./pages/PactHub";
+import PactApproval from "./pages/PactApproval";
+import PactDetail from "./pages/PactDetail";
+import DefaultPactManagement from "./pages/DefaultPactManagement";
 
 const queryClient = new QueryClient();
 
@@ -84,7 +88,7 @@ function ProtectedRoute({ children, bypassAuth = false }: { children: React.Reac
   return <>{children}</>;
 }
 
-const TAB_PATHS = ['/home', '/assistant', '/history', '/mine', '/profile'];
+const TAB_PATHS = ['/home', '/assistant', '/pact', '/history', '/mine', '/profile'];
 type NavMode = 'tab' | 'push' | 'pop';
 
 const slideTransition = { type: 'tween', duration: 0.28, ease: [0.25, 0.46, 0.45, 0.94] };
@@ -131,6 +135,7 @@ function AppRoutes() {
       <Route path="/receive" element={<ProtectedRoute><Receive /></ProtectedRoute>} />
       <Route path="/asset/:symbol" element={<ProtectedRoute><AssetDetail /></ProtectedRoute>} />
       <Route path="/history" element={<ProtectedRoute><History /></ProtectedRoute>} />
+      <Route path="/pact" element={<ProtectedRoute bypassAuth><PactHub /></ProtectedRoute>} />
       <Route path="/mine" element={<ProtectedRoute><Mine /></ProtectedRoute>} />
       <Route path="/transaction/:id" element={<ProtectedRoute><TransactionDetail /></ProtectedRoute>} />
       <Route path="/tx-hash/:hash" element={<ProtectedRoute bypassAuth><TransactionHashDetail /></ProtectedRoute>} />
@@ -162,6 +167,9 @@ function AppRoutes() {
       <Route path="/agent-settings" element={<ProtectedRoute><AgentSettings /></ProtectedRoute>} />
       <Route path="/settlement-dashboard" element={<ProtectedRoute bypassAuth><SettlementDashboard /></ProtectedRoute>} />
       <Route path="/audit-log" element={<ProtectedRoute><AuditLog /></ProtectedRoute>} />
+      <Route path="/pact-approval" element={<ProtectedRoute bypassAuth><PactApproval /></ProtectedRoute>} />
+      <Route path="/pact/:id" element={<ProtectedRoute bypassAuth><PactDetail /></ProtectedRoute>} />
+      <Route path="/default-pact" element={<ProtectedRoute bypassAuth><DefaultPactManagement /></ProtectedRoute>} />
       <Route path="/messages" element={<ProtectedRoute bypassAuth><MessageCenter /></ProtectedRoute>} />
       <Route path="/messages/:type" element={<ProtectedRoute bypassAuth><MessageCategoryPage /></ProtectedRoute>} />
       <Route path="/wallet/recovery" element={<WalletRecovery />} />

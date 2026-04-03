@@ -146,7 +146,7 @@ export default function AgentSettings() {
   // No agents available
   if (availableAgents.length === 0) {
     return (
-      <AppLayout title="Agent 风控管理" showBack>
+      <AppLayout title="Agent 风控管理" showBack showNav showSecurityBanner={false}>
         <div className="p-8 text-center">
           <Bot className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
           <p className="text-sm text-muted-foreground">暂无可管理的 Agent</p>
@@ -159,14 +159,14 @@ export default function AgentSettings() {
   // Selected agent not found (fallback)
   if (!selectedAgent || !config) {
     return (
-      <AppLayout title="Agent 风控管理" showBack>
+      <AppLayout title="Agent 风控管理" showBack showNav showSecurityBanner={false}>
         <div className="p-8 text-center text-muted-foreground">未找到 Agent 配置</div>
       </AppLayout>
     );
   }
 
   return (
-    <AppLayout title="Agent 风控管理" showBack>
+    <AppLayout title="Agent 风控管理" showBack showNav showSecurityBanner={false}>
       <div className="px-4 py-4 space-y-4">
 
         {/* ── 1. Agent Selector ──────────────────────────────── */}

@@ -1,8 +1,10 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
+import { useT } from '@/lib/i18n';
+import { mockPacts } from '@/lib/mock-pacts';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Eye, EyeOff, ChevronRight, Send, QrCode,
-  TrendingDown, Wallet, Plus, Shield, AlertTriangle,
+  TrendingDown, Wallet, Plus, Shield, ShieldCheck, AlertTriangle,
   CheckCircle2, Sparkles, Lock, ChevronDown, Clock, Bell, Bot, ClipboardCheck,
   LayoutGrid
 } from 'lucide-react';
@@ -33,6 +35,7 @@ import { getChainShortName } from '@/lib/chain-utils';
 // Empty state component when no wallet exists - guides user to create first wallet
 function EmptyWalletState() {
   const navigate = useNavigate();
+  const t = useT();
 
   return (
     <AppLayout showNav={false}>
@@ -54,13 +57,13 @@ function EmptyWalletState() {
           </motion.div>
 
           <h1 className="text-xl font-bold text-foreground mb-2">
-            开始创建您的钱包
+            {t.home.createWalletTitle}
           </h1>
           <p className="text-muted-foreground text-sm mb-1">
-            只需 1 分钟完成安全设置
+            {t.home.createWalletSubtitle}
           </p>
           <p className="text-xs text-muted-foreground mb-8">
-            您的资产由多重签名技术保护，安全可靠
+            {t.home.createWalletSecurity}
           </p>
 
           {/* Feature highlights */}
@@ -75,8 +78,8 @@ function EmptyWalletState() {
                 <Shield className="w-5 h-5 text-success" />
               </div>
               <div className="text-left">
-                <p className="font-medium text-foreground text-sm">银行级安全</p>
-                <p className="text-xs text-muted-foreground">MPC 多重签名保护</p>
+                <p className="font-medium text-foreground text-sm">{t.home.bankGradeSecurity}</p>
+                <p className="text-xs text-muted-foreground">{t.home.bankGradeSecurityDesc}</p>
               </div>
             </motion.div>
 
@@ -90,8 +93,8 @@ function EmptyWalletState() {
                 <Lock className="w-5 h-5 text-accent" />
               </div>
               <div className="text-left">
-                <p className="font-medium text-foreground text-sm">完全掌控</p>
-                <p className="text-xs text-muted-foreground">只有您能控制资产</p>
+                <p className="font-medium text-foreground text-sm">{t.home.fullControl}</p>
+                <p className="text-xs text-muted-foreground">{t.home.fullControlDesc}</p>
               </div>
             </motion.div>
 
@@ -105,8 +108,8 @@ function EmptyWalletState() {
                 <Sparkles className="w-5 h-5 text-warning" />
               </div>
               <div className="text-left">
-                <p className="font-medium text-foreground text-sm">可恢复</p>
-                <p className="text-xs text-muted-foreground">换机丢机不丢资产</p>
+                <p className="font-medium text-foreground text-sm">{t.home.recoverable}</p>
+                <p className="text-xs text-muted-foreground">{t.home.recoverableDesc}</p>
               </div>
             </motion.div>
           </div>
@@ -122,15 +125,15 @@ function EmptyWalletState() {
               className="w-full text-base gradient-primary"
               onClick={() => navigate('/onboarding')}
             >
-              创建钱包
+              {t.home.createWallet}
             </Button>
             <p className="text-xs text-muted-foreground">
-              已有备份？
+              {t.home.haveBackup}
               <button 
                 className="text-primary ml-1"
                 onClick={() => navigate('/onboarding?recover=true')}
               >
-                恢复钱包
+                {t.home.recoverWallet}
               </button>
             </p>
           </motion.div>
@@ -156,6 +159,7 @@ function maskEmail(email: string) {
 }
 
 export default function HomePage() {
+  const t = useT();
   const [hideBalance, setHideBalance] = useState(false);
   const [selectedChain, setSelectedChain] = useState<ChainId>('all');
   const [addressSelection, setAddressSelection] = useState<AddressSelection>({ mode: 'all' });
@@ -199,21 +203,21 @@ export default function HomePage() {
     token.networks.forEach(network => {
       addToken(token.symbol, token.name, network, token.price, token.change24h);
     });
-    toast.success(`已添加 ${token.symbol} (${token.networks.length} 个网络)`);
+    toast.success(t.home.tokenAdded.replace('{symbol}', token.symbol).replace('{count}', String(token.networks.length)));
   };
 
   // Handle removing token from all networks
   const handleRemoveToken = (symbol: string) => {
     removeToken(symbol);
-    toast.success(`已删除 ${symbol}`);
+    toast.success(t.home.tokenRemoved.replace('{symbol}', symbol));
   };
 
   // Pull to refresh handler
   const handleRefresh = useCallback(async () => {
     // Simulate API call to refresh balances
     await new Promise(resolve => setTimeout(resolve, 1500));
-    toast.success('余额已刷新');
-  }, []);
+    toast.success(t.home.balanceRefreshed);
+  }, [t]);
 
   // Address selection change handler — resets chain filter
   const handleAddressChange = useCallback((sel: AddressSelection) => {
@@ -290,11 +294,11 @@ export default function HomePage() {
       const dateKey = txDate.toDateString();
       
       if (txDate.toDateString() === today.toDateString()) {
-        dateLabel = '今天';
+        dateLabel = t.common.today;
       } else if (txDate.toDateString() === yesterday.toDateString()) {
-        dateLabel = '昨天';
+        dateLabel = t.common.yesterday;
       } else {
-        dateLabel = `${txDate.getMonth() + 1}月${txDate.getDate()}日`;
+        dateLabel = txDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
       }
       
       const existingGroup = groups.find(g => g.date === dateKey);
@@ -306,7 +310,7 @@ export default function HomePage() {
     });
     
     return groups;
-  }, [filteredTransactions]);
+  }, [filteredTransactions, t]);
 
   const hasMoreTransactions = filteredTransactions.length > 5;
 
@@ -314,6 +318,9 @@ export default function HomePage() {
   const walletPendingCount = useMemo(() => {
     return agentTransactions.filter(tx => tx.status === 'pending_approval').length;
   }, [agentTransactions]);
+
+  const pactPendingCount = useMemo(() => mockPacts.filter(p => p.status === 'pending').length, []);
+  const pactActiveCount = useMemo(() => mockPacts.filter(p => p.status === 'active' || p.status === 'approved').length, []);
 
   const balanceParts = formatBalanceParts(totalBalance);
 
@@ -351,11 +358,11 @@ export default function HomePage() {
           </motion.div>
           <div className="text-left">
             <p className="text-xs text-muted-foreground">
-              当前钱包
+              {t.home.currentWallet}
             </p>
             <div className="flex items-center gap-1">
               <p className="font-semibold text-foreground text-sm">
-                {currentWallet?.name || '我的钱包'}
+                {currentWallet?.name || t.home.myWallet}
               </p>
               {isAgentLinked(currentWallet) && (
                 <span className="text-[10px] px-1.5 py-0.5 bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded ml-1">
@@ -418,7 +425,7 @@ export default function HomePage() {
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-primary-foreground/70">
-                    总资产
+                    {t.home.totalAssets}
                   </span>
                   <button onClick={() => setHideBalance(!hideBalance)}>
                     {hideBalance ? (
@@ -455,14 +462,14 @@ export default function HomePage() {
                   ) : (
                     <Send className="w-4 h-4 mr-2" strokeWidth={1.5} />
                   )}
-                  {isAgentLinked(currentWallet) ? '请求Agent执行' : '转账'}
+                  {isAgentLinked(currentWallet) ? t.home.requestAgent : t.home.send}
                 </Button>
                 <Button
                   className="flex-1 h-10 bg-white/10 backdrop-blur-sm text-white/90 border border-white/15 transition-colors"
                   onClick={() => navigate('/receive')}
                 >
                   <QrCode className="w-4 h-4 mr-2" strokeWidth={1.5} />
-                  收款
+                  {t.home.receive}
                 </Button>
               </div>
             </div>
@@ -476,57 +483,57 @@ export default function HomePage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.15 }}
             onClick={() => navigate('/agent-review')}
-            className={cn(
-              "w-full p-3 rounded-xl mb-4 flex items-center gap-3 active:scale-[0.98] transition-transform border",
-              isAgentLinked(currentWallet)
-                ? "bg-purple-50 dark:bg-purple-900/20 border-purple-200/50 dark:border-purple-800/50"
-                : "bg-blue-50 dark:bg-blue-900/20 border-blue-200/50 dark:border-blue-800/50"
-            )}
+            className="w-full p-3.5 rounded-2xl mb-3 flex items-center gap-3 active:scale-[0.98] transition-transform bg-white border border-border/60 shadow-sm"
           >
-            <div className={cn(
-              "w-9 h-9 rounded-full flex items-center justify-center shrink-0",
-              isAgentLinked(currentWallet)
-                ? "bg-purple-100 dark:bg-purple-800/40"
-                : "bg-blue-100 dark:bg-blue-800/40"
-            )}>
-              {isAgentLinked(currentWallet) ? (
-                <Bot className="w-4.5 h-4.5 text-purple-600 dark:text-purple-400" />
-              ) : (
-                <ClipboardCheck className="w-4.5 h-4.5 text-blue-600 dark:text-blue-400" />
-              )}
+            <div className="w-9 h-9 rounded-full bg-amber-50 flex items-center justify-center shrink-0">
+              <ClipboardCheck className="w-4 h-4 text-amber-600" strokeWidth={1.5} />
             </div>
             <div className="flex-1 text-left min-w-0">
               <div className="flex items-center gap-2">
-                <span className={cn(
-                  "text-sm font-medium",
-                  isAgentLinked(currentWallet)
-                    ? "text-purple-700 dark:text-purple-300"
-                    : "text-blue-700 dark:text-blue-300"
-                )}>
-                  {isAgentLinked(currentWallet) ? 'Agent 待审批' : 'Agent 待审批'}
-                </span>
-                <span className={cn(
-                  "min-w-5 h-5 px-1.5 rounded-full text-[11px] font-bold flex items-center justify-center",
-                  isAgentLinked(currentWallet)
-                    ? "bg-purple-500 text-white"
-                    : "bg-blue-500 text-white"
-                )}>
-                  {walletPendingCount}
-                </span>
+                <span className="text-[14px] font-medium text-foreground">{t.home.agentPending}</span>
+                {walletPendingCount > 0 && (
+                  <span className="min-w-4 h-4 px-1 rounded-full bg-red-500 text-white text-[9px] font-bold flex items-center justify-center">
+                    {walletPendingCount}
+                  </span>
+                )}
               </div>
-              <p className="text-xs text-muted-foreground truncate">
+              <p className="text-[12px] text-muted-foreground truncate">
                 {isAgentLinked(currentWallet)
-                  ? `${currentWallet?.agentInfo?.agentName || 'Agent'} 提交了 ${walletPendingCount} 笔交易请求`
-                  : `通过 Agent 提交的交易请求待审核`
+                  ? t.home.agentPendingDesc.replace('{agent}', currentWallet?.agentInfo?.agentName || 'Agent').replace('{count}', String(walletPendingCount))
+                  : t.home.agentPendingDescGeneric
                 }
               </p>
             </div>
-            <ChevronRight className={cn(
-              "w-4 h-4 shrink-0",
-              isAgentLinked(currentWallet)
-                ? "text-purple-400"
-                : "text-blue-400"
-            )} />
+            <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" strokeWidth={1.5} />
+          </motion.button>
+        )}
+
+        {/* Pact Summary Card */}
+        {!isLoading && (
+          <motion.button
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.18 }}
+            onClick={() => navigate('/pact')}
+            className="w-full p-3.5 rounded-2xl mb-3 flex items-center gap-3 active:scale-[0.98] transition-transform bg-white border border-border/60 shadow-sm"
+          >
+            <div className="w-9 h-9 rounded-full bg-blue-50 flex items-center justify-center shrink-0">
+              <ShieldCheck className="w-4 h-4 text-blue-600" strokeWidth={1.5} />
+            </div>
+            <div className="flex-1 text-left min-w-0">
+              <div className="flex items-center gap-2">
+                <span className="text-[14px] font-medium text-foreground">{t.home.pact}</span>
+                {pactPendingCount > 0 && (
+                  <span className="min-w-4 h-4 px-1 rounded-full bg-red-500 text-white text-[9px] font-bold flex items-center justify-center">
+                    {pactPendingCount}
+                  </span>
+                )}
+              </div>
+              <p className="text-[12px] text-muted-foreground truncate">
+                {t.home.pactDesc}
+              </p>
+            </div>
+            <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" strokeWidth={1.5} />
           </motion.button>
         )}
 
@@ -538,7 +545,7 @@ export default function HomePage() {
           className="mb-4"
         >
           <div className="flex items-center justify-between mb-2">
-            <h2 className="font-semibold text-foreground text-sm">资产</h2>
+            <h2 className="font-semibold text-foreground text-sm">{t.home.assets}</h2>
             <Button 
               variant="ghost" 
               size="sm" 
@@ -546,7 +553,7 @@ export default function HomePage() {
               onClick={() => setShowTokenSearch(true)}
             >
               <Plus className="w-3.5 h-3.5" />
-              添加代币
+              {t.home.addToken}
             </Button>
           </div>
 
@@ -555,10 +562,10 @@ export default function HomePage() {
           ) : displayAssets.length === 0 ? (
             <EmptyState
               icon={Wallet}
-              title="暂无资产"
-              description="添加代币开始管理您的资产"
+              title={t.home.noAssets}
+              description={t.home.noAssetsDesc}
               action={{
-                label: '添加代币',
+                label: t.home.addToken,
                 icon: Plus,
                 onClick: () => setShowTokenSearch(true),
               }}
@@ -589,7 +596,7 @@ export default function HomePage() {
                         <p className="text-xs text-muted-foreground">
                           {asset.name}
                           {asset.addressCount > 1 && (
-                            <span className="ml-1 text-accent">· {asset.addressCount} 个地址</span>
+                            <span className="ml-1 text-accent">· {asset.addressCount} {t.home.addresses}</span>
                           )}
                         </p>
                       </div>
@@ -622,7 +629,7 @@ export default function HomePage() {
                   >
                     <ChevronDown className="w-4 h-4" />
                   </motion.div>
-                  {showAllAssets ? '收起' : '展开全部'}
+                  {showAllAssets ? t.common.collapse : t.common.expandAll}
                 </motion.button>
               )}
             </div>
@@ -636,7 +643,7 @@ export default function HomePage() {
           transition={{ delay: 0.3 }}
         >
           <div className="flex items-center justify-between mb-2">
-            <h2 className="font-semibold text-foreground text-sm">最近交易</h2>
+            <h2 className="font-semibold text-foreground text-sm">{t.home.recentTransactions}</h2>
           </div>
 
           {isLoading ? (
@@ -644,8 +651,8 @@ export default function HomePage() {
           ) : groupedTransactions.length === 0 ? (
             <EmptyState
               icon={Send}
-              title="暂无交易记录"
-              description="您的交易记录将在此显示"
+              title={t.home.noTransactions}
+              description={t.home.noTransactionsDesc}
             />
           ) : (
             <div className="space-y-3">
@@ -678,7 +685,7 @@ export default function HomePage() {
                           </div>
                           <div className="min-w-0">
                             <p className="font-medium text-foreground text-sm">
-                              {tx.type === 'receive' ? '转入' : '转出'}
+                              {tx.type === 'receive' ? t.home.transferIn : t.home.transferOut}
                             </p>
                             <div className="flex items-center gap-1">
                               <span className="text-xs text-muted-foreground truncate max-w-[100px]">
@@ -727,7 +734,7 @@ export default function HomePage() {
                   onClick={() => navigate('/history')}
                   className="w-full py-3 flex items-center justify-center gap-1 text-sm text-muted-foreground transition-colors rounded-xl"
                 >
-                  查看全部
+                  {t.common.viewAll}
                   <ChevronRight className="w-4 h-4" />
                 </motion.button>
               )}
