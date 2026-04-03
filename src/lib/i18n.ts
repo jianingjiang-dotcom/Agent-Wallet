@@ -86,8 +86,8 @@ const zh_CN = {
     title: 'Pact',
     pending: '待审批',
     active: '执行中',
-    pactApproval: '审批请求',
-    pactApprovalDesc: '查看并审批 Agent 提交的请求',
+    pactApproval: 'Pact 记录',
+    pactApprovalDesc: '查看所有 Pact 的历史记录',
     defaultPactManagement: '默认规则',
     defaultPactManagementDesc: '设置 Agent 的交易限额和安全规则',
     pendingPacts: '待审批 Pact',
@@ -99,13 +99,13 @@ const zh_CN = {
   },
 
   pactApproval: {
-    title: 'Pact 审批',
+    title: 'Pact 记录',
     all: '全部',
     pending: '待审批',
     approved: '已通过',
     rejected: '已拒绝',
     expired: '已过期',
-    noRecords: '暂无审批记录',
+    noRecords: '暂无 Pact 记录',
     validity: '有效 {days} 天',
   },
 
@@ -274,7 +274,7 @@ const en: typeof zh_CN = {
     title: 'Pact',
     pending: 'Pending',
     active: 'Active',
-    pactApproval: 'Review Requests',
+    pactApproval: 'Pact Records',
     pactApprovalDesc: 'Review and approve Agent requests',
     defaultPactManagement: 'Default Rules',
     defaultPactManagementDesc: 'Set transaction limits and safety rules for Agents',
@@ -287,13 +287,13 @@ const en: typeof zh_CN = {
   },
 
   pactApproval: {
-    title: 'Pact Approval',
+    title: 'Pact Records',
     all: 'All',
     pending: 'Pending',
     approved: 'Approved',
     rejected: 'Rejected',
     expired: 'Expired',
-    noRecords: 'No approval records',
+    noRecords: 'No Pact records',
     validity: 'Valid for {days} days',
   },
 

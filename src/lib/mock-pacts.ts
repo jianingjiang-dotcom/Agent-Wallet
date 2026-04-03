@@ -40,7 +40,7 @@ export const mockPacts: Pact[] = [
     status: 'pending',
     title: 'ETH 定投策略',
     description: '每周一 9:00 UTC 自动购买 $500 等值的 ETH，使用 Uniswap V3 在 Ethereum 主网执行。',
-    createdAt: new Date('2026-04-01T09:00:00'),
+    createdAt: new Date(Date.now() - 20 * 60 * 1000), // 20 min ago → 40 min remaining
     agentName: 'DCA Agent',
     strategyName: 'ETH Weekly DCA (Ethereum)',
     chain: 'ETH',
@@ -66,6 +66,69 @@ export const mockPacts: Pact[] = [
     exitConditions: '手动撤销 OR 90天到期 OR 预算耗尽',
     riskRules: [
       { name: 'Uniswap Router Allow', type: 'contract_call', chain: 'ETH', addresses: ['0xE592427A...'], action: 'allow' },
+    ],
+  },
+  {
+    id: 'pact-002b',
+    status: 'pending',
+    title: 'Base 链 AAVE 自动复投',
+    description: '监控 AAVE V3 存款收益，每日自动领取并复投 USDC 收益到 Base 链上最优池。',
+    createdAt: new Date(Date.now() - 55 * 60 * 1000), // 55 min ago → 5 min remaining (urgent)
+    agentName: 'Yield Optimizer',
+    strategyName: 'AAVE V3 Auto-compound (Base)',
+    chain: 'BASE_ETH',
+    validityDays: 60,
+    userPrompt: '帮我把AAVE上Base链的USDC存款收益每天自动复投回去。',
+    permissions: [
+      { type: 'write', scope: 'contract call' },
+      { type: 'read', scope: 'wallet' },
+    ],
+    executionSummary: '每日检查 AAVE V3 Base 链上的 USDC 收益，自动领取并复投。',
+    contractOps: [
+      { label: 'Claim Rewards', description: '从 AAVE V3 领取 USDC 收益' },
+      { label: 'Re-supply', description: '将收益重新存入 AAVE V3' },
+    ],
+    riskControls: [
+      { label: '单笔 USD 上限', value: '$1,000' },
+      { label: '24h 滚动上限', value: '$2,000' },
+      { label: '链限制', value: '仅限 Base' },
+    ],
+    schedule: '每日 00:00 UTC 执行，最长授权 60 天。',
+    exitConditions: '手动撤销 OR 60天到期',
+    riskRules: [
+      { name: 'AAVE V3 Base Allow', type: 'contract_call', chain: 'BASE_ETH', addresses: ['0x794a6135...'], action: 'allow' },
+    ],
+  },
+  {
+    id: 'pact-002c',
+    status: 'pending',
+    title: 'Solana MEV 套利监控',
+    description: '在 Solana 链上监控 Jupiter 聚合器的套利机会，自动执行低风险套利交易。',
+    createdAt: new Date(Date.now() - 90 * 60 * 1000), // 90 min ago → already expired
+    agentName: 'MEV Scout',
+    strategyName: 'Jupiter Arb Monitor (Solana)',
+    chain: 'SOL',
+    validityDays: 7,
+    userPrompt: '帮我在Solana上用Jupiter找套利机会，自动执行，控制好风险。',
+    permissions: [
+      { type: 'write', scope: 'contract call' },
+      { type: 'write', scope: 'transfer' },
+      { type: 'read', scope: 'wallet' },
+    ],
+    executionSummary: '持续监控 Jupiter 聚合器套利机会，自动执行低风险交易。',
+    contractOps: [
+      { label: 'Jupiter Swap', description: '通过 Jupiter 聚合器执行兑换' },
+      { label: 'Token Transfer', description: '将利润转回主钱包' },
+    ],
+    riskControls: [
+      { label: '单笔 USD 上限', value: '$200' },
+      { label: '24h 滚动上限', value: '$1,000' },
+      { label: '最小利润率', value: '0.3%' },
+    ],
+    schedule: '持续监控，条件触发执行，最长授权 7 天。',
+    exitConditions: '手动撤销 OR 7天到期',
+    riskRules: [
+      { name: 'Jupiter Router Allow', type: 'contract_call', chain: 'SOL', addresses: ['JUP6...'], action: 'allow' },
     ],
   },
   {
