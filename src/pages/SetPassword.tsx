@@ -85,7 +85,7 @@ export default function SetPassword() {
   };
 
   const handleSkip = () => {
-    navigate('/claim-intro');
+    navigate('/home');
   };
 
   const handleBack = () => {
@@ -98,7 +98,7 @@ export default function SetPassword() {
   };
 
   const handleContinueToOnboarding = () => {
-    navigate('/claim-intro');
+    navigate('/home');
   };
 
   // Success state - Show welcome guidance for onboarding flow

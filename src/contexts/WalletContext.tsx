@@ -1414,8 +1414,8 @@ export function WalletProvider({ children }: { children: ReactNode }) {
 
   // Mock user data - can be toggled for testing different user types
   // Set to false to test existing user with wallets, true for new user onboarding
-  const [mockIsNewUser] = useState(false);
-  
+  const [mockIsNewUser] = useState(true);
+
   const setupExistingUser = useCallback(() => {
     const mockUserInfo: UserInfo = {
       email: 'sarah.chen@gmail.com',
@@ -2113,11 +2113,12 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     }
   }, [mockIsNewUser, setupExistingUser]);
 
-  // Dev mode login - instant login with existing user data
+  // Dev mode login - instant login with no wallet state for new user
   const devModeLogin = useCallback(() => {
     setIsAuthenticated(true);
-    setupExistingUser();
-  }, [setupExistingUser]);
+    setUserInfo({ email: 'dev@cobo.com', nickname: 'Dev User' });
+    setWalletStatus('not_created');
+  }, []);
 
   const logout = useCallback(() => {
     setIsAuthenticated(false);

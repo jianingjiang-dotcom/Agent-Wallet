@@ -4,11 +4,13 @@ import {
   Eye, EyeOff, ChevronRight, Send, QrCode,
   TrendingDown, Wallet, Plus, Shield, AlertTriangle,
   CheckCircle2, Sparkles, Lock, ChevronDown, Clock, Bell, Bot, ClipboardCheck,
-  LayoutGrid, Key, HelpCircle, Copy
+  LayoutGrid, Key, HelpCircle, Copy, Link2, SlidersHorizontal, Loader2
 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
+import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
+import CoboLogo from '@/assets/cobo-logo.svg';
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
@@ -34,82 +36,122 @@ import { TokenInfo } from '@/lib/tokens';
 import { toast } from '@/lib/toast';
 import { getChainShortName } from '@/lib/chain-utils';
 
-// Empty state component when no wallet exists
+// Welcome + pairing page when no wallet exists
 function EmptyWalletState() {
   const navigate = useNavigate();
+  const { validateClaimCode } = useWallet();
+  const [code, setCode] = useState('');
+  const [isValidating, setIsValidating] = useState(false);
+  const [error, setError] = useState('');
   const [showHelp, setShowHelp] = useState(false);
+
+  const handleValidate = async () => {
+    if (code.length !== 6) { setError('请输入完整的 6 位配对口令'); return; }
+    setIsValidating(true);
+    setError('');
+    try {
+      const info = await validateClaimCode(code);
+      navigate('/claim-wallet', { state: { claimInfo: info } });
+    } catch (e: any) {
+      setError(e.message || '配对口令验证失败');
+    } finally {
+      setIsValidating(false);
+    }
+  };
 
   return (
     <AppLayout showNav>
-      <div className="h-full flex flex-col items-center px-6 pb-24 pt-[30%]">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.4 }}
-          className="text-center w-full max-w-sm"
-        >
-          <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="w-16 h-16 mx-auto mb-5 rounded-full bg-accent/10 flex items-center justify-center"
-          >
-            <Wallet className="w-8 h-8 text-accent" />
+      <div className="h-full flex flex-col items-center justify-center px-6 pb-20">
+        <div className="w-full max-w-sm space-y-8">
+          {/* Header — centered */}
+          <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="text-center">
+            <div className="flex items-center justify-center gap-2.5 mb-2">
+              <h1 className="text-xl font-bold text-foreground">欢迎使用</h1>
+              <div className="flex items-center gap-1.5">
+                <img src={CoboLogo} alt="Cobo" className="h-4" />
+                <span className="text-[10px] font-bold text-foreground tracking-wide leading-none">AGENTIC<br />WALLET</span>
+              </div>
+            </div>
+            <p className="text-muted-foreground text-sm">Agent 驱动的下一代加密钱包</p>
           </motion.div>
 
-          <h2 className="text-lg font-bold text-foreground mb-1">还没有钱包</h2>
-          <p className="text-sm text-muted-foreground mb-6">
-            输入配对口令，接管 Agent 创建的钱包
-          </p>
-
-          <Button
-            className="gradient-primary"
-            size="lg"
-            onClick={() => navigate('/claim-intro')}
-          >
-            配对钱包
-          </Button>
-
-          {/* Help section */}
-          <div className="mt-6">
-            <button
-              className="inline-flex items-center gap-1 text-xs text-primary py-1"
-              onClick={() => setShowHelp(!showHelp)}
-            >
-              <HelpCircle className="w-3.5 h-3.5" />
-              还没有配对口令？
-              <motion.div animate={{ rotate: showHelp ? 180 : 0 }} transition={{ duration: 0.2 }}>
-                <ChevronDown className="w-3.5 h-3.5" />
+          {/* 3-step marketing flow */}
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="space-y-4">
+            {[
+              { icon: Bot, color: 'text-purple-600 dark:text-purple-400', bg: 'bg-purple-100 dark:bg-purple-900/30', title: '钱包创建', desc: '您的 Agent 在链上创建 MPC 钱包' },
+              { icon: Link2, color: 'text-accent', bg: 'bg-accent/10', title: '配对关联', desc: '输入口令，将钱包控制权转移到您手中' },
+              { icon: SlidersHorizontal, color: 'text-emerald-600', bg: 'bg-emerald-100 dark:bg-emerald-900/30', title: 'Pact 管控', desc: '设定规则，让 Agent 在边界内自主运行' },
+            ].map((step, i) => (
+              <motion.div
+                key={step.title}
+                initial={{ opacity: 0, x: -15 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.2 + i * 0.08 }}
+                className="flex items-center gap-3.5"
+              >
+                <div className={cn('w-10 h-10 rounded-full flex items-center justify-center shrink-0', step.bg)}>
+                  <step.icon className={cn('w-4.5 h-4.5', step.color)} strokeWidth={1.5} />
+                </div>
+                <div>
+                  <p className="text-[13px] font-semibold text-foreground">{step.title}</p>
+                  <p className="text-[11px] text-muted-foreground mt-0.5">{step.desc}</p>
+                </div>
               </motion.div>
-            </button>
-            <AnimatePresence>
-              {showHelp && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: 'auto', opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.2 }}
-                  className="overflow-hidden"
-                >
-                  <div className="mt-2 p-3 bg-muted/50 rounded-xl text-xs leading-relaxed space-y-2 text-left">
-                    <p className="font-medium text-foreground">在 Agent 环境执行以下指令</p>
-                    <div className="relative">
-                      <pre className="bg-background rounded-lg p-2.5 pr-9 text-[11px] font-mono text-foreground overflow-x-auto whitespace-pre-wrap break-all leading-relaxed">npx skills add cobosteven/cobo-agent-wallet-manual --skill cobo-agentic-wallet-sandbox --yes --global</pre>
-                      <button
-                        onClick={() => {
-                          navigator.clipboard.writeText('npx skills add cobosteven/cobo-agent-wallet-manual --skill cobo-agentic-wallet-sandbox --yes --global');
-                          toast.success('已复制');
-                        }}
-                        className="absolute right-1.5 top-1.5 p-1 rounded text-muted-foreground hover:text-foreground transition-colors"
-                      >
-                        <Copy className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  </div>
+            ))}
+          </motion.div>
+
+          {/* Pairing input — centered */}
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="flex flex-col items-center space-y-4">
+            <p className="text-xs font-medium text-muted-foreground">输入配对口令</p>
+
+            <InputOTP maxLength={6} value={code} onChange={(v) => { setCode(v); setError(''); }} disabled={isValidating}>
+              <InputOTPGroup className="gap-2.5">
+                {[0, 1, 2, 3, 4, 5].map((i) => (
+                  <InputOTPSlot key={i} index={i} className="w-11 h-12 rounded-lg border border-border text-lg font-semibold" />
+                ))}
+              </InputOTPGroup>
+            </InputOTP>
+
+            {error && (
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-1.5 text-destructive text-xs">
+                <AlertTriangle className="w-3.5 h-3.5" />{error}
+              </motion.div>
+            )}
+
+            {/* Help */}
+            <div className="flex flex-col items-center">
+              <button className="inline-flex items-center gap-1 text-xs text-primary py-1" onClick={() => setShowHelp(!showHelp)}>
+                <HelpCircle className="w-3.5 h-3.5" />
+                还没有配对口令？
+                <motion.div animate={{ rotate: showHelp ? 180 : 0 }} transition={{ duration: 0.2 }}>
+                  <ChevronDown className="w-3.5 h-3.5" />
                 </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        </motion.div>
+              </button>
+              <AnimatePresence>
+                {showHelp && (
+                  <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.2 }} className="overflow-hidden w-full">
+                    <div className="mt-2 p-3 bg-muted/50 rounded-xl text-xs leading-relaxed space-y-2 text-left">
+                      <p className="font-medium text-foreground">在 Agent 环境执行以下指令</p>
+                      <div className="relative">
+                        <pre className="bg-background rounded-lg p-2.5 pr-9 text-[11px] font-mono text-foreground overflow-x-auto whitespace-pre-wrap break-all leading-relaxed">npx skills add cobosteven/cobo-agent-wallet-manual --skill cobo-agentic-wallet-sandbox --yes --global</pre>
+                        <button onClick={() => { navigator.clipboard.writeText('npx skills add cobosteven/cobo-agent-wallet-manual --skill cobo-agentic-wallet-sandbox --yes --global'); toast.success('已复制'); }} className="absolute right-1.5 top-1.5 p-1 rounded text-muted-foreground hover:text-foreground transition-colors">
+                          <Copy className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </motion.div>
+
+          {/* CTA */}
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}>
+            <Button size="lg" className="w-full text-base gradient-primary" onClick={handleValidate} disabled={code.length !== 6 || isValidating}>
+              {isValidating ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />验证中...</> : '开始关联'}
+            </Button>
+          </motion.div>
+        </div>
       </div>
     </AppLayout>
   );
