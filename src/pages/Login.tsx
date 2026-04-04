@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Shield, Lock, Wallet, CreditCard, TrendingUp, Sparkles, X, Loader2, ArrowLeft, Mail, CheckCircle2, Phone } from 'lucide-react';
+import { Shield, Lock, Wallet, Bot, Fingerprint, Brain, Globe, Link, Zap, Key, FileText, Sparkles, X, Loader2, ArrowLeft, Mail, CheckCircle2, Phone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useWallet } from '@/contexts/WalletContext';
@@ -47,14 +47,14 @@ const colorThemes = [
     pulseColor: 'bg-blue-500',
   },
   {
-    iconBg: 'bg-gradient-to-br from-violet-500 to-purple-400',
-    orbColor: 'bg-violet-500/20',
-    orbColor2: 'bg-purple-400/15',
-    dotColor: 'bg-violet-400/40',
-    dotColor2: 'bg-purple-400/30',
-    floatingBg: ['bg-violet-500/90', 'bg-purple-500/80', 'bg-violet-400/70'],
-    sparkleColor: 'bg-violet-400',
-    pulseColor: 'bg-violet-500',
+    iconBg: 'bg-gradient-to-br from-amber-500 to-orange-400',
+    orbColor: 'bg-amber-500/20',
+    orbColor2: 'bg-orange-400/15',
+    dotColor: 'bg-amber-400/40',
+    dotColor2: 'bg-orange-400/30',
+    floatingBg: ['bg-amber-500/90', 'bg-orange-500/80', 'bg-amber-400/70'],
+    sparkleColor: 'bg-amber-400',
+    pulseColor: 'bg-amber-500',
   },
   {
     iconBg: 'bg-gradient-to-br from-emerald-500 to-teal-400',
@@ -70,33 +70,33 @@ const colorThemes = [
 
 const slides: SlideData[] = [
   {
-    icon: <Shield className="w-10 h-10 text-white" />,
+    icon: <Bot className="w-10 h-10 text-white" />,
     iconBg: colorThemes[0].iconBg,
-    title: '安全管理您的数字资产',
+    title: 'AI 代理，链上自主运行',
     floatingIcons: [
-      <Wallet className="w-5 h-5" />,
-      <CreditCard className="w-4 h-4" />,
-      <TrendingUp className="w-4 h-4" />,
+      <Globe className="w-5 h-5" />,
+      <Zap className="w-4 h-4" />,
+      <Link className="w-4 h-4" />,
     ],
   },
   {
-    icon: <Lock className="w-10 h-10 text-white" />,
+    icon: <Fingerprint className="w-10 h-10 text-white" />,
     iconBg: colorThemes[1].iconBg,
-    title: '顶级安全，无忧交易',
+    title: '一码认领，无缝掌控',
     floatingIcons: [
-      <Shield className="w-5 h-5" />,
+      <Key className="w-5 h-5" />,
       <Sparkles className="w-4 h-4" />,
-      <Lock className="w-4 h-4" />,
+      <Shield className="w-4 h-4" />,
     ],
   },
   {
-    icon: <Wallet className="w-10 h-10 text-white" />,
+    icon: <Shield className="w-10 h-10 text-white" />,
     iconBg: colorThemes[2].iconBg,
-    title: '快速收款，即时到账',
+    title: 'Pact 守护，你来批准',
     floatingIcons: [
-      <TrendingUp className="w-5 h-5" />,
-      <Sparkles className="w-4 h-4" />,
-      <CreditCard className="w-4 h-4" />,
+      <FileText className="w-5 h-5" />,
+      <Lock className="w-4 h-4" />,
+      <Brain className="w-4 h-4" />,
     ],
   },
 ];
@@ -892,7 +892,7 @@ export default function LoginPage() {
   const bottomGradient = currentIndex === 0
     ? 'from-transparent via-blue-500/3 to-blue-500/10'
     : currentIndex === 1
-    ? 'from-transparent via-violet-500/3 to-violet-500/10'
+    ? 'from-transparent via-amber-500/3 to-amber-500/10'
     : 'from-transparent via-emerald-500/3 to-emerald-500/10';
 
   return (
@@ -929,7 +929,7 @@ export default function LoginPage() {
                         index === 0 
                           ? 'bg-gradient-to-b from-blue-500/15 via-blue-500/5 to-transparent' 
                           : index === 1 
-                          ? 'bg-gradient-to-b from-violet-500/15 via-violet-500/5 to-transparent'
+                          ? 'bg-gradient-to-b from-amber-500/15 via-amber-500/5 to-transparent'
                           : 'bg-gradient-to-b from-emerald-500/15 via-emerald-500/5 to-transparent'
                       }`}
                     />
@@ -1035,19 +1035,28 @@ export default function LoginPage() {
                 key={i}
                 animate={{
                   width: i === currentIndex ? 24 : 6,
-                  backgroundColor: i === currentIndex 
-                    ? 'hsl(var(--foreground))' 
+                  backgroundColor: i === currentIndex
+                    ? 'hsl(var(--foreground))'
                     : 'hsl(var(--muted-foreground) / 0.3)',
                 }}
-                transition={{ duration: 0.3 }}
+                transition={{ type: 'spring', stiffness: 300, damping: 25 }}
                 className="h-1 rounded-full"
               />
             ))}
           </div>
 
-          <h1 className="text-xl font-bold text-foreground text-center mb-6">
-            {slides[currentIndex].title}
-          </h1>
+          <AnimatePresence mode="wait">
+            <motion.h1
+              key={currentIndex}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.25, ease: 'easeOut' }}
+              className="text-xl font-bold text-foreground text-center mb-6"
+            >
+              {slides[currentIndex].title}
+            </motion.h1>
+          </AnimatePresence>
         </div>
       )}
 
