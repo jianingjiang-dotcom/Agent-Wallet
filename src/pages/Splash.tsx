@@ -29,8 +29,12 @@ const Splash = () => {
     <motion.div 
       className="absolute inset-0 bg-background flex flex-col items-center justify-center overflow-hidden"
       initial={{ opacity: 1 }}
-      animate={{ opacity: isExiting ? 0 : 1, y: isExiting ? -20 : 0 }}
-      transition={{ duration: 0.3, ease: "easeOut" }}
+      animate={{
+        opacity: isExiting ? 0 : 1,
+        scale: isExiting ? 0.95 : 1,
+        filter: isExiting ? 'blur(8px)' : 'blur(0px)',
+      }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
     >
       {/* Background decorative elements - blue in light mode, white/grey in dark mode */}
       <div className="absolute inset-0 overflow-hidden">
@@ -134,22 +138,24 @@ const Splash = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.3, ease: "easeOut" }}
         >
-          商户钱包
+          智能钱包
         </motion.h1>
 
-        {/* Tagline - blue accent in light mode, white in dark mode */}
-        <motion.div
-          className="mt-3 flex items-center gap-3"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.45, ease: "easeOut" }}
-        >
-          <span className="text-sm text-primary dark:text-muted-foreground font-medium">安全</span>
-          <span className="w-1 h-1 rounded-full bg-primary/50 dark:bg-muted-foreground/50" />
-          <span className="text-sm text-primary dark:text-muted-foreground font-medium">便捷</span>
-          <span className="w-1 h-1 rounded-full bg-primary/50 dark:bg-muted-foreground/50" />
-          <span className="text-sm text-primary dark:text-muted-foreground font-medium">专业</span>
-        </motion.div>
+        {/* Tagline - staggered word reveal */}
+        <div className="mt-3 flex items-center gap-3">
+          {['AI 驱动', '链上自主', '人机协作'].map((word, i) => (
+            <motion.span
+              key={word}
+              className="text-sm text-primary dark:text-muted-foreground font-medium flex items-center gap-3"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.45 + i * 0.15, ease: "easeOut" }}
+            >
+              {i > 0 && <span className="w-1 h-1 rounded-full bg-primary/50 dark:bg-muted-foreground/50 -ml-3" />}
+              {word}
+            </motion.span>
+          ))}
+        </div>
       </div>
 
       {/* Footer with COBO logo - white background container */}
