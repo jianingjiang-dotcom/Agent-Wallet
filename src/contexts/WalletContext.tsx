@@ -2319,8 +2319,8 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const validateClaimCode = useCallback(async (code: string): Promise<ClaimWalletInfo> => {
     await new Promise(resolve => setTimeout(resolve, 1200));
     const normalized = code.trim();
-    if (!/^\d{8}$/.test(normalized)) {
-      throw new Error('配对口令格式无效，请输入 8 位数字');
+    if (!/^\d{6}$/.test(normalized)) {
+      throw new Error('配对口令格式无效，请输入 6 位数字');
     }
     // Return mock wallet info
     return {
@@ -2381,7 +2381,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   // Generate MPC keyshare — called after confirmClaim
   const generateKeyShare = useCallback(async (): Promise<void> => {
     // Simulate MPC keyshare generation (Mobile + Cobo 2/2)
-    await new Promise(resolve => setTimeout(resolve, 3000));
+    await new Promise(resolve => setTimeout(resolve, 8000));
     setWalletStatus('created_no_backup');
   }, []);
 

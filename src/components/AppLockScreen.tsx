@@ -1,76 +1,41 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Lock, Fingerprint } from 'lucide-react';
+import { Fingerprint } from 'lucide-react';
 import { useAppLock } from '@/contexts/AppLockContext';
-import { useWallet } from '@/contexts/WalletContext';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import coboLogo from '@/assets/cobo-logo.svg';
 import { cn } from '@/lib/utils';
 
-type LockPhase = 'locked' | 'authenticating' | 'password' | 'unlocking';
+type LockPhase = 'locked' | 'authenticating' | 'unlocking';
 
 export function AppLockScreen() {
   const { isLocked, unlock } = useAppLock();
-  const { hasBiometric } = useWallet();
 
   const [phase, setPhase] = useState<LockPhase>('locked');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
 
   // Reset state whenever lock activates
   useEffect(() => {
     if (isLocked) {
       setPhase('locked');
-      setPassword('');
-      setError('');
-      setIsLoading(false);
     }
   }, [isLocked]);
 
-  // -- Click lock icon: immediate biometric or show password --
-  const handleIconClick = useCallback(async () => {
-    if (phase !== 'locked' && phase !== 'password') return;
-
-    if (hasBiometric) {
-      setPhase('authenticating');
-      // Simulate biometric authentication
-      await new Promise(r => setTimeout(r, 800));
-      // Success → trigger curtain animation
-      setPhase('unlocking');
-    } else {
-      setPhase('password');
+  // Auto-trigger biometric on mount
+  useEffect(() => {
+    if (isLocked && phase === 'locked') {
+      const timer = setTimeout(() => {
+        triggerBiometric();
+      }, 600);
+      return () => clearTimeout(timer);
     }
-  }, [phase, hasBiometric]);
+  }, [isLocked]);
 
-  // -- Password submit --
-  const handlePasswordSubmit = useCallback(async () => {
-    if (!password.trim()) {
-      setError('请输入密码');
-      return;
-    }
-    setIsLoading(true);
-    setError('');
-    await new Promise(r => setTimeout(r, 500));
-
-    if (password.length >= 6) {
-      setIsLoading(false);
-      setPhase('unlocking');
-    } else {
-      setIsLoading(false);
-      setError('密码错误，请重试');
-    }
-  }, [password]);
-
-  // -- Switch to biometric from password mode --
-  const handleSwitchToBiometric = useCallback(async () => {
-    setError('');
-    setPassword('');
+  const triggerBiometric = useCallback(async () => {
+    if (phase === 'authenticating' || phase === 'unlocking') return;
     setPhase('authenticating');
+    // Simulate biometric authentication
     await new Promise(r => setTimeout(r, 800));
     setPhase('unlocking');
-  }, []);
+  }, [phase]);
 
   // -- Curtain animation complete → unlock --
   const handleCurtainComplete = useCallback(() => {
@@ -79,7 +44,7 @@ export function AppLockScreen() {
     }
   }, [phase, unlock]);
 
-  // Shared gradient classes for the two curtain halves — must be fully opaque
+  // Shared gradient classes for the two curtain halves
   const gradientBg = 'bg-gradient-to-b from-muted via-background to-background';
   const gradientOverlay = 'bg-gradient-to-br from-primary/5 via-transparent to-primary/3';
 
@@ -102,7 +67,6 @@ export function AppLockScreen() {
             transition={{ duration: 0.55, ease: curtainEase, delay: phase === 'unlocking' ? 0.15 : 0 }}
             onAnimationComplete={handleCurtainComplete}
           >
-            {/* Full-width gradient so both halves form one seamless background */}
             <div className={cn('absolute inset-0 w-[200%]', gradientBg)} />
             <div className={cn('absolute inset-0 w-[200%]', gradientOverlay)} />
           </motion.div>
@@ -113,7 +77,6 @@ export function AppLockScreen() {
             animate={phase === 'unlocking' ? { x: '100%' } : { x: 0 }}
             transition={{ duration: 0.55, ease: curtainEase, delay: phase === 'unlocking' ? 0.15 : 0 }}
           >
-            {/* Offset by -100% so the right half shows the right portion of the same gradient */}
             <div className={cn('absolute inset-0 w-[200%] -translate-x-1/2', gradientBg)} />
             <div className={cn('absolute inset-0 w-[200%] -translate-x-1/2', gradientOverlay)} />
           </motion.div>
@@ -126,9 +89,9 @@ export function AppLockScreen() {
               : { opacity: 1, scale: 1 }}
             transition={{ duration: 0.2, ease: 'easeOut' }}
           >
-            {/* Lock / Fingerprint icon area */}
+            {/* Fingerprint icon area */}
             <motion.button
-              onClick={handleIconClick}
+              onClick={triggerBiometric}
               disabled={phase === 'authenticating' || phase === 'unlocking'}
               className="relative flex items-center justify-center cursor-pointer focus:outline-none disabled:cursor-default"
               whileHover={phase === 'locked' ? { scale: 1.05 } : {}}
@@ -150,41 +113,22 @@ export function AppLockScreen() {
 
               {/* Icon background */}
               <div className="relative w-20 h-20 rounded-full bg-primary/15 flex items-center justify-center">
-                <AnimatePresence mode="wait">
-                  {phase === 'authenticating' ? (
-                    <motion.div
-                      key="fingerprint"
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{
-                        opacity: 1,
-                        scale: [1, 1.15, 1],
-                      }}
-                      exit={{ opacity: 0, scale: 0.8 }}
-                      transition={{
-                        opacity: { duration: 0.15 },
-                        scale: { duration: 1, repeat: Infinity, ease: 'easeInOut' },
-                      }}
-                    >
-                      <Fingerprint className="w-8 h-8 text-primary" strokeWidth={1.5} />
-                    </motion.div>
-                  ) : (
-                    <motion.div
-                      key="lock"
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.8 }}
-                      transition={{ duration: 0.15 }}
-                    >
-                      <Lock className="w-8 h-8 text-primary" strokeWidth={1.5} />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                <motion.div
+                  animate={phase === 'authenticating'
+                    ? { scale: [1, 1.15, 1] }
+                    : { scale: 1 }}
+                  transition={{
+                    scale: { duration: 1, repeat: phase === 'authenticating' ? Infinity : 0, ease: 'easeInOut' },
+                  }}
+                >
+                  <Fingerprint className="w-8 h-8 text-primary" strokeWidth={1.5} />
+                </motion.div>
               </div>
             </motion.button>
 
             {/* Brand name */}
             <h1 className="mt-8 text-2xl font-bold text-foreground">
-              商户钱包
+              智能钱包
             </h1>
 
             {/* Hint text */}
@@ -199,16 +143,6 @@ export function AppLockScreen() {
                 >
                   验证中...
                 </motion.p>
-              ) : phase === 'password' ? (
-                <motion.p
-                  key="pw-hint"
-                  initial={{ opacity: 0, y: 4 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -4 }}
-                  className="mt-3 text-sm text-muted-foreground"
-                >
-                  请输入密码解锁
-                </motion.p>
               ) : (
                 <motion.p
                   key="lock-hint"
@@ -217,63 +151,8 @@ export function AppLockScreen() {
                   exit={{ opacity: 0, y: -4 }}
                   className="mt-3 text-sm text-muted-foreground"
                 >
-                  点击图标解锁
+                  点击验证身份
                 </motion.p>
-              )}
-            </AnimatePresence>
-
-            {/* Inline password input area */}
-            <AnimatePresence>
-              {phase === 'password' && (
-                <motion.div
-                  key="password-form"
-                  initial={{ opacity: 0, y: 16, height: 0 }}
-                  animate={{ opacity: 1, y: 0, height: 'auto' }}
-                  exit={{ opacity: 0, y: 16, height: 0 }}
-                  transition={{ duration: 0.25, ease: 'easeOut' }}
-                  className="mt-6 w-full max-w-[260px] space-y-3 overflow-hidden"
-                >
-                  <Input
-                    type="password"
-                    placeholder="请输入支付密码"
-                    value={password}
-                    onChange={(e) => {
-                      setPassword(e.target.value);
-                      setError('');
-                    }}
-                    onKeyDown={(e) => e.key === 'Enter' && handlePasswordSubmit()}
-                    className={cn(
-                      'text-center',
-                      error && 'border-destructive'
-                    )}
-                    autoFocus
-                  />
-                  {error && (
-                    <motion.p
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      className="text-xs text-destructive text-center"
-                    >
-                      {error}
-                    </motion.p>
-                  )}
-                  <Button
-                    className="w-full"
-                    onClick={handlePasswordSubmit}
-                    disabled={isLoading}
-                  >
-                    {isLoading ? '验证中...' : '确认'}
-                  </Button>
-
-                  {hasBiometric && (
-                    <button
-                      onClick={handleSwitchToBiometric}
-                      className="w-full text-sm text-muted-foreground transition-colors text-center"
-                    >
-                      使用生物识别
-                    </button>
-                  )}
-                </motion.div>
               )}
             </AnimatePresence>
           </motion.div>

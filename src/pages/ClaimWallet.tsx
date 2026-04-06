@@ -266,6 +266,14 @@ function ConfirmClaimStep({
 }
 
 // ─── Step 3: KeyShare Generation ───────────────────────────
+const keygenStages = [
+  { delay: 0, title: '正在连接安全服务器...', sub: '与 Cobo 节点建立加密通道' },
+  { delay: 2000, title: '协商密钥参数...', sub: '同步 MPC 计算规则与参与方信息' },
+  { delay: 4500, title: '正在生成密钥分片...', sub: '手机端与服务器协同计算中' },
+  { delay: 8000, title: '验证密钥分片...', sub: '确认双方分片可正确协同签名' },
+  { delay: 12000, title: '正在写入安全存储...', sub: '将密钥分片加密保存至本地' },
+];
+
 function KeyShareGenStep({
   onComplete,
 }: {
@@ -276,6 +284,8 @@ function KeyShareGenStep({
   const [started, setStarted] = useState(false);
   const [done, setDone] = useState(false);
   const [error, setError] = useState('');
+  const [stageIndex, setStageIndex] = useState(0);
+  const [displayedSub, setDisplayedSub] = useState('');
 
   const handleStart = () => {
     setStarted(true);
@@ -293,6 +303,29 @@ function KeyShareGenStep({
         setError(e.message || '密钥生成失败');
       });
   }, [started]);
+
+  // Stage timer — advance through fake progress stages
+  useEffect(() => {
+    if (!started || done) return;
+    const timers = keygenStages.slice(1).map((stage, i) =>
+      setTimeout(() => setStageIndex(i + 1), stage.delay)
+    );
+    return () => timers.forEach(clearTimeout);
+  }, [started, done]);
+
+  // Typewriter effect for subtitle
+  const currentSub = keygenStages[stageIndex]?.sub || '';
+  useEffect(() => {
+    if (!started || done) return;
+    setDisplayedSub('');
+    let i = 0;
+    const interval = setInterval(() => {
+      i++;
+      setDisplayedSub(currentSub.slice(0, i));
+      if (i >= currentSub.length) clearInterval(interval);
+    }, 40);
+    return () => clearInterval(interval);
+  }, [stageIndex, started, done, currentSub]);
 
   if (error) {
     return (
@@ -486,12 +519,26 @@ function KeyShareGenStep({
         </div>
       </div>
 
-      <p className="text-base font-semibold text-foreground">
-        正在生成安全密钥...
-      </p>
+      <AnimatePresence mode="wait">
+        <motion.p
+          key={stageIndex}
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -8 }}
+          transition={{ duration: 0.3 }}
+          className="text-base font-semibold text-foreground"
+        >
+          {keygenStages[stageIndex]?.title}
+        </motion.p>
+      </AnimatePresence>
 
-      <p className="text-xs text-muted-foreground mt-2 mb-8 leading-relaxed max-w-[260px]">
-        密钥生成需要手机与服务器协同计算，可能需要一些时间，请勿关闭页面
+      <p className="text-xs text-muted-foreground mt-2 mb-8 leading-relaxed max-w-[260px] min-h-[1.5em]">
+        {displayedSub}
+        <motion.span
+          animate={{ opacity: [1, 0] }}
+          transition={{ duration: 0.5, repeat: Infinity, repeatType: 'reverse' }}
+          className="inline-block w-px h-3 bg-muted-foreground/50 ml-0.5 align-middle"
+        />
       </p>
     </motion.div>
   );
