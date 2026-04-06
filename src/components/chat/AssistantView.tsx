@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { ChatMessage } from '@/components/chat/ChatMessage';
 import { ChatInput } from '@/components/chat/ChatInput';
 import { QuickActions } from '@/components/chat/QuickActions';
+import { SuggestedQuestions } from '@/components/chat/SuggestedQuestions';
 import { TypingIndicator } from '@/components/chat/TypingIndicator';
 import { streamChat } from '@/lib/chat-stream';
 import { useWallet } from '@/contexts/WalletContext';
@@ -20,6 +21,53 @@ const PAGE_MAP: Record<string, { label: string; path: string }> = {
   contacts: { label: '地址簿', path: '/contacts' },
   help: { label: '帮助中心', path: '/help' },
 };
+
+// Suggestion pools
+const WELCOME_SUGGESTIONS = [
+  '查看我的各币种余额',
+  '最近有什么交易记录',
+  '我的钱包安全状态如何',
+  '如何给朋友转账',
+  '查看待审核的 Pact',
+  'Agent 最近执行了什么操作',
+  '如何备份我的钱包',
+  '如何设置资金风控规则',
+];
+
+const FOLLOW_UP_MAP: Record<string, string[]> = {
+  '余额': ['各币种占比是多少', '最近余额变化趋势', '如何充值'],
+  '交易': ['查看待处理交易', '导出交易记录', '最近一笔转账状态'],
+  '转账': ['查看手续费预估', '设置转账限额', '添加常用收款人'],
+  '安全': ['修改支付密码', '查看登录设备', '开启生物识别'],
+  'Pact': ['查看活跃 Pact', '如何撤销 Pact', 'Pact 的审批流程是什么'],
+  'Agent': ['查看 Agent 权限', '暂停 Agent 操作', 'Agent 的操作日志'],
+  '备份': ['如何恢复钱包', '备份状态检查', '密钥分片在哪里'],
+  '风控': ['当前风控规则有哪些', '如何修改转账限额', '紧急冻结钱包'],
+};
+
+const GENERIC_FOLLOW_UPS = [
+  '还有什么需要注意的吗',
+  '帮我查看钱包余额',
+  '最近有什么异常交易吗',
+  '如何提升钱包安全等级',
+  '查看 Agent 的最新操作',
+  '帮我了解 Pact 机制',
+];
+
+function pickRandom(pool: string[], count: number): string[] {
+  const shuffled = [...pool].sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, count);
+}
+
+function getFollowUpSuggestions(lastUserMsg: string): string[] {
+  // Try to match keywords in user message
+  for (const [keyword, suggestions] of Object.entries(FOLLOW_UP_MAP)) {
+    if (lastUserMsg.includes(keyword)) {
+      return pickRandom(suggestions, 3);
+    }
+  }
+  return pickRandom(GENERIC_FOLLOW_UPS, 3);
+}
 
 export interface AssistantViewHandle {
   startNewSession: () => void;
@@ -52,6 +100,9 @@ export const AssistantView = forwardRef<AssistantViewHandle, AssistantViewProps>
     const [isLoading, setIsLoading] = useState(false);
     const [showScrollBtn, setShowScrollBtn] = useState(false);
     const [inputHeight, setInputHeight] = useState(59);
+    const [welcomeSuggestions, setWelcomeSuggestions] = useState(() => pickRandom(WELCOME_SUGGESTIONS, 3));
+    const [followUpSuggestions, setFollowUpSuggestions] = useState<string[]>([]);
+    const prevLoadingRef = useRef(false);
     const scrollRef = useRef<HTMLDivElement>(null);
     const inputWrapperRef = useRef<HTMLDivElement>(null);
     const abortRef = useRef<AbortController | null>(null);
@@ -96,6 +147,26 @@ export const AssistantView = forwardRef<AssistantViewHandle, AssistantViewProps>
     useEffect(() => {
       scrollToBottom('smooth');
     }, [messages, isLoading, scrollToBottom]);
+
+    // Generate follow-up suggestions when AI finishes responding
+    useEffect(() => {
+      if (prevLoadingRef.current && !isLoading && messages.length > 0) {
+        // Find last user message for context matching
+        let lastUserContent = '';
+        for (let i = messages.length - 1; i >= 0; i--) {
+          if (messages[i].role === 'user') {
+            lastUserContent = messages[i].content;
+            break;
+          }
+        }
+        setFollowUpSuggestions(getFollowUpSuggestions(lastUserContent));
+      }
+      prevLoadingRef.current = isLoading;
+    }, [isLoading, messages]);
+
+    const handleRefreshWelcome = useCallback(() => {
+      setWelcomeSuggestions(pickRandom(WELCOME_SUGGESTIONS, 3));
+    }, []);
 
     // Show/hide scroll-to-bottom button
     useEffect(() => {
@@ -211,6 +282,7 @@ export const AssistantView = forwardRef<AssistantViewHandle, AssistantViewProps>
     };
 
     const sendMessage = useCallback(async (text: string, _attachment?: File) => {
+      setFollowUpSuggestions([]);
       const userMsg: ChatMessageType = {
         id: generateId(),
         role: 'user',
@@ -370,14 +442,21 @@ export const AssistantView = forwardRef<AssistantViewHandle, AssistantViewProps>
           style={{ bottom: hideNav ? -(scrollBottomOffset ?? 0) : -96, transition: scrollBottomOffset !== undefined ? 'bottom 0.4s cubic-bezier(0.25, 0.1, 0.25, 1)' : undefined }}
         >
           {showWelcome && (
-            <div className="flex flex-col items-center justify-center h-full" style={{ marginTop: '-20%' }}>
-              <span className="text-[24px] leading-[32px] font-bold text-foreground">
+            <div className="flex flex-col items-center justify-center h-full" style={{ marginTop: '-15%' }}>
+              <span className="text-[24px] leading-[32px] font-bold text-foreground mb-8">
                 {(() => {
                   const hour = new Date().getHours();
                   const greeting = hour < 12 ? '上午好' : hour < 18 ? '下午好' : '晚上好';
                   return `${greeting}，${userName}`;
                 })()}
               </span>
+              <div className="w-full px-6">
+                <SuggestedQuestions
+                  questions={welcomeSuggestions}
+                  onSelect={sendMessage}
+                  onRefresh={handleRefreshWelcome}
+                />
+              </div>
             </div>
           )}
           {!showWelcome && <div className="pt-4 space-y-[24px]" style={{ paddingBottom: inputHeight + 48 + (hideNav ? 34 : 88) }}>
@@ -403,6 +482,14 @@ export const AssistantView = forwardRef<AssistantViewHandle, AssistantViewProps>
             {isLoading && messages[messages.length - 1]?.role !== 'assistant' && (
               <div className="flex justify-start px-6">
                 <TypingIndicator />
+              </div>
+            )}
+            {!isLoading && followUpSuggestions.length > 0 && (
+              <div className="px-6">
+                <SuggestedQuestions
+                  questions={followUpSuggestions}
+                  onSelect={sendMessage}
+                />
               </div>
             )}
           </div>}
