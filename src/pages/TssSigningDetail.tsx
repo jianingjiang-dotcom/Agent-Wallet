@@ -1,12 +1,14 @@
+import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { CheckCircle2, XCircle, Clock, ArrowRight } from 'lucide-react';
+import { CheckCircle2, XCircle, Clock, ArrowRight, Sparkles } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { SwipeBack } from '@/components/SwipeBack';
 import { Button } from '@/components/ui/button';
 import { DetailRow } from '@/components/ui/detail-row';
 import { CryptoIconWithChain } from '@/components/CryptoIconWithChain';
 import { CryptoIcon } from '@/components/CryptoIcon';
+import { BiometricVerifyDrawer } from '@/components/BiometricVerifyDrawer';
 import { useWallet } from '@/contexts/WalletContext';
 import { cn } from '@/lib/utils';
 import type { TssSigningMeta } from '@/types/notification';
@@ -32,20 +34,49 @@ export default function TssSigningDetail() {
 
   const meta = todo.metadata as TssSigningMeta;
   const isPending = todo.status === 'pending';
+  const [biometricOpen, setBiometricOpen] = useState(false);
+  const [pendingAction, setPendingAction] = useState<'approve' | 'reject' | null>(null);
 
   const handleSign = () => {
-    completeTodo(todo.id, 'approved');
+    setPendingAction('approve');
+    setBiometricOpen(true);
   };
 
   const handleReject = () => {
-    completeTodo(todo.id, 'rejected');
+    setPendingAction('reject');
+    setBiometricOpen(true);
+  };
+
+  const handleBiometricVerified = () => {
+    if (pendingAction === 'approve') completeTodo(todo.id, 'approved');
+    else if (pendingAction === 'reject') completeTodo(todo.id, 'rejected');
+    setPendingAction(null);
   };
 
   const txTypeLabel = meta.txType === 'transfer' ? '转账' : meta.txType === 'contract_interaction' ? '合约交互' : '消息签名';
 
   return (
     <SwipeBack>
-      <AppLayout showNav={false} showBack onBack={() => navigate(-1)} title="交易签名" showSecurityBanner={false}>
+      <AppLayout showNav={false} showBack onBack={() => navigate(-1)} title="交易签名" showSecurityBanner={false}
+        rightAction={
+          <motion.button
+            onClick={() => navigate('/assistant')}
+            className="relative flex items-center gap-1.5 pl-2 pr-2.5 py-1 rounded-full overflow-hidden active:scale-95 transition-transform"
+            style={{ background: 'linear-gradient(135deg, #7C3AED, #6366F1, #3B82F6)', boxShadow: '0 2px 8px rgba(99, 102, 241, 0.4)' }}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.92 }}
+          >
+            <motion.div
+              className="absolute inset-0 opacity-30"
+              style={{ background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.5) 50%, transparent 100%)' }}
+              animate={{ x: ['-100%', '200%'] }}
+              transition={{ duration: 2.5, repeat: Infinity, ease: 'linear' }}
+            />
+            <Sparkles className="w-3 h-3 text-white relative z-10" strokeWidth={2} />
+            <span className="text-[11px] font-semibold text-white relative z-10 tracking-wide">Ask AI</span>
+          </motion.button>
+        }
+      >
         <div className="flex flex-col h-full">
           <div className="flex-1 px-4 overflow-y-auto">
             {/* Amount display */}
@@ -94,11 +125,12 @@ export default function TssSigningDetail() {
                   {isPending ? '等待签名确认' : todo.status === 'approved' ? '已签名' : '已拒绝签名'}
                 </span>
               </div>
-              {todo.completedAt && !isPending && (
-                <p className="text-xs text-muted-foreground mt-1 ml-6">
-                  {todo.completedAt.toLocaleString('zh-CN')}
-                </p>
-              )}
+              <div className="text-xs text-muted-foreground mt-2 ml-6 space-y-0.5">
+                <p>推送时间: {todo.createdAt.toLocaleString('zh-CN')}</p>
+                {todo.completedAt && !isPending && (
+                  <p>完成时间: {todo.completedAt.toLocaleString('zh-CN')}</p>
+                )}
+              </div>
             </motion.div>
 
             {/* Transaction details card */}
@@ -181,6 +213,13 @@ export default function TssSigningDetail() {
           )}
         </div>
       </AppLayout>
+      <BiometricVerifyDrawer
+        open={biometricOpen}
+        onOpenChange={setBiometricOpen}
+        title={pendingAction === 'approve' ? '确认签名' : '确认拒绝'}
+        description={pendingAction === 'approve' ? '请验证身份以签名此交易' : '请验证身份以拒绝此签名请求'}
+        onVerified={handleBiometricVerified}
+      />
     </SwipeBack>
   );
 }

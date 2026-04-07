@@ -1,13 +1,16 @@
+import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { AlertTriangle, ArrowRight, FileText, CheckCircle2, XCircle } from 'lucide-react';
+import { AlertTriangle, ArrowRight, CheckCircle2, XCircle, Sparkles } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { SwipeBack } from '@/components/SwipeBack';
 import { Button } from '@/components/ui/button';
 import { DetailRow } from '@/components/ui/detail-row';
 import { CryptoIconWithChain } from '@/components/CryptoIconWithChain';
+import { BiometricVerifyDrawer } from '@/components/BiometricVerifyDrawer';
 import { useWallet } from '@/contexts/WalletContext';
 import { cn } from '@/lib/utils';
+import { mockPacts } from '@/lib/mock-pacts';
 import type { ExcessApprovalMeta } from '@/types/notification';
 import type { ChainId } from '@/types/wallet';
 
@@ -31,18 +34,47 @@ export default function ExcessApproval() {
 
   const meta = todo.metadata as ExcessApprovalMeta;
   const isPending = todo.status === 'pending';
+  const [biometricOpen, setBiometricOpen] = useState(false);
+  const [pendingAction, setPendingAction] = useState<'approve' | 'reject' | null>(null);
 
   const handleApprove = () => {
-    completeTodo(todo.id, 'approved');
+    setPendingAction('approve');
+    setBiometricOpen(true);
   };
 
   const handleReject = () => {
-    completeTodo(todo.id, 'rejected');
+    setPendingAction('reject');
+    setBiometricOpen(true);
+  };
+
+  const handleBiometricVerified = () => {
+    if (pendingAction === 'approve') completeTodo(todo.id, 'approved');
+    else if (pendingAction === 'reject') completeTodo(todo.id, 'rejected');
+    setPendingAction(null);
   };
 
   return (
     <SwipeBack>
-      <AppLayout showNav={false} showBack onBack={() => navigate(-1)} title="超额交易审批" showSecurityBanner={false}>
+      <AppLayout showNav={false} showBack onBack={() => navigate(-1)} title="超额交易审批" showSecurityBanner={false}
+        rightAction={
+          <motion.button
+            onClick={() => navigate('/assistant')}
+            className="relative flex items-center gap-1.5 pl-2 pr-2.5 py-1 rounded-full overflow-hidden active:scale-95 transition-transform"
+            style={{ background: 'linear-gradient(135deg, #7C3AED, #6366F1, #3B82F6)', boxShadow: '0 2px 8px rgba(99, 102, 241, 0.4)' }}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.92 }}
+          >
+            <motion.div
+              className="absolute inset-0 opacity-30"
+              style={{ background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.5) 50%, transparent 100%)' }}
+              animate={{ x: ['-100%', '200%'] }}
+              transition={{ duration: 2.5, repeat: Infinity, ease: 'linear' }}
+            />
+            <Sparkles className="w-3 h-3 text-white relative z-10" strokeWidth={2} />
+            <span className="text-[11px] font-semibold text-white relative z-10 tracking-wide">Ask AI</span>
+          </motion.button>
+        }
+      >
         <div className="flex flex-col h-full">
           <div className="flex-1 px-4 overflow-y-auto">
             {/* Amount display */}
@@ -83,11 +115,12 @@ export default function ExcessApproval() {
                   {isPending ? '待审批 — 交易金额超出 Pact 限额' : todo.status === 'approved' ? '已批准' : '已拒绝'}
                 </span>
               </div>
-              {todo.completedAt && !isPending && (
-                <p className="text-xs text-muted-foreground mt-1 ml-6">
-                  {todo.completedAt.toLocaleString('zh-CN')}
-                </p>
-              )}
+              <div className="text-xs text-muted-foreground mt-2 ml-6 space-y-0.5">
+                <p>推送时间: {todo.createdAt.toLocaleString('zh-CN')}</p>
+                {todo.completedAt && !isPending && (
+                  <p>完成时间: {todo.completedAt.toLocaleString('zh-CN')}</p>
+                )}
+              </div>
             </motion.div>
 
             {/* Transaction details card */}
@@ -113,40 +146,47 @@ export default function ExcessApproval() {
               />
             </motion.div>
 
-            {/* Associated Pact card */}
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.15 }}
-              className="rounded-xl bg-[#F8F9FC] dark:bg-muted/30 py-4 space-y-4 mb-4"
-            >
-              <div className="px-4 flex items-center gap-2 -mt-1 mb-1">
-                <FileText className="w-3.5 h-3.5 text-muted-foreground" strokeWidth={1.5} />
-                <span className="text-xs text-muted-foreground">关联 Pact</span>
-              </div>
-              <DetailRow
-                label="策略名称"
-                value={meta.pactName}
-              />
-            </motion.div>
-
-            {/* Post-action follow-up */}
-            {!isPending && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-                className="space-y-3"
-              >
-                <button
-                  onClick={() => navigate(`/pact/${meta.pactId}`)}
-                  className="w-full flex items-center justify-between px-4 py-3.5 rounded-xl bg-[#F8F9FC] dark:bg-muted/30 transition-colors active:bg-muted"
+            {/* Associated Pact card — reuses PactHub card style */}
+            {(() => {
+              const pact = mockPacts.find(p => p.id === meta.pactId);
+              if (!pact) return null;
+              return (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.15 }}
+                  className="mb-4"
                 >
-                  <span className="text-sm text-foreground">查看关联 Pact</span>
-                  <ArrowRight className="w-4 h-4 text-muted-foreground" />
-                </button>
-              </motion.div>
-            )}
+                  <p className="text-xs text-muted-foreground font-medium mb-2 px-1">关联 Pact</p>
+                  <div
+                    onClick={() => navigate(`/pact/${meta.pactId}`)}
+                    className="bg-card rounded-2xl p-4 border border-border/60 shadow-sm cursor-pointer active:scale-[0.98] transition-transform"
+                  >
+                    <div className="flex items-start justify-between gap-3 mb-3">
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-[14px] font-semibold text-foreground leading-snug mb-1">{pact.title}</h3>
+                        <p className="text-[12px] text-muted-foreground line-clamp-1">{pact.description}</p>
+                      </div>
+                      <ArrowRight className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
+                    </div>
+                    <div className="flex rounded-xl bg-muted/50 overflow-hidden">
+                      <div className="flex-1 py-2 px-3 text-center border-r border-border/50">
+                        <p className="text-[10px] text-muted-foreground mb-0.5">Agent</p>
+                        <p className="text-[12px] font-medium text-foreground truncate">{pact.agentName}</p>
+                      </div>
+                      <div className="flex-1 py-2 px-3 text-center border-r border-border/50">
+                        <p className="text-[10px] text-muted-foreground mb-0.5">链</p>
+                        <p className="text-[12px] font-medium text-foreground">{pact.chain}</p>
+                      </div>
+                      <div className="flex-1 py-2 px-3 text-center">
+                        <p className="text-[10px] text-muted-foreground mb-0.5">有效期</p>
+                        <p className="text-[12px] font-medium text-foreground">{pact.validityDays}天</p>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              );
+            })()}
           </div>
 
           {/* Bottom actions */}
@@ -172,6 +212,14 @@ export default function ExcessApproval() {
           )}
         </div>
       </AppLayout>
+
+      <BiometricVerifyDrawer
+        open={biometricOpen}
+        onOpenChange={setBiometricOpen}
+        title={pendingAction === 'approve' ? '确认通过' : '确认拒绝'}
+        description={pendingAction === 'approve' ? '请验证身份以通过此超额交易' : '请验证身份以拒绝此超额交易'}
+        onVerified={handleBiometricVerified}
+      />
     </SwipeBack>
   );
 }

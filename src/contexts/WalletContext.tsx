@@ -358,6 +358,23 @@ const mockTransactionsWallet1: Transaction[] = [
     confirmations: 3500,
     blockHeight: 58900000,
   },
+  // TSS signed transaction (linked from todo-tss-2)
+  {
+    id: 'tx-tss-signed',
+    type: 'send',
+    amount: 200,
+    symbol: 'USDT',
+    usdValue: 200,
+    status: 'confirmed',
+    counterparty: '0xdAC17F958D2ee523a2206206994597C13D831eC7',
+    counterpartyLabel: 'USDT 合约',
+    timestamp: new Date(Date.now() - 1.8 * 60 * 60 * 1000),
+    txHash: '0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890',
+    network: 'ethereum',
+    fee: 3.2,
+    gasAmount: 0.00089,
+    gasToken: 'ETH',
+  },
   // Day 5
   {
     id: 'tx-day5-1',
@@ -2170,12 +2187,17 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     }
   }, [mockIsNewUser, setupExistingUser]);
 
-  // Dev mode login - instant login with no wallet state for new user
+  // Dev mode login - instant login, respects mockIsNewUser flag
   const devModeLogin = useCallback(() => {
     setIsAuthenticated(true);
-    setUserInfo({ email: 'dev@cobo.com', nickname: 'Dev User' });
-    setWalletStatus('not_created');
-  }, []);
+    if (mockIsNewUser) {
+      setUserInfo({ email: 'dev@cobo.com', nickname: 'Dev User' });
+      setWalletStatus('not_created');
+      setTransactions(getTransactionsForWallet('wallet-1'));
+    } else {
+      setupExistingUser();
+    }
+  }, [mockIsNewUser, setupExistingUser]);
 
   const logout = useCallback(() => {
     setIsAuthenticated(false);

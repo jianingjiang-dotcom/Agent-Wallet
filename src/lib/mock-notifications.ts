@@ -238,7 +238,7 @@ export const mockTodoItems: TodoItem[] = [
       symbol: 'USDT',
       chainId: 'ethereum',
       toAddress: '0xdAC1...1eC7',
-      txId: 'tx-day4-2',
+      txId: 'tx-tss-signed',
     },
   },
 ];

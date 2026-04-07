@@ -1,18 +1,19 @@
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Inbox, Check } from 'lucide-react';
+import { Inbox, Settings } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { SwipeBack } from '@/components/SwipeBack';
+import { Drawer, DrawerContent } from '@/components/ui/drawer';
+import { Switch } from '@/components/ui/switch';
 import { useWallet } from '@/contexts/WalletContext';
 import { useNavigate } from 'react-router-dom';
 import { MessageCard } from '@/components/notifications/MessageCard';
 import { TodoCard } from '@/components/notifications/TodoCard';
 import { EmptyState } from '@/components/EmptyState';
 import { cn } from '@/lib/utils';
-import type { MessageCategory, TodoType } from '@/types/notification';
 
 type MainTab = 'messages' | 'todos';
-type MessageFilter = 'all' | MessageCategory;
+
 export default function MessageCenter() {
   const navigate = useNavigate();
   const {
@@ -22,59 +23,63 @@ export default function MessageCenter() {
   } = useWallet();
 
   const [mainTab, setMainTab] = useState<MainTab>('messages');
-  const [messageFilter, setMessageFilter] = useState<MessageFilter>('all');
-  const [todoFilter, setTodoFilter] = useState<TodoFilter>('all');
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
-  // Filtered messages
-  const filteredMessages = useMemo(() => {
-    const sorted = [...messages].sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
-    if (messageFilter === 'all') return sorted;
-    return sorted.filter(m => m.category === messageFilter);
-  }, [messages, messageFilter]);
+  // Notification preferences (local state for demo)
+  const [msgPrefs, setMsgPrefs] = useState({
+    transaction: true,
+    pact: true,
+    system: true,
+  });
+  const [todoPrefs, setTodoPrefs] = useState({
+    pact_approval: true,
+    excess_approval: true,
+    tss_signing: true,
+  });
 
-  // Group messages by date
+  // All messages sorted by time, grouped by date
+  const sortedMessages = useMemo(() => {
+    return [...messages].sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+  }, [messages]);
+
   const groupedMessages = useMemo(() => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const yesterday = new Date(today);
     yesterday.setDate(yesterday.getDate() - 1);
 
-    const groups: { label: string; items: typeof filteredMessages }[] = [];
-    const todayItems = filteredMessages.filter(m => m.timestamp >= today);
-    const yesterdayItems = filteredMessages.filter(m => m.timestamp >= yesterday && m.timestamp < today);
-    const earlierItems = filteredMessages.filter(m => m.timestamp < yesterday);
+    const groups: { label: string; items: typeof sortedMessages }[] = [];
+    const todayItems = sortedMessages.filter(m => m.timestamp >= today);
+    const yesterdayItems = sortedMessages.filter(m => m.timestamp >= yesterday && m.timestamp < today);
+    const earlierItems = sortedMessages.filter(m => m.timestamp < yesterday);
 
     if (todayItems.length) groups.push({ label: '今天', items: todayItems });
     if (yesterdayItems.length) groups.push({ label: '昨天', items: yesterdayItems });
     if (earlierItems.length) groups.push({ label: '更早', items: earlierItems });
     return groups;
-  }, [filteredMessages]);
+  }, [sortedMessages]);
 
-  // Filtered todos — by type, pending first then completed
-  const filteredTodos = useMemo(() => {
-    let items = [...todoItems];
-    if (todoFilter !== 'all') {
-      items = items.filter(t => t.type === todoFilter);
-    }
-    // pending first (sorted by createdAt desc), then completed (sorted by completedAt desc)
-    const pending = items.filter(t => t.status === 'pending').sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
-    const completed = items.filter(t => t.status !== 'pending').sort((a, b) => (b.completedAt?.getTime() ?? 0) - (a.completedAt?.getTime() ?? 0));
-    return [...pending, ...completed];
-  }, [todoItems, todoFilter]);
+  // All todos sorted by createdAt, grouped by date
+  const sortedTodos = useMemo(() => {
+    return [...todoItems].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+  }, [todoItems]);
 
-  const messageFilterTabs: { key: MessageFilter; label: string }[] = [
-    { key: 'all', label: '全部' },
-    { key: 'transaction', label: '交易' },
-    { key: 'pact', label: 'Pact' },
-    { key: 'system', label: '系统' },
-  ];
+  const groupedTodos = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
 
-  const todoFilterTabs: { key: TodoFilter; label: string }[] = [
-    { key: 'all', label: '全部' },
-    { key: 'pact_approval', label: 'Pact 审批' },
-    { key: 'excess_approval', label: '超额审批' },
-    { key: 'tss_signing', label: 'TSS 签名' },
-  ];
+    const groups: { label: string; items: typeof sortedTodos }[] = [];
+    const todayItems = sortedTodos.filter(t => t.createdAt >= today);
+    const yesterdayItems = sortedTodos.filter(t => t.createdAt >= yesterday && t.createdAt < today);
+    const earlierItems = sortedTodos.filter(t => t.createdAt < yesterday);
+
+    if (todayItems.length) groups.push({ label: '今天', items: todayItems });
+    if (yesterdayItems.length) groups.push({ label: '昨天', items: yesterdayItems });
+    if (earlierItems.length) groups.push({ label: '更早', items: earlierItems });
+    return groups;
+  }, [sortedTodos]);
 
   return (
     <SwipeBack>
@@ -84,16 +89,13 @@ export default function MessageCenter() {
         onBack={() => navigate(-1)}
         title="通知中心"
         showSecurityBanner={false}
-        headerRight={
-          mainTab === 'messages' && unreadMessageCount > 0 ? (
-            <button
-              onClick={markAllMessagesAsRead}
-              className="flex items-center gap-1 text-xs text-primary"
-            >
-              <Check className="w-3.5 h-3.5" />
-              全部已读
-            </button>
-          ) : undefined
+        rightAction={
+          <button
+            onClick={() => setSettingsOpen(true)}
+            className="p-1 text-muted-foreground transition-colors"
+          >
+            <Settings className="w-5 h-5" strokeWidth={1.5} />
+          </button>
         }
       >
         <div className="flex flex-col h-full">
@@ -139,45 +141,6 @@ export default function MessageCenter() {
                 />
               )}
             </button>
-          </div>
-
-          {/* Sub-filters */}
-          <div className="px-4 py-2">
-            {mainTab === 'messages' ? (
-              <div className="flex gap-2">
-                {messageFilterTabs.map(tab => (
-                  <button
-                    key={tab.key}
-                    onClick={() => setMessageFilter(tab.key)}
-                    className={cn(
-                      'px-3 py-1.5 text-xs font-medium rounded-full transition-colors',
-                      messageFilter === tab.key
-                        ? 'bg-foreground text-background'
-                        : 'bg-muted text-muted-foreground'
-                    )}
-                  >
-                    {tab.label}
-                  </button>
-                ))}
-              </div>
-            ) : (
-              <div className="flex gap-2">
-                {todoFilterTabs.map(tab => (
-                  <button
-                    key={tab.key}
-                    onClick={() => setTodoFilter(tab.key)}
-                    className={cn(
-                      'px-3 py-1.5 text-xs font-medium rounded-full transition-colors',
-                      todoFilter === tab.key
-                        ? 'bg-foreground text-background'
-                        : 'bg-muted text-muted-foreground'
-                    )}
-                  >
-                    {tab.label}
-                  </button>
-                ))}
-              </div>
-            )}
           </div>
 
           {/* Content */}
@@ -226,7 +189,7 @@ export default function MessageCenter() {
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.15 }}
                 >
-                  {filteredTodos.length === 0 ? (
+                  {groupedTodos.length === 0 ? (
                     <div className="pt-20">
                       <EmptyState
                         icon={<Inbox className="w-10 h-10 text-muted-foreground/40" />}
@@ -235,12 +198,21 @@ export default function MessageCenter() {
                       />
                     </div>
                   ) : (
-                    <div className="px-4 space-y-3 py-2">
-                      {filteredTodos.map(item => (
-                        <TodoCard
-                          key={item.id}
-                          item={item}
-                        />
+                    <div className="px-4">
+                      {groupedTodos.map(group => (
+                        <div key={group.label}>
+                          <p className="px-1 pt-3 pb-2 text-xs font-medium text-muted-foreground">
+                            {group.label}
+                          </p>
+                          <div className="space-y-3">
+                            {group.items.map(item => (
+                              <TodoCard
+                                key={item.id}
+                                item={item}
+                              />
+                            ))}
+                          </div>
+                        </div>
                       ))}
                     </div>
                   )}
@@ -250,6 +222,66 @@ export default function MessageCenter() {
           </div>
         </div>
       </AppLayout>
+
+      {/* Settings Drawer */}
+      <Drawer open={settingsOpen} onOpenChange={setSettingsOpen}>
+        <DrawerContent>
+          <div className="px-6 pt-2 pb-8">
+            <h3 className="text-base font-semibold text-foreground mb-5">通知设置</h3>
+
+            {/* 消息提醒 */}
+            <p className="text-xs text-muted-foreground font-medium mb-3">消息提醒</p>
+            <div className="space-y-0 mb-6">
+              <div className="flex items-center justify-between py-3">
+                <span className="text-sm text-foreground">交易消息</span>
+                <Switch checked={msgPrefs.transaction} onCheckedChange={(v) => setMsgPrefs(p => ({ ...p, transaction: v }))} />
+              </div>
+              <div className="flex items-center justify-between py-3">
+                <span className="text-sm text-foreground">Pact 状态变更</span>
+                <Switch checked={msgPrefs.pact} onCheckedChange={(v) => setMsgPrefs(p => ({ ...p, pact: v }))} />
+              </div>
+              <div className="flex items-center justify-between py-3">
+                <span className="text-sm text-foreground">系统通知</span>
+                <Switch checked={msgPrefs.system} onCheckedChange={(v) => setMsgPrefs(p => ({ ...p, system: v }))} />
+              </div>
+            </div>
+
+            {/* 待办提醒 */}
+            <p className="text-xs text-muted-foreground font-medium mb-3">待办提醒</p>
+            <div className="space-y-0 mb-6">
+              <div className="flex items-center justify-between py-3">
+                <span className="text-sm text-foreground">Pact 审批</span>
+                <Switch checked={todoPrefs.pact_approval} onCheckedChange={(v) => setTodoPrefs(p => ({ ...p, pact_approval: v }))} />
+              </div>
+              <div className="flex items-center justify-between py-3">
+                <span className="text-sm text-foreground">超额交易审批</span>
+                <Switch checked={todoPrefs.excess_approval} onCheckedChange={(v) => setTodoPrefs(p => ({ ...p, excess_approval: v }))} />
+              </div>
+              <div className="flex items-center justify-between py-3">
+                <span className="text-sm text-foreground">交易签名</span>
+                <Switch checked={todoPrefs.tss_signing} onCheckedChange={(v) => setTodoPrefs(p => ({ ...p, tss_signing: v }))} />
+              </div>
+            </div>
+
+            {/* 操作 */}
+            <div className="border-t border-border pt-4">
+              <button
+                onClick={() => { markAllMessagesAsRead(); setSettingsOpen(false); }}
+                disabled={unreadMessageCount === 0}
+                className={cn(
+                  'w-full flex items-center justify-between py-3 text-sm transition-colors',
+                  unreadMessageCount > 0 ? 'text-foreground' : 'text-muted-foreground/40'
+                )}
+              >
+                全部标记为已读
+                {unreadMessageCount > 0 && (
+                  <span className="text-xs text-muted-foreground">{unreadMessageCount} 条未读</span>
+                )}
+              </button>
+            </div>
+          </div>
+        </DrawerContent>
+      </Drawer>
     </SwipeBack>
   );
 }
