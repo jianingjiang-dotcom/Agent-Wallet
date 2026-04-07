@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
-  CheckCircle2, XCircle, Clock, ArrowLeft, X, Menu, Plus
+  CheckCircle2, XCircle, Clock, ArrowLeft, X, Menu, Plus, Sparkles
 } from 'lucide-react';
 import { useWallet } from '@/contexts/WalletContext';
 import { cn } from '@/lib/utils';
@@ -108,9 +108,25 @@ export default function TransactionDetail() {
   return (
     <PageTransition>
       <AppLayout showNav={false} showBack title="交易详情" pageBg="bg-background" rightAction={
-        <button className="flex items-center justify-center w-6 h-6" onClick={() => { chatHistory.cleanEmptySessions(); chatHistory.switchSession(null); setChatOpen(true); }}>
-          <svg xmlns="http://www.w3.org/2000/svg" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#1C1C1C" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z"/><path d="M12 8v6"/><path d="M9 11h6"/></svg>
-        </button>
+        <motion.button
+          onClick={() => { chatHistory.cleanEmptySessions(); chatHistory.switchSession(null); setChatOpen(true); }}
+          className="relative flex items-center gap-1.5 pl-2 pr-2.5 py-1 rounded-full overflow-hidden active:scale-95 transition-transform"
+          style={{
+            background: 'linear-gradient(135deg, #7C3AED, #6366F1, #3B82F6)',
+            boxShadow: '0 2px 8px rgba(99, 102, 241, 0.4)',
+          }}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.92 }}
+        >
+          <motion.div
+            className="absolute inset-0 opacity-30"
+            style={{ background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.5) 50%, transparent 100%)' }}
+            animate={{ x: ['-100%', '200%'] }}
+            transition={{ duration: 2.5, repeat: Infinity, ease: 'linear' }}
+          />
+          <Sparkles className="w-3 h-3 text-white relative z-10" strokeWidth={2} />
+          <span className="text-[11px] font-semibold text-white relative z-10 tracking-wide">Ask AI</span>
+        </motion.button>
       }>
         <div className="flex-1 overflow-y-auto">
           <div className="px-4 pt-6 space-y-4" style={{ paddingBottom: '64px' }}>
@@ -198,22 +214,6 @@ export default function TransactionDetail() {
                 />
               )}
 
-              {/* Confirmations */}
-              {transaction.status === 'confirmed' && transaction.confirmations !== undefined && (
-                <DetailRow
-                  label="确认数"
-                  value={`${transaction.confirmations >= 100 ? '100+' : transaction.confirmations} 次确认`}
-                />
-              )}
-
-              {/* Block Height */}
-              {transaction.status === 'confirmed' && transaction.blockHeight && (
-                <DetailRow
-                  label="区块高度"
-                  value={`#${transaction.blockHeight.toLocaleString()}`}
-                  mono
-                />
-              )}
 
               {/* Memo */}
               {transaction.memo && (

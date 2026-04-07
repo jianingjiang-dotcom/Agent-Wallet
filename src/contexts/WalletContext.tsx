@@ -4,6 +4,11 @@ import {
   SecurityConfig, BackupStatus, WalletStatus, WalletState,
   RiskColor, ChainId, AggregatedAsset, ChainAsset, UserInfo, LimitStatus,
   Notification,
+} from '@/types/wallet';
+import type { Message, TodoItem, TodoStatus } from '@/types/notification';
+import { mockMessages, mockTodoItems } from '@/lib/mock-notifications';
+// Re-import rest of wallet types (the line above closes the first import block)
+import {
   AuthResult, UserType,
   AddressSystem, WalletAddress, buildLegacyAddresses,
   DelegatedAgent, DelegatedAgentStatus, DelegatedAgentRiskConfig,
@@ -1272,11 +1277,20 @@ interface WalletContextType extends WalletState {
   onboardingStep: number;
   setOnboardingStep: (step: number) => void;
   
-  // Notification actions
+  // Notification actions (legacy)
   notifications: Notification[];
   unreadNotificationCount: number;
   markNotificationAsRead: (id: string) => void;
   markAllNotificationsAsRead: () => void;
+
+  // New message/todo system
+  messages: Message[];
+  todoItems: TodoItem[];
+  unreadMessageCount: number;
+  pendingTodoCount: number;
+  markMessageAsRead: (id: string) => void;
+  markAllMessagesAsRead: () => void;
+  completeTodo: (id: string, status: 'approved' | 'rejected') => void;
   
   // TSS Node actions
   hasTSSNode: boolean;
@@ -1381,6 +1395,8 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const [hasBiometric, setHasBiometric] = useState(false);
   const [onboardingStep, setOnboardingStep] = useState(0);
   const [notifications, setNotifications] = useState<Notification[]>(mockNotifications);
+  const [messages, setMessages] = useState<Message[]>(mockMessages);
+  const [todoItems, setTodoItems] = useState<TodoItem[]>(mockTodoItems);
 
   // Delegated Agent state
   const [delegatedAgents, setDelegatedAgents] = useState<DelegatedAgent[]>([]);
@@ -1412,9 +1428,46 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
   }, []);
 
+  // New message/todo system
+  const unreadMessageCount = useMemo(() => messages.filter(m => !m.isRead).length, [messages]);
+  const pendingTodoCount = useMemo(() => todoItems.filter(t => t.status === 'pending').length, [todoItems]);
+
+  const markMessageAsRead = useCallback((id: string) => {
+    setMessages(prev => prev.map(m => m.id === id ? { ...m, isRead: true } : m));
+  }, []);
+
+  const markAllMessagesAsRead = useCallback(() => {
+    setMessages(prev => prev.map(m => ({ ...m, isRead: true })));
+  }, []);
+
+  const completeTodo = useCallback((id: string, result: 'approved' | 'rejected') => {
+    setTodoItems(prev => prev.map(t =>
+      t.id === id ? { ...t, status: result as TodoStatus, completedAt: new Date() } : t
+    ));
+    // Auto-generate a message when a pact todo is completed
+    const todo = todoItems.find(t => t.id === id);
+    if (todo?.type === 'pact_approval') {
+      const meta = todo.metadata as import('@/types/notification').PactApprovalMeta;
+      const newMsg: Message = {
+        id: `msg-auto-${Date.now()}`,
+        category: 'pact',
+        subType: result === 'approved' ? 'pact_activated' : 'pact_rejected',
+        title: result === 'approved' ? 'Pact 已激活' : 'Pact 审批被拒绝',
+        summary: meta.intent,
+        status: result === 'approved'
+          ? { label: '已激活', variant: 'success' }
+          : { label: '已拒绝', variant: 'error' },
+        timestamp: new Date(),
+        isRead: false,
+        route: `/pact/${meta.pactId}`,
+      };
+      setMessages(prev => [newMsg, ...prev]);
+    }
+  }, [todoItems]);
+
   // Mock user data - can be toggled for testing different user types
   // Set to false to test existing user with wallets, true for new user onboarding
-  const [mockIsNewUser] = useState(true);
+  const [mockIsNewUser] = useState(false);
 
   const setupExistingUser = useCallback(() => {
     const mockUserInfo: UserInfo = {
@@ -2029,7 +2082,9 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       };
       setUserInfo(mockUserInfo);
       setWalletStatus('not_created');
-      
+      // Load transactions for demo/notification center even in new user mode
+      setTransactions(getTransactionsForWallet('wallet-1'));
+
       return {
         userType: 'new',
         isDeviceAuthorized: true,
@@ -2066,7 +2121,8 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       };
       setUserInfo(mockUserInfo);
       setWalletStatus('not_created');
-      
+      setTransactions(getTransactionsForWallet('wallet-1'));
+
       return {
         userType: 'new',
         isDeviceAuthorized: true,
@@ -2075,7 +2131,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     } else {
       // Existing user with wallets
       setupExistingUser();
-      
+
       return {
         userType: 'returning_with_wallet',
         isDeviceAuthorized: true,
@@ -2096,7 +2152,8 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       };
       setUserInfo(mockUserInfo);
       setWalletStatus('not_created');
-      
+      setTransactions(getTransactionsForWallet('wallet-1'));
+
       return {
         userType: 'new',
         isDeviceAuthorized: true,
@@ -2104,7 +2161,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       };
     } else {
       setupExistingUser();
-      
+
       return {
         userType: 'returning_with_wallet',
         isDeviceAuthorized: true,
@@ -3165,6 +3222,13 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     unreadNotificationCount,
     markNotificationAsRead,
     markAllNotificationsAsRead,
+    messages,
+    todoItems,
+    unreadMessageCount,
+    pendingTodoCount,
+    markMessageAsRead,
+    markAllMessagesAsRead,
+    completeTodo,
     // TSS Node
     hasTSSNode,
     tssNodeInfo,

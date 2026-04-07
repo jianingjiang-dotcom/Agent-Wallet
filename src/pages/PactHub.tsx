@@ -28,7 +28,7 @@ export default function PactHub() {
     [],
   );
   const historyPacts = useMemo(
-    () => mockPacts.filter(p => p.status === 'rejected' || p.status === 'expired' || p.status === 'completed' || dismissedIds.has(p.id)),
+    () => mockPacts.filter(p => p.status === 'rejected' || p.status === 'expired' || p.status === 'completed' || p.status === 'revoked' || dismissedIds.has(p.id)),
     [dismissedIds],
   );
 

@@ -1,4 +1,4 @@
-export type PactStatus = 'pending' | 'approved' | 'rejected' | 'expired' | 'active' | 'completed';
+export type PactStatus = 'pending' | 'approved' | 'rejected' | 'expired' | 'active' | 'completed' | 'revoked';
 
 export interface PactPermission {
   type: 'write' | 'read';

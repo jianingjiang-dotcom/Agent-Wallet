@@ -63,6 +63,7 @@ export default function PactDetail() {
     completed: { label: t.common.completed, color: 'text-slate-600', bg: 'bg-slate-50', icon: CheckCircle2 },
     rejected: { label: t.common.rejected, color: 'text-red-600', bg: 'bg-red-50', icon: XCircle },
     expired: { label: t.common.expired, color: 'text-muted-foreground', bg: 'bg-muted/50', icon: Clock },
+    revoked: { label: '已撤销', color: 'text-red-600', bg: 'bg-red-50', icon: ShieldOff },
   };
 
   if (!pact) {
