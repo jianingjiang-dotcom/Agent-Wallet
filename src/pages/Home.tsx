@@ -505,66 +505,7 @@ export default function HomePage() {
           </motion.div>
         )}
 
-        {/* Pending Approval Banner */}
-        {!isLoading && walletPendingCount > 0 && (
-          <motion.button
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.15 }}
-            onClick={() => navigate('/agent-review')}
-            className={cn(
-              "w-full p-3 rounded-xl mb-4 flex items-center gap-3 active:scale-[0.98] transition-transform border",
-              isAgentLinked(currentWallet)
-                ? "bg-purple-50 dark:bg-purple-900/20 border-purple-200/50 dark:border-purple-800/50"
-                : "bg-blue-50 dark:bg-blue-900/20 border-blue-200/50 dark:border-blue-800/50"
-            )}
-          >
-            <div className={cn(
-              "w-9 h-9 rounded-full flex items-center justify-center shrink-0",
-              isAgentLinked(currentWallet)
-                ? "bg-purple-100 dark:bg-purple-800/40"
-                : "bg-blue-100 dark:bg-blue-800/40"
-            )}>
-              {isAgentLinked(currentWallet) ? (
-                <Bot className="w-4.5 h-4.5 text-purple-600 dark:text-purple-400" />
-              ) : (
-                <ClipboardCheck className="w-4.5 h-4.5 text-blue-600 dark:text-blue-400" />
-              )}
-            </div>
-            <div className="flex-1 text-left min-w-0">
-              <div className="flex items-center gap-2">
-                <span className={cn(
-                  "text-sm font-medium",
-                  isAgentLinked(currentWallet)
-                    ? "text-purple-700 dark:text-purple-300"
-                    : "text-blue-700 dark:text-blue-300"
-                )}>
-                  {isAgentLinked(currentWallet) ? 'Agent 待审批' : 'Agent 待审批'}
-                </span>
-                <span className={cn(
-                  "min-w-5 h-5 px-1.5 rounded-full text-[11px] font-bold flex items-center justify-center",
-                  isAgentLinked(currentWallet)
-                    ? "bg-purple-500 text-white"
-                    : "bg-blue-500 text-white"
-                )}>
-                  {walletPendingCount}
-                </span>
-              </div>
-              <p className="text-xs text-muted-foreground truncate">
-                {isAgentLinked(currentWallet)
-                  ? `${currentWallet?.agentInfo?.agentName || 'Agent'} 提交了 ${walletPendingCount} 笔交易请求`
-                  : `通过 Agent 提交的交易请求待审核`
-                }
-              </p>
-            </div>
-            <ChevronRight className={cn(
-              "w-4 h-4 shrink-0",
-              isAgentLinked(currentWallet)
-                ? "text-purple-400"
-                : "text-blue-400"
-            )} />
-          </motion.button>
-        )}
+        {/* Pending Approval Banner — hidden */}
 
         {/* Assets */}
         <motion.div
