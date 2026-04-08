@@ -104,11 +104,11 @@ export function AppLayout({
 
       <main className={cn("flex-1 flex flex-col overflow-auto", pageBg ?? (showNav ? "bg-page" : "bg-background"))}>
         {children}
-        {showNav && <div className="shrink-0 h-[96px]" />}
+        {showNav && <div className="shrink-0 h-[112px]" />}
       </main>
 
       {showNav && (
-        <div className="absolute bottom-0 left-0 right-0 z-20">
+        <div className="absolute bottom-0 left-0 right-0 z-20" style={{ overflow: 'visible' }}>
           <BottomNav />
           <div className="absolute bottom-0 left-0 right-0 h-[83px] pointer-events-none z-[-1]" style={{ backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)', maskImage: 'linear-gradient(to bottom, transparent, black)', WebkitMaskImage: 'linear-gradient(to bottom, transparent, black)' }} />
           <div className="absolute bottom-0 left-0 right-0 h-[83px] pointer-events-none z-[-1]" style={{ background: 'linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,1))' }} />

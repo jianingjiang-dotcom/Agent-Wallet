@@ -489,6 +489,7 @@ export const AssistantView = forwardRef<AssistantViewHandle, AssistantViewProps>
                 <SuggestedQuestions
                   questions={followUpSuggestions}
                   onSelect={sendMessage}
+                  align="left"
                 />
               </div>
             )}

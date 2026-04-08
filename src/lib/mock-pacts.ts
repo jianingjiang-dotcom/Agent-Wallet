@@ -159,6 +159,11 @@ export const mockPacts: Pact[] = [
     ],
     schedule: '持续监控，条件触发执行，最长授权 60 天。',
     exitConditions: '手动撤销 OR 60天到期',
+    exitConditionList: [
+      { type: 'tx_count', label: '交易笔数', current: 23, target: 50 },
+      { type: 'tx_amount', label: '交易金额', current: 4500, target: 20000, unit: '$' },
+      { type: 'duration', label: '有效期', current: 15, target: 90, unit: '天' },
+    ],
     riskRules: [
       { name: 'Aave V3 Pool Allow', type: 'contract_call', chain: 'ARB_ETH', addresses: ['0x794a61358B...'], action: 'allow' },
     ],
@@ -225,6 +230,10 @@ export const mockPacts: Pact[] = [
     ],
     schedule: '每日 00:00 UTC 检查收益并复投，最长授权 30 天。',
     exitConditions: '手动撤销 OR 30天到期',
+    exitConditionList: [
+      { type: 'tx_count', label: '交易笔数', current: 8, target: 100 },
+      { type: 'tx_amount', label: '交易金额', current: 6200, target: 10000, unit: '$' },
+    ],
     riskRules: [
       { name: 'Lending Protocol Allow', type: 'contract_call', chain: 'BASE_ETH', action: 'allow' },
     ],

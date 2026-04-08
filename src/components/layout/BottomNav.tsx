@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTheme } from 'next-themes';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -8,17 +8,21 @@ const ACTIVE_COLOR = '#1F32D6';
 const LIGHT_INACTIVE = '#73798B';
 const DARK_INACTIVE = '#8E8E9A';
 
-// Default (closed) icon paths
+// Ripple state
+interface Ripple {
+  id: number;
+  x: number;
+  y: number;
+}
+
+let rippleCounter = 0;
+
+// Icon paths: [wallet, pact, mine]
 const iconDefault: string[][] = [
   // 钱包 — closed
   [
     'M18.3329 9.14174V10.8584C18.3329 11.3167 17.9662 11.6917 17.4995 11.7084H15.8662C14.9662 11.7084 14.1412 11.0501 14.0662 10.1501C14.0162 9.62507 14.2162 9.13341 14.5662 8.79174C14.8745 8.47507 15.2995 8.29175 15.7662 8.29175H17.4995C17.9662 8.30841 18.3329 8.68341 18.3329 9.14174Z',
     'M17.0577 12.9584H15.866C14.2827 12.9584 12.9493 11.7667 12.816 10.2501C12.741 9.38342 13.0577 8.51675 13.691 7.90008C14.2243 7.35008 14.966 7.04175 15.766 7.04175H17.0577C17.2993 7.04175 17.4993 6.84175 17.4743 6.60008C17.291 4.57508 15.9493 3.19175 13.9577 2.95841C13.7577 2.92508 13.5493 2.91675 13.3327 2.91675H5.83268C5.59935 2.91675 5.37435 2.93341 5.15768 2.96675C3.03268 3.23341 1.66602 4.81675 1.66602 7.08342V12.9167C1.66602 15.2167 3.53268 17.0834 5.83268 17.0834H13.3327C15.666 17.0834 17.2743 15.6251 17.4743 13.4001C17.4993 13.1584 17.2993 12.9584 17.0577 12.9584ZM10.8327 8.12508H5.83268C5.49102 8.12508 5.20768 7.84175 5.20768 7.50008C5.20768 7.15842 5.49102 6.87508 5.83268 6.87508H10.8327C11.1743 6.87508 11.4577 7.15842 11.4577 7.50008C11.4577 7.84175 11.1743 8.12508 10.8327 8.12508Z',
-  ],
-  // 助手
-  [
-    'M10.9427 5.25H5.87607C5.67023 5.25 5.47232 5.25792 5.28232 5.28167C3.15273 5.46375 2.08398 6.7225 2.08398 9.04208V12.2088C2.08398 15.3754 3.35065 16.0008 5.87607 16.0008H6.19273C6.3669 16.0008 6.59648 16.1196 6.6994 16.2542L7.6494 17.5208C8.06898 18.0829 8.74982 18.0829 9.1694 17.5208L10.1194 16.2542C10.2382 16.0958 10.4282 16.0008 10.6261 16.0008H10.9427C13.2623 16.0008 14.5211 14.94 14.7032 12.8025C14.7269 12.6125 14.7348 12.4146 14.7348 12.2088V9.04208C14.7348 6.51667 13.4682 5.25 10.9427 5.25ZM5.64648 11.5833C5.20315 11.5833 4.85482 11.2271 4.85482 10.7917C4.85482 10.3563 5.21107 10 5.64648 10C6.0819 10 6.43815 10.3563 6.43815 10.7917C6.43815 11.2271 6.0819 11.5833 5.64648 11.5833ZM8.4094 11.5833C7.96607 11.5833 7.61773 11.2271 7.61773 10.7917C7.61773 10.3563 7.97398 10 8.4094 10C8.84482 10 9.20107 10.3563 9.20107 10.7917C9.20107 11.2271 8.85273 11.5833 8.4094 11.5833ZM11.1802 11.5833C10.7369 11.5833 10.3886 11.2271 10.3886 10.7917C10.3886 10.3563 10.7448 10 11.1802 10C11.6157 10 11.9719 10.3563 11.9719 10.7917C11.9719 11.2271 11.6157 11.5833 11.1802 11.5833Z',
-    'M17.9012 5.87534V9.042C17.9012 10.6253 17.4104 11.702 16.4287 12.2958C16.1912 12.4383 15.9141 12.2483 15.9141 11.9712L15.9221 9.042C15.9221 5.87534 14.1091 4.06242 10.9425 4.06242L6.12119 4.07034C5.84411 4.07034 5.65411 3.79325 5.79661 3.55575C6.39036 2.57409 7.46702 2.08325 9.04247 2.08325H14.1091C16.6346 2.08325 17.9012 3.34992 17.9012 5.87534Z',
   ],
   // Pact (shield)
   [
@@ -32,64 +36,100 @@ const iconDefault: string[][] = [
   ],
 ];
 
-// Active (open) icon paths — only wallet has a different active state for now
 const iconActive: (string[][] | null)[] = [
-  // 钱包 — active: same wallet but with clasp highlighted as a filled circle (coin visible)
+  // 钱包 — active
   [
-    // Wallet body
     'M17.0577 12.9584H15.866C14.2827 12.9584 12.9493 11.7667 12.816 10.2501C12.741 9.38342 13.0577 8.51675 13.691 7.90008C14.2243 7.35008 14.966 7.04175 15.766 7.04175H17.0577C17.2993 7.04175 17.4993 6.84175 17.4743 6.60008C17.291 4.57508 15.9493 3.19175 13.9577 2.95841C13.7577 2.92508 13.5493 2.91675 13.3327 2.91675H5.83268C5.59935 2.91675 5.37435 2.93341 5.15768 2.96675C3.03268 3.23341 1.66602 4.81675 1.66602 7.08342V12.9167C1.66602 15.2167 3.53268 17.0834 5.83268 17.0834H13.3327C15.666 17.0834 17.2743 15.6251 17.4743 13.4001C17.4993 13.1584 17.2993 12.9584 17.0577 12.9584Z',
-    // Clasp area
     'M18.3329 9.14174V10.8584C18.3329 11.3167 17.9662 11.6917 17.4995 11.7084H15.8662C14.9662 11.7084 14.1412 11.0501 14.0662 10.1501C14.0162 9.62507 14.2162 9.13341 14.5662 8.79174C14.8745 8.47507 15.2995 8.29175 15.7662 8.29175H17.4995C17.9662 8.30841 18.3329 8.68341 18.3329 9.14174Z',
-    // Horizontal lines inside — bills/cards
     'M10.833 8.125H5.833C5.491 8.125 5.208 7.842 5.208 7.5C5.208 7.158 5.491 6.875 5.833 6.875H10.833C11.174 6.875 11.458 7.158 11.458 7.5C11.458 7.842 11.174 8.125 10.833 8.125Z',
     'M8.333 10.625H5.833C5.491 10.625 5.208 10.342 5.208 10C5.208 9.658 5.491 9.375 5.833 9.375H8.333C8.674 9.375 8.958 9.658 8.958 10C8.958 10.342 8.674 10.625 8.333 10.625Z',
   ],
-  // 助手 — active: chat bubbles with typing dots visible
+  // Pact — active (filled shield)
   [
-    // Main bubble
-    'M10.9427 5.25H5.87607C5.67023 5.25 5.47232 5.25792 5.28232 5.28167C3.15273 5.46375 2.08398 6.7225 2.08398 9.04208V12.2088C2.08398 15.3754 3.35065 16.0008 5.87607 16.0008H6.19273C6.3669 16.0008 6.59648 16.1196 6.6994 16.2542L7.6494 17.5208C8.06898 18.0829 8.74982 18.0829 9.1694 17.5208L10.1194 16.2542C10.2382 16.0958 10.4282 16.0008 10.6261 16.0008H10.9427C13.2623 16.0008 14.5211 14.94 14.7032 12.8025C14.7269 12.6125 14.7348 12.4146 14.7348 12.2088V9.04208C14.7348 6.51667 13.4682 5.25 10.9427 5.25Z',
-    // Secondary bubble
-    'M17.9012 5.87534V9.042C17.9012 10.6253 17.4104 11.702 16.4287 12.2958C16.1912 12.4383 15.9141 12.2483 15.9141 11.9712L15.9221 9.042C15.9221 5.87534 14.1091 4.06242 10.9425 4.06242L6.12119 4.07034C5.84411 4.07034 5.65411 3.79325 5.79661 3.55575C6.39036 2.57409 7.46702 2.08325 9.04247 2.08325H14.1091C16.6346 2.08325 17.9012 3.34992 17.9012 5.87534Z',
-    // Typing line 1
-    'M5 10.5H11.5C11.78 10.5 12 10.28 12 10C12 9.72 11.78 9.5 11.5 9.5H5C4.72 9.5 4.5 9.72 4.5 10C4.5 10.28 4.72 10.5 5 10.5Z',
-    // Typing line 2
-    'M5 12.8H8.5C8.78 12.8 9 12.58 9 12.3C9 12.02 8.78 11.8 8.5 11.8H5C4.72 11.8 4.5 12.02 4.5 12.3C4.5 12.58 4.72 12.8 5 12.8Z',
-  ],
-  // Pact — active: filled shield + lock inside
-  [
-    // Shield filled
     'M9.99984 1.81665C10.1082 1.81665 10.2165 1.84165 10.3165 1.89165L15.6832 4.53332C16.0665 4.72499 16.2998 5.11665 16.2998 5.54165V9.16665C16.2998 12.7583 13.6415 16.1083 10.2082 17.0583C10.0748 17.0917 9.92484 17.0917 9.79151 17.0583C6.35817 16.1083 3.69984 12.7583 3.69984 9.16665V5.54165C3.69984 5.11665 3.93317 4.72499 4.31651 4.53332L9.68317 1.89165C9.78317 1.84165 9.89151 1.81665 9.99984 1.81665Z',
   ],
-  // 我的 — active: person with settings gear accent
+  // 我的 — active
   [
-    // Head
     'M10 10.625C11.7259 10.625 13.125 9.22589 13.125 7.5C13.125 5.77411 11.7259 4.375 10 4.375C8.27411 4.375 6.875 5.77411 6.875 7.5C6.875 9.22589 8.27411 10.625 10 10.625Z',
-    // Body
     'M10 12.5C6.6625 12.5 3.9375 14.6333 3.9375 17.2917C3.9375 17.5208 4.12917 17.7083 4.35417 17.7083H15.6458C15.8708 17.7083 16.0625 17.5208 16.0625 17.2917C16.0625 14.6333 13.3375 12.5 10 12.5Z',
-    // Small gear at top-right
     'M16.25 5.625C16.25 5.97 15.97 6.25 15.625 6.25C15.28 6.25 15 5.97 15 5.625C15 5.28 15.28 5 15.625 5C15.97 5 16.25 5.28 16.25 5.625Z',
     'M17.1 5.15L16.85 5.01C16.86 4.88 16.86 4.75 16.85 4.62L17.1 4.48C17.2 4.42 17.24 4.3 17.19 4.19L16.94 3.76C16.89 3.66 16.77 3.62 16.66 3.67L16.41 3.81C16.31 3.73 16.2 3.66 16.08 3.61L16.08 3.33C16.08 3.22 15.99 3.12 15.87 3.12H15.37C15.26 3.12 15.16 3.22 15.16 3.33L15.16 3.61C15.04 3.66 14.93 3.73 14.83 3.81L14.58 3.67C14.47 3.62 14.35 3.66 14.3 3.76L14.05 4.19C14 4.3 14.04 4.42 14.14 4.48L14.39 4.62C14.38 4.75 14.38 4.88 14.39 5.01L14.14 5.15C14.04 5.21 14 5.33 14.05 5.44L14.3 5.87C14.35 5.97 14.47 6.01 14.58 5.96L14.83 5.82C14.93 5.9 15.04 5.97 15.16 6.02L15.16 6.3C15.16 6.41 15.26 6.51 15.37 6.51H15.87C15.99 6.51 16.08 6.41 16.08 6.3L16.08 6.02C16.2 5.97 16.31 5.9 16.41 5.82L16.66 5.96C16.77 6.01 16.89 5.97 16.94 5.87L17.19 5.44C17.24 5.33 17.2 5.21 17.1 5.15Z',
   ],
 ];
 
-const navPaths = ['/home', '/assistant', '/pact', '/mine'];
+const PACT_INDEX = 1;
+const navPaths = ['/home', '/pact', '/mine'];
+
+// Ripple component — expands from click point then fades
+function RippleEffect({ ripples, color }: { ripples: Ripple[]; color: string }) {
+  return (
+    <AnimatePresence>
+      {ripples.map(r => (
+        <motion.span
+          key={r.id}
+          initial={{ scale: 0, opacity: 0.75 }}
+          animate={{ scale: 4, opacity: 0 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.8, ease: 'easeOut' }}
+          style={{
+            position: 'absolute',
+            left: r.x,
+            top: r.y,
+            width: 40,
+            height: 40,
+            marginLeft: -20,
+            marginTop: -20,
+            borderRadius: '50%',
+            background: color,
+            pointerEvents: 'none',
+          }}
+        />
+      ))}
+    </AnimatePresence>
+  );
+}
 
 export function BottomNav({ activeOverride }: { activeOverride?: number } = {}) {
   const navigate = useNavigate();
   const location = useLocation();
   const { resolvedTheme } = useTheme();
   const t = useT();
-  const tabLabels = [t.nav.wallet, t.nav.assistant, t.nav.pact, t.nav.mine];
+  const tabLabels = [t.nav.wallet, t.nav.pact, t.nav.mine];
 
   const routeIndex = Math.max(0, navPaths.findIndex(p => location.pathname.startsWith(p)));
   const realIndex = activeOverride !== undefined ? activeOverride : routeIndex;
   const [displayIndex, setDisplayIndex] = useState(realIndex);
   const [isAnimating, setIsAnimating] = useState(false);
-  const [isBouncing, setIsBouncing] = useState(false);
   const isDark = resolvedTheme === 'dark';
   const INACTIVE_COLOR = isDark ? DARK_INACTIVE : LIGHT_INACTIVE;
 
-  const handleTabClick = useCallback((i: number) => {
+  // Per-tab ripple state
+  const [tabRipples, setTabRipples] = useState<Record<number, Ripple[]>>({});
+  const btnRefs = useRef<(HTMLButtonElement | null)[]>([]);
+
+  const triggerRipple = useCallback((i: number, e: React.MouseEvent | React.TouchEvent) => {
+    const btn = btnRefs.current[i];
+    if (!btn) return;
+    const rect = btn.getBoundingClientRect();
+    let clientX: number, clientY: number;
+    if ('touches' in e) {
+      clientX = e.touches[0].clientX;
+      clientY = e.touches[0].clientY;
+    } else {
+      clientX = e.clientX;
+      clientY = e.clientY;
+    }
+    const x = clientX - rect.left;
+    const y = clientY - rect.top;
+    const id = ++rippleCounter;
+    setTabRipples(prev => ({ ...prev, [i]: [...(prev[i] || []), { id, x, y }] }));
+    setTimeout(() => {
+      setTabRipples(prev => ({ ...prev, [i]: (prev[i] || []).filter(r => r.id !== id) }));
+    }, 600);
+  }, []);
+
+  const handleTabClick = useCallback((i: number, e: React.MouseEvent | React.TouchEvent) => {
+    triggerRipple(i, e);
     if (i === realIndex || isAnimating) return;
     setIsAnimating(true);
     setDisplayIndex(i);
@@ -97,20 +137,16 @@ export function BottomNav({ activeOverride }: { activeOverride?: number } = {}) 
       navigate(navPaths[i]);
       setIsAnimating(false);
     }, 250);
-  }, [realIndex, isAnimating, navigate]);
+  }, [realIndex, isAnimating, navigate, triggerRipple]);
+
+  const rippleColor = isDark ? 'rgba(255,255,255,0.25)' : 'rgba(31, 50, 214, 0.2)';
+  const pactRippleColor = 'rgba(255,255,255,0.45)';
 
   return (
     <div className="flex justify-center px-[16px] pb-[21px]">
       <nav
-        className="flex flex-row justify-center items-center w-full rounded-[47px] relative overflow-hidden"
-        onTouchStart={() => setIsBouncing(true)}
-        onTouchEnd={() => setIsBouncing(false)}
-        onMouseDown={() => setIsBouncing(true)}
-        onMouseUp={() => setIsBouncing(false)}
-        onMouseLeave={() => setIsBouncing(false)}
+        className="flex flex-row justify-center items-end w-full rounded-[47px] relative"
         style={{
-          transform: isBouncing ? 'scale(1.03)' : 'scale(1)',
-          transition: 'transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1)',
           padding: '4px',
           height: '62px',
           background: isDark
@@ -124,22 +160,63 @@ export function BottomNav({ activeOverride }: { activeOverride?: number } = {}) 
           border: isDark
             ? '0.5px solid rgba(255,255,255,0.08)'
             : '0.5px solid rgba(255,255,255,0.5)',
+          overflow: 'visible',
         }}
       >
-        {/* Sliding active indicator */}
-        <div
-          className="absolute rounded-full"
-          style={{
-            top: '4px',
-            bottom: '4px',
-            width: `calc((100% + 28px) / ${tabLabels.length})`,
-            left: `calc(4px + ${displayIndex} * (100% - 20px) / ${tabLabels.length})`,
-            transition: 'left 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-            background: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(237, 238, 243, 0.9)',
-          }}
-        />
         {tabLabels.map((label, i) => {
           const isActive = i === displayIndex;
+          const isPact = i === PACT_INDEX;
+
+          // Pact — elevated circle button
+          if (isPact) {
+            return (
+              <button
+                key={i}
+                ref={el => { btnRefs.current[i] = el; }}
+                type="button"
+                onClick={(e) => handleTabClick(i, e)}
+                className="flex-1 flex flex-col items-center justify-end relative z-[2] h-full"
+                aria-label={label}
+              >
+                {/* Elevated circle */}
+                <div
+                  className="absolute flex items-center justify-center rounded-full overflow-hidden"
+                  style={{
+                    width: 56,
+                    height: 56,
+                    top: -16,
+                    background: 'linear-gradient(135deg, #1F32D6, #6366F1)',
+                    boxShadow: isActive
+                      ? '0 -4px 16px rgba(31, 50, 214, 0.4), 0 4px 12px rgba(99, 102, 241, 0.3)'
+                      : '0 -2px 12px rgba(31, 50, 214, 0.25), 0 4px 8px rgba(0,0,0,0.1)',
+                  }}
+                >
+                  {/* Ripple inside circle */}
+                  <RippleEffect ripples={tabRipples[i] || []} color={pactRippleColor} />
+                  <svg
+                    width="28"
+                    height="28"
+                    viewBox="0 0 20 20"
+                    fill="none"
+                    className="relative z-10"
+                  >
+                    {(isActive && iconActive[i] ? iconActive[i]! : iconDefault[i]).map((d, j) => (
+                      <path key={j} d={d} fill="white" />
+                    ))}
+                  </svg>
+                </div>
+                {/* Label below the circle */}
+                <span
+                  className="text-[10px] leading-3 font-medium mb-[2px]"
+                  style={{ color: isActive ? ACTIVE_COLOR : INACTIVE_COLOR }}
+                >
+                  {label}
+                </span>
+              </button>
+            );
+          }
+
+          // Regular tabs — wallet & mine
           const activeIcon = iconActive[i];
           const paths = isActive && activeIcon ? activeIcon : iconDefault[i];
           const color = isActive ? ACTIVE_COLOR : INACTIVE_COLOR;
@@ -147,38 +224,27 @@ export function BottomNav({ activeOverride }: { activeOverride?: number } = {}) 
           return (
             <button
               key={i}
+              ref={el => { btnRefs.current[i] = el; }}
               type="button"
-              onClick={() => handleTabClick(i)}
-              className="flex-1 flex flex-col items-center justify-center gap-[2px] transition-colors duration-200 relative h-full rounded-full z-[1]"
+              onClick={(e) => handleTabClick(i, e)}
+              className="flex-1 flex flex-col items-center justify-center gap-[2px] relative h-full rounded-full z-[1] overflow-hidden"
               aria-label={label}
-              style={i > 0 ? { marginLeft: '-12px' } : undefined}
             >
-              <div className="relative">
-                {/* Glow effect for Pact when active */}
-                {isActive && i === 2 && (
-                  <motion.div
-                    className="absolute -inset-1.5 rounded-full"
-                    style={{ background: `radial-gradient(circle, ${ACTIVE_COLOR}30 0%, transparent 70%)` }}
-                    animate={{ opacity: [0.5, 1, 0.5], scale: [0.9, 1.1, 0.9] }}
-                    transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-                  />
-                )}
-                <motion.svg
-                  width="26"
-                  height="26"
-                  viewBox="0 0 20 20"
-                  fill="none"
-                  animate={{ scale: isActive && activeIcon ? [1, 1.1, 1] : 1 }}
-                  transition={{ duration: 0.3, ease: 'easeOut' }}
-                  className="relative"
-                >
-                  {paths.map((d, j) => (
-                    <path key={j} d={d} fill={color} />
-                  ))}
-                </motion.svg>
-              </div>
+              {/* Ripple layer */}
+              <RippleEffect ripples={tabRipples[i] || []} color={rippleColor} />
+              <svg
+                width="26"
+                height="26"
+                viewBox="0 0 20 20"
+                fill="none"
+                className="relative z-10"
+              >
+                {paths.map((d, j) => (
+                  <path key={j} d={d} fill={color} />
+                ))}
+              </svg>
               <span
-                className="text-[10px] leading-3 font-medium"
+                className="text-[10px] leading-3 font-medium relative z-10"
                 style={{ color }}
               >
                 {label}

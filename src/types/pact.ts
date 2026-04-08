@@ -32,7 +32,18 @@ export interface Pact {
   riskControls: PactRiskControl[];
   schedule: string;
   exitConditions: string;
+  exitConditionList?: ExitCondition[];
   riskRules: PactRiskRule[];
+}
+
+export type ExitConditionType = 'tx_count' | 'tx_amount' | 'duration';
+
+export interface ExitCondition {
+  type: ExitConditionType;
+  label: string;
+  current: number;
+  target: number;
+  unit?: string;
 }
 
 export interface PactRiskRule {

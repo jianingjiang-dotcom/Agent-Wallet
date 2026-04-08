@@ -196,7 +196,7 @@ export default function HomePage() {
       handledSidebarOpen.current = false;
     }
   }, [location.state]);
-  const { assets, transactions, currentWallet, walletStatus, addToken, removeToken, unreadNotificationCount, getAgentTxByWallet, agentTransactions } = useWallet();
+  const { assets, transactions, currentWallet, walletStatus, addToken, removeToken, unreadMessageCount, pendingTodoCount, getAgentTxByWallet, agentTransactions } = useWallet();
 
   // Claimed wallet states
   const needsKeyGen = walletStatus === 'claimed_no_key';
@@ -400,7 +400,24 @@ export default function HomePage() {
           </div>
           </motion.button>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5">
+            {/* AI Assistant Entry */}
+            <motion.button
+              onClick={() => navigate('/assistant')}
+              className="relative flex items-center gap-1.5 pl-2 pr-2.5 py-1 rounded-full overflow-hidden active:scale-95 transition-transform"
+              style={{ background: 'linear-gradient(135deg, #7C3AED, #6366F1, #3B82F6)', boxShadow: '0 2px 8px rgba(99, 102, 241, 0.4)' }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.92 }}
+            >
+              <motion.div
+                className="absolute inset-0 opacity-30"
+                style={{ background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.5) 50%, transparent 100%)' }}
+                animate={{ x: ['-100%', '200%'] }}
+                transition={{ duration: 2.5, repeat: Infinity, ease: 'linear' }}
+              />
+              <Sparkles className="w-3 h-3 text-white relative z-10" strokeWidth={2} />
+              <span className="text-[11px] font-semibold text-white relative z-10 tracking-wide">AI</span>
+            </motion.button>
             {/* Message Center Entry */}
             <motion.button
               className="relative flex items-center justify-center"
@@ -409,13 +426,13 @@ export default function HomePage() {
               transition={{ type: 'spring', stiffness: 400, damping: 25 }}
             >
               <Bell className="w-6 h-6" strokeWidth={1.5} style={{ color: '#000000' }} />
-              {unreadNotificationCount > 0 && (
+              {(unreadMessageCount + pendingTodoCount) > 0 && (
                 <motion.span
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   className="absolute -top-[6px] -right-[6px] min-w-4 h-4 px-1 bg-destructive text-destructive-foreground text-[10px] font-medium rounded-full flex items-center justify-center"
                 >
-                  {unreadNotificationCount > 9 ? '9+' : unreadNotificationCount}
+                  {(unreadMessageCount + pendingTodoCount) > 9 ? '9+' : (unreadMessageCount + pendingTodoCount)}
                 </motion.span>
               )}
             </motion.button>

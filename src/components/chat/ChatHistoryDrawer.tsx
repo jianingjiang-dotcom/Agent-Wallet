@@ -1,6 +1,6 @@
 import { ReactNode, useState, useRef, useCallback, useEffect } from 'react';
 import { isToday, isYesterday, subDays, isAfter } from 'date-fns';
-import { Copy, Trash2 } from 'lucide-react';
+import { Copy, Trash2, Plus } from 'lucide-react';
 import { EmptyState } from '@/components/EmptyState';
 import { EmptyIcon } from '@/components/icons/EmptyIcon';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -16,6 +16,7 @@ interface ChatHistoryDrawerProps {
   currentSessionId: string | null;
   onSelectSession: (id: string) => void;
   onDeleteSession: (id: string) => void;
+  onNewSession?: () => void;
 }
 
 function groupSessions(sessions: ChatSession[]) {
@@ -57,6 +58,7 @@ export function ChatHistoryDrawer({
   currentSessionId,
   onSelectSession,
   onDeleteSession,
+  onNewSession,
 }: ChatHistoryDrawerProps) {
   const groups = groupSessions(sessions);
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
@@ -169,8 +171,17 @@ export function ChatHistoryDrawer({
         )}
       >
         <div className="h-[44px] shrink-0" />
-        <div className="flex items-center h-[44px] px-5 shrink-0">
+        <div className="flex items-center justify-between h-[44px] px-5 shrink-0">
           <h2 className="text-[18px] leading-[28px] font-semibold">对话记录</h2>
+          {onNewSession && (
+            <button
+              onClick={onNewSession}
+              className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-[#1F32D6] text-white text-[13px] font-medium active:opacity-80 transition-opacity"
+            >
+              <Plus className="w-3.5 h-3.5" strokeWidth={2} />
+              新对话
+            </button>
+          )}
         </div>
 
         <ScrollArea className="flex-1">

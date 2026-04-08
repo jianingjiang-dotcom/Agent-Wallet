@@ -32,7 +32,7 @@ export function ChatInput({ onSend, onStop, disabled, isLoading }: ChatInputProp
   const { isListening, interimTranscript, start: startListening, stop: stopListening, isSupported: voiceSupported } = useSpeechRecognition();
 
   const hasText = text.trim().length > 0 || attachment !== null;
-  const isExpanded = isFocused || hasText || isListening;
+  const isExpanded = true;
 
 
   const handleSend = useCallback(() => {

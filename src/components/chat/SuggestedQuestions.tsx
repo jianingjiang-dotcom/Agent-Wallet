@@ -1,14 +1,16 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { RefreshCw } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface SuggestedQuestionsProps {
   questions: string[];
   onSelect: (question: string) => void;
   onRefresh?: () => void;
+  align?: 'center' | 'left';
 }
 
-export function SuggestedQuestions({ questions, onSelect, onRefresh }: SuggestedQuestionsProps) {
+export function SuggestedQuestions({ questions, onSelect, onRefresh, align = 'center' }: SuggestedQuestionsProps) {
   const [isSpinning, setIsSpinning] = useState(false);
 
   const handleRefresh = () => {
@@ -19,7 +21,7 @@ export function SuggestedQuestions({ questions, onSelect, onRefresh }: Suggested
   };
 
   return (
-    <div className="flex flex-col items-center gap-2.5">
+    <div className={cn("flex flex-col gap-2.5", align === 'left' ? 'items-start' : 'items-center')}>
       {questions.map((q, i) => (
         <motion.button
           key={q}
@@ -27,7 +29,7 @@ export function SuggestedQuestions({ questions, onSelect, onRefresh }: Suggested
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: i * 0.1, duration: 0.25 }}
           onClick={() => onSelect(q)}
-          className="px-5 py-2.5 text-sm rounded-full border border-border bg-card text-foreground shadow-sm transition-colors active:bg-muted"
+          className="px-5 py-2.5 text-sm rounded-full border border-border bg-card text-foreground shadow-sm transition-colors active:bg-muted text-left"
         >
           {q}
         </motion.button>

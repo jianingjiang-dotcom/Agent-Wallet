@@ -179,13 +179,6 @@ export default function PactDetail() {
               </span>
               <span className="font-medium text-foreground">主钱包</span>
             </div>
-            <div className="flex items-center justify-between text-[12px]">
-              <span className="text-muted-foreground flex items-center gap-1.5">
-                <Clock className="w-3.5 h-3.5" strokeWidth={1.5} />
-                有效期
-              </span>
-              <span className="font-medium text-foreground">{pact.validityDays} 天</span>
-            </div>
           </div>
         </motion.div>
 
@@ -299,9 +292,48 @@ export default function PactDetail() {
         </CollapsibleSection>
 
         {/* Exit Conditions */}
-        <CollapsibleSection title="退出条件" icon={LogOut}>
-          <p className="text-[13px] text-foreground/80 leading-relaxed">{pact.exitConditions}</p>
-        </CollapsibleSection>
+        {pact.exitConditionList && pact.exitConditionList.length > 0 ? (
+          <div className="bg-card rounded-2xl border border-border/60 shadow-sm p-4">
+            <div className="flex items-center gap-2 mb-4">
+              <LogOut className="w-4 h-4 text-muted-foreground" strokeWidth={1.5} />
+              <span className="text-[13px] font-semibold text-foreground">退出条件</span>
+            </div>
+            <div className="space-y-4">
+              {pact.exitConditionList.map((cond, idx) => {
+                const pct = Math.min((cond.current / cond.target) * 100, 100);
+                const currentDisplay = cond.unit === '$'
+                  ? `$${cond.current.toLocaleString()}`
+                  : `${cond.current.toLocaleString()}`;
+                const targetDisplay = cond.unit === '$'
+                  ? `$${cond.target.toLocaleString()}`
+                  : `${cond.target.toLocaleString()}`;
+                return (
+                  <div key={idx}>
+                    <div className="flex items-baseline justify-between mb-1.5">
+                      <span className="text-[13px] text-muted-foreground">{cond.label}</span>
+                      <span className="text-[14px] font-semibold text-foreground tabular-nums">
+                        {currentDisplay} / {targetDisplay}
+                      </span>
+                    </div>
+                    <div className="h-[6px] rounded-full bg-muted/60 overflow-hidden">
+                      <div
+                        className="h-full rounded-full transition-all duration-500"
+                        style={{
+                          width: `${pct}%`,
+                          background: 'linear-gradient(90deg, #1F32D6, #6366F1)',
+                        }}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ) : (
+          <CollapsibleSection title="退出条件" icon={LogOut}>
+            <p className="text-[13px] text-foreground/80 leading-relaxed">{pact.exitConditions}</p>
+          </CollapsibleSection>
+        )}
       </div>
 
       {/* ===== Fixed bottom action bar ===== */}
@@ -360,10 +392,6 @@ export default function PactDetail() {
                 <div className="flex justify-between text-[12px]">
                   <span className="text-muted-foreground">Agent</span>
                   <span className="font-medium text-foreground">{pact.agentName}</span>
-                </div>
-                <div className="flex justify-between text-[12px]">
-                  <span className="text-muted-foreground">有效期</span>
-                  <span className="font-medium text-foreground">{pact.validityDays} 天</span>
                 </div>
               </div>
               <div className="flex gap-3 pt-2">
