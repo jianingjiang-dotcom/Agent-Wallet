@@ -79,7 +79,8 @@ export default function PactDetail() {
   const status = statusConfig[pact.status];
   const StatusIcon = status.icon;
   const isPending = pact.status === 'pending';
-  const showRevoke = pact.status === 'active' || pact.status === 'approved';
+  const isRunning = pact.status === 'active' || pact.status === 'approved';
+  const showRevoke = isRunning;
 
   const handleConfirm = () => {
     if (confirmAction === 'approve') toast.success(t.pactDetail.pactApproved);
@@ -158,12 +159,21 @@ export default function PactDetail() {
             </div>
 
             <h2 className="text-[17px] font-bold text-foreground leading-snug mb-2">{pact.title}</h2>
-            <p className="text-[13px] text-muted-foreground leading-relaxed">{pact.description}</p>
+
+            {/* Original prompt — quote style */}
+            <div className="flex gap-3 mt-3">
+              <div className="w-[3px] rounded-full bg-[#1F32D6] shrink-0" />
+              <p className="text-[16px] font-semibold text-foreground leading-relaxed">
+                "{pact.userPrompt}"
+              </p>
+            </div>
+
+            <p className="text-[13px] text-muted-foreground leading-relaxed mt-3">{pact.description}</p>
           </div>
 
           <div className="h-px bg-border/40 mx-4" />
 
-          {/* Key meta: Agent, Wallet, Validity */}
+          {/* Key meta: Agent, Wallet */}
           <div className="px-4 py-3.5 space-y-2.5">
             <div className="flex items-center justify-between text-[12px]">
               <span className="text-muted-foreground flex items-center gap-1.5">
@@ -179,51 +189,6 @@ export default function PactDetail() {
               </span>
               <span className="font-medium text-foreground">主钱包</span>
             </div>
-          </div>
-        </motion.div>
-
-        {/* ===== Original prompt ===== */}
-        <motion.div
-          className="bg-white rounded-2xl border border-border/60 shadow-sm px-4 py-3.5"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.05 }}
-        >
-          <p className="text-[12px] text-muted-foreground mb-2 font-medium">原始指令</p>
-          <div className="bg-muted/30 rounded-lg p-3">
-            <p className="text-[13px] text-foreground/80 leading-relaxed italic">
-              "{pact.userPrompt}"
-            </p>
-          </div>
-        </motion.div>
-
-        {/* ===== Agent Permissions ===== */}
-        <motion.div
-          className="bg-white rounded-2xl border border-border/60 shadow-sm px-4 py-3.5"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-        >
-          <p className="text-[12px] text-muted-foreground mb-2.5 font-medium">Agent 权限</p>
-          <div className="space-y-2">
-            {pact.permissions.map((perm, i) => {
-              const isWrite = perm.type === 'write';
-              const permLabel = t.pactDetail.permLabels?.[perm.scope as keyof typeof t.pactDetail.permLabels] ?? perm.scope;
-              return (
-                <div key={i} className="flex items-center gap-2.5 text-[13px]">
-                  <div className={cn(
-                    'w-7 h-7 rounded-full flex items-center justify-center shrink-0',
-                    isWrite ? 'bg-blue-50' : 'bg-slate-50',
-                  )}>
-                    {isWrite
-                      ? <Pencil className="w-3.5 h-3.5 text-blue-500" strokeWidth={1.5} />
-                      : <Eye className="w-3.5 h-3.5 text-slate-400" strokeWidth={1.5} />
-                    }
-                  </div>
-                  <span className="text-foreground/80">{permLabel}</span>
-                </div>
-              );
-            })}
           </div>
         </motion.div>
 
@@ -292,48 +257,58 @@ export default function PactDetail() {
         </CollapsibleSection>
 
         {/* Exit Conditions */}
-        {pact.exitConditionList && pact.exitConditionList.length > 0 ? (
-          <div className="bg-card rounded-2xl border border-border/60 shadow-sm p-4">
-            <div className="flex items-center gap-2 mb-4">
-              <LogOut className="w-4 h-4 text-muted-foreground" strokeWidth={1.5} />
-              <span className="text-[13px] font-semibold text-foreground">退出条件</span>
-            </div>
-            <div className="space-y-4">
-              {pact.exitConditionList.map((cond, idx) => {
-                const pct = Math.min((cond.current / cond.target) * 100, 100);
-                const currentDisplay = cond.unit === '$'
-                  ? `$${cond.current.toLocaleString()}`
-                  : `${cond.current.toLocaleString()}`;
-                const targetDisplay = cond.unit === '$'
-                  ? `$${cond.target.toLocaleString()}`
-                  : `${cond.target.toLocaleString()}`;
-                return (
-                  <div key={idx}>
-                    <div className="flex items-baseline justify-between mb-1.5">
-                      <span className="text-[13px] text-muted-foreground">{cond.label}</span>
-                      <span className="text-[14px] font-semibold text-foreground tabular-nums">
-                        {currentDisplay} / {targetDisplay}
-                      </span>
+        <CollapsibleSection title="退出条件" icon={LogOut}>
+          {pact.exitConditionList && pact.exitConditionList.length > 0 ? (
+            isRunning ? (
+              <div className="space-y-4">
+                {pact.exitConditionList.map((cond, idx) => {
+                  const pct = Math.min((cond.current / cond.target) * 100, 100);
+                  const currentDisplay = cond.unit === '$'
+                    ? `$${cond.current.toLocaleString()}`
+                    : `${cond.current.toLocaleString()}`;
+                  const targetDisplay = cond.unit === '$'
+                    ? `$${cond.target.toLocaleString()}`
+                    : `${cond.target.toLocaleString()}`;
+                  return (
+                    <div key={idx}>
+                      <div className="flex items-baseline justify-between mb-1.5">
+                        <span className="text-[13px] text-muted-foreground">{cond.label}</span>
+                        <span className="text-[14px] font-semibold text-foreground tabular-nums">
+                          {currentDisplay} / {targetDisplay}
+                        </span>
+                      </div>
+                      <div className="h-[6px] rounded-full bg-muted/60 overflow-hidden">
+                        <div
+                          className="h-full rounded-full transition-all duration-500"
+                          style={{
+                            width: `${pct}%`,
+                            background: 'linear-gradient(90deg, #1F32D6, #6366F1)',
+                          }}
+                        />
+                      </div>
                     </div>
-                    <div className="h-[6px] rounded-full bg-muted/60 overflow-hidden">
-                      <div
-                        className="h-full rounded-full transition-all duration-500"
-                        style={{
-                          width: `${pct}%`,
-                          background: 'linear-gradient(90deg, #1F32D6, #6366F1)',
-                        }}
-                      />
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="space-y-2.5">
+                {pact.exitConditionList.map((cond, idx) => {
+                  const targetDisplay = cond.unit === '$'
+                    ? `$${cond.target.toLocaleString()}`
+                    : `${cond.target.toLocaleString()}${cond.unit ? ` ${cond.unit}` : ''}`;
+                  return (
+                    <div key={idx} className="flex items-center justify-between text-[13px]">
+                      <span className="text-muted-foreground">{cond.label}</span>
+                      <span className="font-semibold text-foreground tabular-nums">{targetDisplay}</span>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        ) : (
-          <CollapsibleSection title="退出条件" icon={LogOut}>
+                  );
+                })}
+              </div>
+            )
+          ) : (
             <p className="text-[13px] text-foreground/80 leading-relaxed">{pact.exitConditions}</p>
-          </CollapsibleSection>
-        )}
+          )}
+        </CollapsibleSection>
       </div>
 
       {/* ===== Fixed bottom action bar ===== */}

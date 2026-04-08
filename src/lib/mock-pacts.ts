@@ -64,6 +64,11 @@ export const mockPacts: Pact[] = [
     ],
     schedule: '每周一 9:00 UTC 执行，最长授权 90 天。',
     exitConditions: '手动撤销 OR 90天到期 OR 预算耗尽',
+    exitConditionList: [
+      { type: 'tx_count', label: '总交易笔数达到', current: 0, target: 50 },
+      { type: 'tx_amount', label: '总交易额达到', current: 0, target: 6000, unit: '$' },
+      { type: 'duration', label: '生效时间达到', current: 0, target: 90, unit: '天' },
+    ],
     riskRules: [
       { name: 'Uniswap Router Allow', type: 'contract_call', chain: 'ETH', addresses: ['0xE592427A...'], action: 'allow' },
     ],
