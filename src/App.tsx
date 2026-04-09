@@ -73,6 +73,8 @@ import PactHub from "./pages/PactHub";
 import PactApproval from "./pages/PactApproval";
 import PactDetail from "./pages/PactDetail";
 import DefaultPactManagement from "./pages/DefaultPactManagement";
+import StrategyMarketplace from "./pages/StrategyMarketplace";
+import StrategyDetail from "./pages/StrategyDetail";
 
 const queryClient = new QueryClient();
 
@@ -174,6 +176,8 @@ function AppRoutes() {
       <Route path="/pact-approval" element={<ProtectedRoute bypassAuth><PactApproval /></ProtectedRoute>} />
       <Route path="/pact/:id" element={<ProtectedRoute bypassAuth><PactDetail /></ProtectedRoute>} />
       <Route path="/default-pact" element={<ProtectedRoute bypassAuth><DefaultPactManagement /></ProtectedRoute>} />
+      <Route path="/pact-marketplace" element={<ProtectedRoute bypassAuth><StrategyMarketplace /></ProtectedRoute>} />
+      <Route path="/pact-marketplace/:id" element={<ProtectedRoute bypassAuth><StrategyDetail /></ProtectedRoute>} />
       <Route path="/messages" element={<ProtectedRoute bypassAuth><MessageCenter /></ProtectedRoute>} />
       <Route path="/messages/:type" element={<ProtectedRoute bypassAuth><MessageCategoryPage /></ProtectedRoute>} />
       <Route path="/excess-approval/:todoId" element={<ProtectedRoute bypassAuth><ExcessApproval /></ProtectedRoute>} />

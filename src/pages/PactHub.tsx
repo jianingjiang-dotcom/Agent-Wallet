@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -16,38 +16,47 @@ import { mockPacts, mockDefaultPacts } from '@/lib/mock-pacts';
 import { getPactHistoryData, type DailyPactData } from '@/lib/mock-pact-history';
 import { toast } from '@/lib/toast';
 import { CryptoIcon } from '@/components/CryptoIcon';
-import type { Pact } from '@/types/pact';
+import type { Pact, PactStatus } from '@/types/pact';
+
+type ListTab = 'all' | 'pending' | 'active' | 'rejected' | 'completed' | 'expired' | 'revoked';
 
 export default function PactHub() {
   const navigate = useNavigate();
   const t = useT();
-  const [dismissedIds, setDismissedIds] = useState<Set<string>>(new Set());
   const [forceEmpty, setForceEmpty] = useState(false); // TODO: 临时测试开关，上线前删除
+  const [listTab, setListTab] = useState<ListTab>('all');
 
-  const pendingPacts = useMemo(
-    () => mockPacts.filter(p => p.status === 'pending' && !dismissedIds.has(p.id)),
-    [dismissedIds],
-  );
-  const activePacts = useMemo(
-    () => mockPacts.filter(p => p.status === 'active'),
-    [],
-  );
-  const historyPacts = useMemo(
-    () => mockPacts.filter(p => p.status === 'rejected' || p.status === 'expired' || p.status === 'completed' || p.status === 'revoked' || dismissedIds.has(p.id)),
-    [dismissedIds],
-  );
+  const allPacts = mockPacts;
+  const activePacts = useMemo(() => allPacts.filter(p => p.status === 'active'), []);
+  const pendingCount = allPacts.filter(p => p.status === 'pending').length;
+  const hasAnyPact = allPacts.length > 0;
 
-  const defaultPact = mockDefaultPacts[0];
+  // List tabs config
+  const listTabs: { value: ListTab; label: string; statuses: PactStatus[]; count?: number }[] = [
+    { value: 'all', label: '全部', statuses: ['pending', 'active', 'rejected', 'completed', 'expired', 'revoked'] },
+    { value: 'pending', label: '待审批', statuses: ['pending'], count: pendingCount || undefined },
+    { value: 'active', label: '生效中', statuses: ['active'] },
+    { value: 'rejected', label: '已拒绝', statuses: ['rejected'] },
+    { value: 'completed', label: '已完成', statuses: ['completed'] },
+    { value: 'expired', label: '已过期', statuses: ['expired'] },
+    { value: 'revoked', label: '已撤回', statuses: ['revoked'] },
+  ];
 
-  const handleApproveConfirm = useCallback((id: string) => {
-    setDismissedIds(prev => new Set(prev).add(id));
-    toast.success('Pact 已通过');
-  }, []);
+  const statusConfig: Record<PactStatus, { label: string; color: string; bg: string }> = {
+    pending: { label: '待审批', color: 'text-amber-600', bg: 'bg-amber-50' },
+    active: { label: '生效中', color: 'text-blue-600', bg: 'bg-blue-50' },
+    completed: { label: '已完成', color: 'text-slate-600', bg: 'bg-slate-50' },
+    rejected: { label: '已拒绝', color: 'text-red-600', bg: 'bg-red-50' },
+    expired: { label: '已过期', color: 'text-muted-foreground', bg: 'bg-muted/50' },
+    revoked: { label: '已撤回', color: 'text-red-600', bg: 'bg-red-50' },
+  };
 
-  const handleRejectConfirm = useCallback((id: string) => {
-    setDismissedIds(prev => new Set(prev).add(id));
-    toast.success('Pact 已拒绝');
-  }, []);
+  const filteredPacts = useMemo(() => {
+    const statuses = listTabs.find(t => t.value === listTab)!.statuses;
+    return allPacts
+      .filter(p => statuses.includes(p.status))
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+  }, [listTab]);
 
   return (
     <AppLayout
@@ -55,22 +64,16 @@ export default function PactHub() {
       pageBg="bg-page"
       title="Pact"
       rightAction={
-        <div className="flex items-center gap-2">
-          {/* TODO: 临时测试按钮，上线前删除 */}
-          <button
-            onClick={() => setForceEmpty(f => !f)}
-            className={cn('px-2 py-0.5 rounded text-[10px] font-medium border', forceEmpty ? 'bg-red-50 text-red-600 border-red-200' : 'bg-muted/50 text-muted-foreground border-border/60')}
-          >
-            {forceEmpty ? '新用户' : '测试'}
-          </button>
-          <button onClick={() => navigate('/pact-approval')} className="flex items-center gap-1 text-muted-foreground">
-            <FileText className="w-5 h-5" strokeWidth={1.5} />
-          </button>
-        </div>
+        /* TODO: 临时测试按钮，上线前删除 */
+        <button
+          onClick={() => setForceEmpty(f => !f)}
+          className={cn('px-2 py-0.5 rounded text-[10px] font-medium border', forceEmpty ? 'bg-red-50 text-red-600 border-red-200' : 'bg-muted/50 text-muted-foreground border-border/60')}
+        >
+          {forceEmpty ? '新用户' : '测试'}
+        </button>
       }
     >
-      {forceEmpty || (pendingPacts.length === 0 && activePacts.length === 0 && historyPacts.length === 0) ? (
-        /* ===== New User Onboarding ===== */
+      {forceEmpty || !hasAnyPact ? (
         <PactOnboarding />
       ) : (
         <>
@@ -84,50 +87,95 @@ export default function PactHub() {
             </div>
           </div>
 
-          <div className="px-4 pb-6 space-y-5">
+          <div className="pb-6 space-y-5">
 
             {/* ===== Execution History Chart ===== */}
-            <PactHistoryChart />
+            <div className="px-4">
+              <PactHistoryChart />
+            </div>
 
-            {/* ===== Pending Entry ===== */}
-            {pendingPacts.length > 0 && (
-              <motion.button
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                onClick={() => navigate('/pact-approval', { state: { defaultTab: 'pending' } })}
-                className="w-full flex items-center gap-3 p-3.5 bg-amber-50/80 dark:bg-amber-900/15 rounded-2xl border border-amber-200/60 dark:border-amber-800/40 active:scale-[0.98] transition-transform"
+            {/* ===== Strategy Templates — auto-scroll carousel ===== */}
+            <TemplateCarousel />
+
+            {/* ===== Pact List with Tabs ===== */}
+            <div className="px-4">
+              {/* Scrollable pill tabs */}
+              <div
+                className="flex gap-2 overflow-x-auto pb-3 -mx-4 px-4"
+                style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}
               >
-                <div className="w-9 h-9 rounded-full bg-amber-100 dark:bg-amber-800/30 flex items-center justify-center shrink-0">
-                  <Clock className="w-4.5 h-4.5 text-amber-600" strokeWidth={1.5} />
-                </div>
-                <div className="flex-1 text-left">
-                  <p className="text-[14px] font-semibold text-foreground">{pendingPacts.length} 个 Pact 待审批</p>
-                  <p className="text-[12px] text-muted-foreground mt-0.5">点击查看并审批</p>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="min-w-[20px] h-[20px] px-1.5 rounded-full bg-red-500 text-white text-[11px] font-bold flex items-center justify-center">
-                    {pendingPacts.length}
-                  </span>
-                  <ChevronRight className="w-4 h-4 text-muted-foreground" strokeWidth={1.5} />
-                </div>
-              </motion.button>
-            )}
+                {listTabs.map(tab => {
+                  const isActive = listTab === tab.value;
+                  return (
+                    <button
+                      key={tab.value}
+                      onClick={() => setListTab(tab.value)}
+                      className={cn(
+                        'shrink-0 px-3.5 py-1.5 rounded-full text-[12px] font-medium transition-all border',
+                        isActive
+                          ? 'bg-foreground text-background border-foreground'
+                          : 'bg-white text-muted-foreground border-border/60'
+                      )}
+                    >
+                      {tab.label}
+                      {tab.count && tab.count > 0 && (
+                        <span className="ml-1 text-[10px] font-bold">{tab.count}</span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
 
-            {/* ===== Active Pacts ===== */}
-            <div>
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">执行中</span>
-                {activePacts.length > 0 && (
-                  <span className="text-[11px] text-muted-foreground">{activePacts.length} 个策略</span>
+              {/* List */}
+              <AnimatePresence mode="wait">
+                {filteredPacts.length === 0 ? (
+                  <motion.div
+                    key="empty"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="py-12 text-center"
+                  >
+                    <Shield className="w-10 h-10 mx-auto text-muted-foreground/20 mb-2" strokeWidth={1.5} />
+                    <p className="text-[13px] text-muted-foreground">暂无记录</p>
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key={listTab}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="space-y-2.5"
+                  >
+                    {filteredPacts.map((pact, i) => {
+                      const status = statusConfig[pact.status];
+                      return (
+                        <motion.div
+                          key={pact.id}
+                          initial={{ opacity: 0, y: 8 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: i * 0.03 }}
+                          onClick={() => navigate(`/pact/${pact.id}`)}
+                          className="bg-white rounded-2xl p-4 border border-border/60 shadow-sm cursor-pointer active:scale-[0.98] transition-transform"
+                        >
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className={cn('text-[11px] font-medium px-2 py-0.5 rounded-full', status.color, status.bg)}>
+                                  {status.label}
+                                </span>
+                              </div>
+                              <h3 className="text-[14px] font-bold text-foreground leading-snug mb-1">{pact.title}</h3>
+                              <p className="text-[12px] text-muted-foreground line-clamp-2">{pact.description}</p>
+                            </div>
+                            <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0 mt-1" strokeWidth={1.5} />
+                          </div>
+                        </motion.div>
+                      );
+                    })}
+                  </motion.div>
                 )}
-              </div>
-              <div className="space-y-2.5">
-                {/* Default Pact — hidden */}
-
-                {activePacts.map((pact, i) => (
-                  <ActivePactCard key={pact.id} pact={pact} delay={i * 0.05} onTap={() => navigate(`/pact/${pact.id}`)} />
-                ))}
-              </div>
+              </AnimatePresence>
             </div>
           </div>
         </>
@@ -136,105 +184,82 @@ export default function PactHub() {
   );
 }
 
-// ─── Pending Carousel (horizontal swipe) ────────────────────
-function PendingCarousel({
-  pacts, onTap,
-}: {
-  pacts: Pact[];
-  onTap: (id: string) => void;
-}) {
-  const [activeIndex, setActiveIndex] = useState(0);
+// ─── Template Carousel (horizontal swipe) ──────────────────
+function TemplateCarousel() {
+  const navigate = useNavigate();
+  const [drawerTpl, setDrawerTpl] = useState<typeof PROMPT_TEMPLATES[number] | null>(null);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  const handleCopy = (id: string, text: string) => {
+    navigator.clipboard.writeText(text);
+    toast.success('已复制到剪贴板');
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000);
+  };
 
   return (
-    <div>
-      {/* Horizontal scroll */}
-      <div
-        className="flex gap-3 overflow-x-auto snap-x snap-mandatory -mx-4 px-4 pb-2"
-        style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}
-        onScroll={(e) => {
-          const el = e.currentTarget;
-          const cardW = el.firstElementChild?.clientWidth || 300;
-          setActiveIndex(Math.min(Math.round(el.scrollLeft / (cardW + 12)), pacts.length - 1));
-        }}
-      >
-        {pacts.map((pact) => (
-          <div key={pact.id} className="snap-start shrink-0" style={{ width: 'calc(100% - 32px)' }}>
-            <div
-              onClick={() => onTap(pact.id)}
-              className="bg-card rounded-2xl p-4 border border-border/60 shadow-sm cursor-pointer active:scale-[0.98] transition-transform"
+    <>
+      <div>
+        <div className="flex items-center justify-between px-4 mb-2">
+          <span className="text-[12px] font-semibold text-muted-foreground uppercase tracking-wide">策略模板</span>
+          <button onClick={() => navigate('/pact-marketplace')} className="text-[12px] text-primary font-medium">
+            查看更多
+          </button>
+        </div>
+        <div
+          className="flex gap-3 overflow-x-auto snap-x snap-mandatory pb-1"
+          style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch', paddingLeft: 16, paddingRight: 16 }}
+        >
+          {PROMPT_TEMPLATES.map((tpl) => (
+            <button
+              key={tpl.id}
+              onClick={() => setDrawerTpl(tpl)}
+              className="snap-start shrink-0 w-full flex items-center gap-3 p-3.5 bg-card rounded-2xl border border-border/60 shadow-sm active:scale-[0.98] transition-transform text-left"
+              style={{ minWidth: 'calc(100% - 32px)', maxWidth: 'calc(100% - 32px)' }}
             >
-              <div className="flex items-start justify-between gap-3 mb-2">
-                <div className="flex-1 min-w-0">
-                  <span className="text-[11px] font-medium px-2 py-0.5 rounded-full inline-block mb-1 bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400">
-                    待审批
-                  </span>
-                  <h3 className="text-[15px] font-semibold text-foreground leading-snug">{pact.title}</h3>
-                </div>
-                <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0 mt-1" strokeWidth={1.5} />
+              <CryptoIcon symbol={tpl.symbol} size="md" />
+              <div className="flex-1 min-w-0">
+                <p className="text-[14px] font-semibold text-foreground leading-snug">{tpl.title}</p>
+                <p className="text-[12px] text-muted-foreground mt-0.5">{tpl.desc}</p>
               </div>
-              <p className="text-[13px] text-muted-foreground leading-relaxed line-clamp-2">{pact.description}</p>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Dots */}
-      {pacts.length > 1 && (
-        <div className="flex justify-center gap-1.5 mt-2">
-          {pacts.map((_, i) => (
-            <div key={i} className={cn('h-1.5 rounded-full transition-all duration-300', i === activeIndex ? 'w-4 bg-primary' : 'w-1.5 bg-muted-foreground/20')} />
+              <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" strokeWidth={1.5} />
+            </button>
           ))}
         </div>
-      )}
-
-    </div>
-  );
-}
-
-// ─── Active Pact Card ───────────────────────────────────────
-function ActivePactCard({ pact, delay, onTap }: { pact: Pact; delay: number; onTap: () => void }) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.1 + delay }}
-      onClick={onTap}
-      className="bg-card rounded-2xl p-4 border border-border/60 shadow-sm cursor-pointer active:scale-[0.98] transition-transform"
-    >
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex-1 min-w-0">
-          <h3 className="text-[14px] font-bold text-foreground leading-snug mb-1">{pact.title}</h3>
-          <p className="text-[12px] text-muted-foreground line-clamp-2">{pact.description}</p>
-        </div>
-        <div className="flex flex-col items-center shrink-0">
-          <div className="relative w-7 h-7 flex items-center justify-center">
-            <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 relative z-10" />
-            <div className="absolute inset-0 rounded-full bg-emerald-500/20 animate-ping" style={{ animationDuration: '2s' }} />
-          </div>
-          <span className="text-[9px] text-emerald-600 font-medium mt-0.5">生效中</span>
-        </div>
       </div>
-      {pact.exitConditionList && pact.exitConditionList.length > 0 && (
-        <div className="mt-3 space-y-3">
-          {pact.exitConditionList.map((cond, idx) => {
-            const pct = Math.min((cond.current / cond.target) * 100, 100);
-            const cur = cond.unit === '$' ? `$${cond.current.toLocaleString()}` : `${cond.current.toLocaleString()}`;
-            const tgt = cond.unit === '$' ? `$${cond.target.toLocaleString()}` : `${cond.target.toLocaleString()}`;
-            return (
-              <div key={idx}>
-                <div className="flex items-baseline justify-between mb-1">
-                  <span className="text-[11px] text-muted-foreground">{cond.label}</span>
-                  <span className="text-[12px] font-semibold text-foreground tabular-nums">{cur} / {tgt}</span>
-                </div>
-                <div className="h-[5px] rounded-full bg-muted/60 overflow-hidden">
-                  <div className="h-full rounded-full" style={{ width: `${pct}%`, background: 'linear-gradient(90deg, #1F32D6, #6366F1)' }} />
+
+      {/* Template Drawer */}
+      <Drawer open={!!drawerTpl} onOpenChange={(open) => { if (!open) setDrawerTpl(null); }}>
+        <DrawerContent>
+          {drawerTpl && (
+            <div className="px-5 pt-2 pb-8">
+              <div className="flex items-center gap-3 mb-5">
+                <CryptoIcon symbol={drawerTpl.symbol} size="lg" />
+                <div>
+                  <p className="text-[17px] font-bold text-foreground">{drawerTpl.title}</p>
+                  <p className="text-[13px] text-muted-foreground mt-0.5">{drawerTpl.desc}</p>
                 </div>
               </div>
-            );
-          })}
-        </div>
-      )}
-    </motion.div>
+              <div className="flex gap-3 mb-5">
+                <div className="w-[3px] rounded-full bg-primary shrink-0" />
+                <p className="text-[15px] text-foreground leading-relaxed">{drawerTpl.prompt}</p>
+              </div>
+              <Button
+                size="lg"
+                className="w-full text-[14px] font-medium gradient-primary"
+                onClick={() => handleCopy(drawerTpl.id, drawerTpl.prompt)}
+              >
+                {copiedId === drawerTpl.id ? (
+                  <><CheckCircle2 className="w-4 h-4 mr-2" />已复制到剪贴板</>
+                ) : (
+                  <><Copy className="w-4 h-4 mr-2" />复制 Prompt</>
+                )}
+              </Button>
+            </div>
+          )}
+        </DrawerContent>
+      </Drawer>
+    </>
   );
 }
 
