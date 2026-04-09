@@ -18,6 +18,7 @@ const SYMBOL_MAP: Record<string, string> = {
   'DOGE': 'doge',
   'ADA': 'ada',
   'DOT': 'dot',
+  'AAVE': 'aave',
   'AVAX': 'avax',
   'LINK': 'link',
   'UNI': 'uni',
