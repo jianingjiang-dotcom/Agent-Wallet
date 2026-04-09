@@ -29,7 +29,7 @@ export default function PactHub() {
     [dismissedIds],
   );
   const activePacts = useMemo(
-    () => mockPacts.filter(p => p.status === 'active' || p.status === 'approved'),
+    () => mockPacts.filter(p => p.status === 'active'),
     [],
   );
   const historyPacts = useMemo(
@@ -89,61 +89,40 @@ export default function PactHub() {
             {/* ===== Execution History Chart ===== */}
             <PactHistoryChart />
 
-            {/* ===== Pending Section — horizontal carousel ===== */}
+            {/* ===== Pending Entry ===== */}
             {pendingPacts.length > 0 && (
-              <div>
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">待审批</span>
-                  <span className="min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center">
+              <motion.button
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                onClick={() => navigate('/pact-approval', { state: { defaultTab: 'pending' } })}
+                className="w-full flex items-center gap-3 p-3.5 bg-amber-50/80 dark:bg-amber-900/15 rounded-2xl border border-amber-200/60 dark:border-amber-800/40 active:scale-[0.98] transition-transform"
+              >
+                <div className="w-9 h-9 rounded-full bg-amber-100 dark:bg-amber-800/30 flex items-center justify-center shrink-0">
+                  <Clock className="w-4.5 h-4.5 text-amber-600" strokeWidth={1.5} />
+                </div>
+                <div className="flex-1 text-left">
+                  <p className="text-[14px] font-semibold text-foreground">{pendingPacts.length} 个 Pact 待审批</p>
+                  <p className="text-[12px] text-muted-foreground mt-0.5">点击查看并审批</p>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="min-w-[20px] h-[20px] px-1.5 rounded-full bg-red-500 text-white text-[11px] font-bold flex items-center justify-center">
                     {pendingPacts.length}
                   </span>
+                  <ChevronRight className="w-4 h-4 text-muted-foreground" strokeWidth={1.5} />
                 </div>
-                <PendingCarousel
-                  pacts={pendingPacts}
-                  onTap={(id) => navigate(`/pact/${id}`)}
-                />
-              </div>
+              </motion.button>
             )}
 
-            {/* ===== Active Pacts (Default Pact pinned at top) ===== */}
+            {/* ===== Active Pacts ===== */}
             <div>
               <div className="flex items-center justify-between mb-3">
                 <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">执行中</span>
                 {activePacts.length > 0 && (
-                  <span className="text-[11px] text-muted-foreground">{activePacts.length + 1} 个策略</span>
+                  <span className="text-[11px] text-muted-foreground">{activePacts.length} 个策略</span>
                 )}
               </div>
               <div className="space-y-2.5">
-                {/* Default Pact — pinned */}
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  onClick={() => navigate('/default-pact')}
-                  className="relative overflow-hidden rounded-2xl p-4 border border-primary/20 shadow-sm cursor-pointer active:scale-[0.98] transition-transform"
-                  style={{ background: 'linear-gradient(135deg, rgba(31,50,214,0.06) 0%, rgba(31,50,214,0.02) 100%)' }}
-                >
-                  <div className="flex items-start justify-between gap-3 mb-2">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1.5">
-                        <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-primary/10 text-primary">DEFAULT</span>
-                        <span className="text-[10px] text-emerald-600 font-medium flex items-center gap-0.5">
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                          始终生效
-                        </span>
-                      </div>
-                      <h3 className="text-[14px] font-bold text-foreground leading-snug">{defaultPact.name}</h3>
-                      <p className="text-[12px] text-muted-foreground mt-0.5">{defaultPact.description}</p>
-                    </div>
-                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                      <ShieldCheck className="w-5 h-5 text-primary" strokeWidth={1.5} />
-                    </div>
-                  </div>
-                  <div className="flex gap-3 mt-3">
-                    <div className="text-[11px]"><span className="text-muted-foreground">单笔限额 </span><span className="font-semibold text-foreground">${defaultPact.maxPerTx}</span></div>
-                    <div className="text-[11px]"><span className="text-muted-foreground">24h 限额 </span><span className="font-semibold text-foreground">${defaultPact.rolling24h}</span></div>
-                    <div className="text-[11px]"><span className="text-muted-foreground">链 </span><span className="font-semibold text-foreground">{defaultPact.allowedChains.length} 条</span></div>
-                  </div>
-                </motion.div>
+                {/* Default Pact — hidden */}
 
                 {activePacts.map((pact, i) => (
                   <ActivePactCard key={pact.id} pact={pact} delay={i * 0.05} onTap={() => navigate(`/pact/${pact.id}`)} />

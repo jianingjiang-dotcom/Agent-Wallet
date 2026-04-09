@@ -13,7 +13,7 @@ import { cn } from '@/lib/utils';
 import { mockPacts } from '@/lib/mock-pacts';
 import { toast } from '@/lib/toast';
 import { useT } from '@/lib/i18n';
-import type { PactStatus } from '@/types/pact';
+import type { PactStatus, PolicyRule } from '@/types/pact';
 
 function CollapsibleSection({ title, icon: Icon, defaultOpen = false, children }: {
   title: string;
@@ -49,6 +49,130 @@ function CollapsibleSection({ title, icon: Icon, defaultOpen = false, children }
   );
 }
 
+// ─── Policy Card ───────────────────────────────────────────
+const policyTypeLabels: Record<string, { label: string; color: string; bg: string }> = {
+  transfer: { label: 'Transfer', color: 'text-blue-700', bg: 'bg-blue-100' },
+  contract_call: { label: 'Contract Call', color: 'text-purple-700', bg: 'bg-purple-100' },
+  message_sign: { label: 'Message Sign', color: 'text-amber-700', bg: 'bg-amber-100' },
+};
+
+const windowLabels: Record<string, string> = {
+  rolling_1h: '1h',
+  rolling_24h: '24h',
+  rolling_7d: '7d',
+  rolling_30d: '30d',
+};
+
+function shortenAddr(addr: string) {
+  if (addr.length <= 14) return addr;
+  return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
+}
+
+function PolicyCard({ policy }: { policy: PolicyRule }) {
+  const typeInfo = policyTypeLabels[policy.type] || policyTypeLabels.transfer;
+  const { when, deny_if, review_if } = policy.rules;
+
+  // Collect when chips
+  const whenChips: { label: string; value: string }[] = [];
+  if (when?.chain_in?.length) whenChips.push({ label: '链', value: when.chain_in.join(', ') });
+  if (when?.token_in?.length) whenChips.push({ label: 'Token', value: when.token_in.map(t => t.token_id).join(', ') });
+  if (when?.destination_address_in?.length) {
+    when.destination_address_in.forEach(d => {
+      const addr = shortenAddr(d.address);
+      whenChips.push({ label: '目标', value: d.label ? `${addr} (${d.label})` : addr });
+    });
+  }
+  if (when?.target_in?.length) {
+    when.target_in.forEach(t => {
+      const addr = shortenAddr(t.contract_addr);
+      whenChips.push({ label: '合约', value: t.label ? `${addr} (${t.label})` : addr });
+    });
+  }
+  if (when?.source_address_in?.length) {
+    whenChips.push({ label: '来源', value: when.source_address_in.map(shortenAddr).join(', ') });
+  }
+
+  // Collect usage limits
+  const limitRows: { window: string; label: string; value: string }[] = [];
+  if (deny_if?.usage_limits) {
+    for (const [winKey, winVal] of Object.entries(deny_if.usage_limits)) {
+      if (!winVal) continue;
+      const winLabel = windowLabels[winKey] || winKey;
+      if (winVal.amount_usd_gt) limitRows.push({ window: winLabel, label: '金额上限', value: `$${winVal.amount_usd_gt.toLocaleString()}` });
+      if (winVal.amount_gt) limitRows.push({ window: winLabel, label: '数量上限', value: `${winVal.amount_gt}` });
+      if (winVal.tx_count_gt) limitRows.push({ window: winLabel, label: '笔数上限', value: `${winVal.tx_count_gt}` });
+      if (winVal.request_count_gt) limitRows.push({ window: winLabel, label: '请求上限', value: `${winVal.request_count_gt}` });
+    }
+  }
+
+  // Collect review conditions
+  const reviewRows: { label: string; value: string }[] = [];
+  if (review_if) {
+    if (review_if.amount_usd_gt) reviewRows.push({ label: '单笔超过', value: `> $${review_if.amount_usd_gt.toLocaleString()}` });
+    if (review_if.amount_gt) reviewRows.push({ label: '数量超过', value: `> ${review_if.amount_gt}` });
+  }
+
+  return (
+    <div className="bg-muted/30 rounded-xl p-3.5">
+      {/* Header */}
+      <div className="flex items-center gap-2 mb-3">
+        <span className="text-[13px] font-semibold text-foreground">{policy.name}</span>
+        <span className={cn('text-[10px] font-bold px-1.5 py-0.5 rounded', typeInfo.bg, typeInfo.color)}>
+          {typeInfo.label}
+        </span>
+      </div>
+
+      {/* When — chips */}
+      {whenChips.length > 0 && (
+        <div className="mb-3">
+          <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">准入条件</p>
+          <div className="flex flex-wrap gap-1.5">
+            {whenChips.map((c, i) => (
+              <span key={i} className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-md bg-white border border-border/60">
+                <span className="text-muted-foreground">{c.label}:</span>
+                <span className="font-medium text-foreground">{c.value}</span>
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Deny — usage limits */}
+      {limitRows.length > 0 && (
+        <div className="mb-3">
+          <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">使用限额</p>
+          <div className="space-y-1">
+            {limitRows.map((r, i) => (
+              <div key={i} className="flex items-center justify-between text-[12px]">
+                <span className="text-muted-foreground">
+                  <span className="inline-block min-w-[28px] text-[10px] font-bold text-primary/70 mr-1">{r.window}</span>
+                  {r.label}
+                </span>
+                <span className="font-semibold text-foreground tabular-nums">{r.value}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Review conditions */}
+      {reviewRows.length > 0 && (
+        <div>
+          <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">需审批</p>
+          <div className="space-y-1">
+            {reviewRows.map((r, i) => (
+              <div key={i} className="flex items-center justify-between text-[12px]">
+                <span className="text-muted-foreground">{r.label}</span>
+                <span className="font-semibold text-amber-600 tabular-nums">{r.value}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function PactDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -58,12 +182,11 @@ export default function PactDetail() {
 
   const statusConfig: Record<PactStatus, { label: string; color: string; bg: string; icon: typeof CheckCircle2 }> = {
     pending: { label: t.common.pending, color: 'text-amber-600', bg: 'bg-amber-50', icon: Clock },
-    approved: { label: t.common.approved, color: 'text-emerald-600', bg: 'bg-emerald-50', icon: CheckCircle2 },
     active: { label: t.common.active, color: 'text-blue-600', bg: 'bg-blue-50', icon: Zap },
     completed: { label: t.common.completed, color: 'text-slate-600', bg: 'bg-slate-50', icon: CheckCircle2 },
     rejected: { label: t.common.rejected, color: 'text-red-600', bg: 'bg-red-50', icon: XCircle },
     expired: { label: t.common.expired, color: 'text-muted-foreground', bg: 'bg-muted/50', icon: Clock },
-    revoked: { label: '已撤销', color: 'text-red-600', bg: 'bg-red-50', icon: ShieldOff },
+    revoked: { label: t.common.revoked, color: 'text-red-600', bg: 'bg-red-50', icon: ShieldOff },
   };
 
   if (!pact) {
@@ -79,7 +202,7 @@ export default function PactDetail() {
   const status = statusConfig[pact.status];
   const StatusIcon = status.icon;
   const isPending = pact.status === 'pending';
-  const isRunning = pact.status === 'active' || pact.status === 'approved';
+  const isRunning = pact.status === 'active';
   const showRevoke = isRunning;
 
   const handleConfirm = () => {
@@ -222,38 +345,24 @@ export default function PactDetail() {
           </div>
         </CollapsibleSection>
 
-        {/* Risk Controls */}
+        {/* Risk Controls / Policies */}
         <CollapsibleSection title="风控限制" icon={Shield}>
-          <div className="space-y-2">
-            {pact.riskControls.map((rc, i) => (
-              <div key={i} className="flex items-center justify-between py-1.5">
-                <span className="text-[13px] text-muted-foreground">{rc.label}</span>
-                <span className="text-[13px] font-medium text-foreground">{rc.value}</span>
-              </div>
-            ))}
-            {/* Risk rules */}
-            {pact.riskRules.length > 0 && (
-              <div className="pt-2 space-y-2">
-                {pact.riskRules.map((rule, i) => (
-                  <div key={i} className="bg-muted/30 rounded-lg p-3">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className={cn(
-                        'text-[10px] font-bold px-1.5 py-0.5 rounded',
-                        rule.action === 'deny' ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-700',
-                      )}>
-                        {rule.action === 'deny' ? '拒绝' : '允许'}
-                      </span>
-                      <span className="text-[12px] font-semibold text-foreground">{rule.name}</span>
-                    </div>
-                    <div className="text-[11px] text-muted-foreground space-y-0.5">
-                      <p>链: {rule.chain} · 类型: {rule.type}</p>
-                      {rule.addresses && <p>地址: {rule.addresses.join(', ')}</p>}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+          {pact.policies && pact.policies.length > 0 ? (
+            <div className="space-y-3">
+              {pact.policies.map((policy, pi) => (
+                <PolicyCard key={pi} policy={policy} />
+              ))}
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {pact.riskControls.map((rc, i) => (
+                <div key={i} className="flex items-center justify-between py-1.5">
+                  <span className="text-[13px] text-muted-foreground">{rc.label}</span>
+                  <span className="text-[13px] font-medium text-foreground">{rc.value}</span>
+                </div>
+              ))}
+            </div>
+          )}
         </CollapsibleSection>
 
         {/* Exit Conditions */}
@@ -313,7 +422,7 @@ export default function PactDetail() {
 
       {/* ===== Fixed bottom action bar ===== */}
       {isPending && (
-        <div className="fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-t border-border/50 px-4 py-3 flex gap-3" style={{ maxWidth: 430, margin: '0 auto' }}>
+        <div className="fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-t border-border/50 px-4 pt-3 pb-8 flex gap-3" style={{ maxWidth: 430, margin: '0 auto' }}>
           <Button
             variant="outline"
             className="flex-1 h-12 text-[15px] font-semibold border-red-200 text-red-600 hover:bg-red-50"
@@ -330,7 +439,7 @@ export default function PactDetail() {
         </div>
       )}
       {showRevoke && (
-        <div className="fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-t border-border/50 px-4 py-3" style={{ maxWidth: 430, margin: '0 auto' }}>
+        <div className="fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-t border-border/50 px-4 pt-3 pb-8" style={{ maxWidth: 430, margin: '0 auto' }}>
           <Button
             variant="outline"
             className="w-full h-12 text-[15px] font-semibold border-red-200 text-red-600 hover:bg-red-50"

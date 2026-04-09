@@ -57,7 +57,6 @@ const iconActive: (string[][] | null)[] = [
   ],
 ];
 
-const PACT_INDEX = 1;
 const navPaths = ['/home', '/pact', '/mine'];
 
 // Ripple component — expands from click point then fades
@@ -99,7 +98,6 @@ export function BottomNav({ activeOverride }: { activeOverride?: number } = {}) 
   const routeIndex = Math.max(0, navPaths.findIndex(p => location.pathname.startsWith(p)));
   const realIndex = activeOverride !== undefined ? activeOverride : routeIndex;
   const [displayIndex, setDisplayIndex] = useState(realIndex);
-  const [isAnimating, setIsAnimating] = useState(false);
   const isDark = resolvedTheme === 'dark';
   const INACTIVE_COLOR = isDark ? DARK_INACTIVE : LIGHT_INACTIVE;
 
@@ -130,17 +128,12 @@ export function BottomNav({ activeOverride }: { activeOverride?: number } = {}) 
 
   const handleTabClick = useCallback((i: number, e: React.MouseEvent | React.TouchEvent) => {
     triggerRipple(i, e);
-    if (i === realIndex || isAnimating) return;
-    setIsAnimating(true);
+    if (i === realIndex) return;
     setDisplayIndex(i);
-    setTimeout(() => {
-      navigate(navPaths[i]);
-      setIsAnimating(false);
-    }, 250);
-  }, [realIndex, isAnimating, navigate, triggerRipple]);
+    navigate(navPaths[i]);
+  }, [realIndex, navigate, triggerRipple]);
 
   const rippleColor = isDark ? 'rgba(255,255,255,0.25)' : 'rgba(31, 50, 214, 0.2)';
-  const pactRippleColor = 'rgba(255,255,255,0.45)';
 
   return (
     <div className="flex justify-center px-[16px] pb-[21px]">
@@ -165,58 +158,6 @@ export function BottomNav({ activeOverride }: { activeOverride?: number } = {}) 
       >
         {tabLabels.map((label, i) => {
           const isActive = i === displayIndex;
-          const isPact = i === PACT_INDEX;
-
-          // Pact — elevated circle button
-          if (isPact) {
-            return (
-              <button
-                key={i}
-                ref={el => { btnRefs.current[i] = el; }}
-                type="button"
-                onClick={(e) => handleTabClick(i, e)}
-                className="flex-1 flex flex-col items-center justify-end relative z-[2] h-full"
-                aria-label={label}
-              >
-                {/* Elevated circle */}
-                <div
-                  className="absolute flex items-center justify-center rounded-full overflow-hidden"
-                  style={{
-                    width: 56,
-                    height: 56,
-                    top: -16,
-                    background: 'linear-gradient(135deg, #1F32D6, #6366F1)',
-                    boxShadow: isActive
-                      ? '0 -4px 16px rgba(31, 50, 214, 0.4), 0 4px 12px rgba(99, 102, 241, 0.3)'
-                      : '0 -2px 12px rgba(31, 50, 214, 0.25), 0 4px 8px rgba(0,0,0,0.1)',
-                  }}
-                >
-                  {/* Ripple inside circle */}
-                  <RippleEffect ripples={tabRipples[i] || []} color={pactRippleColor} />
-                  <svg
-                    width="28"
-                    height="28"
-                    viewBox="0 0 20 20"
-                    fill="none"
-                    className="relative z-10"
-                  >
-                    {(isActive && iconActive[i] ? iconActive[i]! : iconDefault[i]).map((d, j) => (
-                      <path key={j} d={d} fill="white" />
-                    ))}
-                  </svg>
-                </div>
-                {/* Label below the circle */}
-                <span
-                  className="text-[10px] leading-3 font-medium mb-[2px]"
-                  style={{ color: isActive ? ACTIVE_COLOR : INACTIVE_COLOR }}
-                >
-                  {label}
-                </span>
-              </button>
-            );
-          }
-
-          // Regular tabs — wallet & mine
           const activeIcon = iconActive[i];
           const paths = isActive && activeIcon ? activeIcon : iconDefault[i];
           const color = isActive ? ACTIVE_COLOR : INACTIVE_COLOR;
@@ -230,7 +171,6 @@ export function BottomNav({ activeOverride }: { activeOverride?: number } = {}) 
               className="flex-1 flex flex-col items-center justify-center gap-[2px] relative h-full rounded-full z-[1] overflow-hidden"
               aria-label={label}
             >
-              {/* Ripple layer */}
               <RippleEffect ripples={tabRipples[i] || []} color={rippleColor} />
               <svg
                 width="26"

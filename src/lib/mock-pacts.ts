@@ -34,6 +34,30 @@ export const mockPacts: Pact[] = [
     riskRules: [
       { name: 'Sushi LP Contracts Allow', type: 'contract_call', chain: 'BASE_ETH', addresses: ['0x80C7DD17...', '0x57713f77...', '0xFB7eF66a...'], action: 'allow' },
     ],
+    policies: [
+      {
+        name: 'SushiSwap 流动性操作',
+        type: 'contract_call',
+        rules: {
+          when: {
+            chain_in: ['Base'],
+            target_in: [
+              { chain_id: 'BASE_ETH', contract_addr: '0x80C7DD17B01855a6D2347444a0FCC36136a314de', label: 'NonfungiblePositionManager' },
+              { chain_id: 'BASE_ETH', contract_addr: '0x57713f776e0b0f65ec116912f834e49805480d2', label: 'WETH/USDC Pool' },
+              { chain_id: 'BASE_ETH', contract_addr: '0xFB7eF66a7e61224DD6FcD0D7d9C3be5C8B049b9f', label: 'SwapRouter' },
+            ],
+          },
+          deny_if: {
+            usage_limits: {
+              rolling_24h: { amount_usd_gt: 1000, tx_count_gt: 8 },
+            },
+          },
+          review_if: { amount_usd_gt: 500 },
+        },
+        priority: 0,
+        is_active: true,
+      },
+    ],
   },
   {
     id: 'pact-002',
@@ -72,6 +96,44 @@ export const mockPacts: Pact[] = [
     riskRules: [
       { name: 'Uniswap Router Allow', type: 'contract_call', chain: 'ETH', addresses: ['0xE592427A...'], action: 'allow' },
     ],
+    policies: [
+      {
+        name: 'Uniswap 交易',
+        type: 'contract_call',
+        rules: {
+          when: {
+            chain_in: ['Ethereum'],
+            target_in: [{ chain_id: 'ETH', contract_addr: '0xE592427A0AEce92De3Edee1F18E0157C05861564', label: 'Uniswap V3 Router' }],
+          },
+          deny_if: {
+            usage_limits: {
+              rolling_24h: { amount_usd_gt: 2000, tx_count_gt: 5 },
+            },
+          },
+          review_if: { amount_usd_gt: 1000 },
+        },
+        priority: 0,
+        is_active: true,
+      },
+      {
+        name: 'ETH 转账',
+        type: 'transfer',
+        rules: {
+          when: {
+            chain_in: ['Ethereum'],
+            token_in: [{ chain_id: 'ETH', token_id: 'ETH' }],
+          },
+          deny_if: {
+            usage_limits: {
+              rolling_24h: { amount_usd_gt: 500, tx_count_gt: 2 },
+            },
+          },
+          review_if: { amount_usd_gt: 500 },
+        },
+        priority: 1,
+        is_active: true,
+      },
+    ],
   },
   {
     id: 'pact-002b',
@@ -102,6 +164,28 @@ export const mockPacts: Pact[] = [
     exitConditions: '手动撤销 OR 60天到期',
     riskRules: [
       { name: 'AAVE V3 Base Allow', type: 'contract_call', chain: 'BASE_ETH', addresses: ['0x794a6135...'], action: 'allow' },
+    ],
+    policies: [
+      {
+        name: 'AAVE V3 复投',
+        type: 'contract_call',
+        rules: {
+          when: {
+            chain_in: ['Base'],
+            target_in: [
+              { chain_id: 'BASE_ETH', contract_addr: '0x794a61358D6845594F94dc1DB02A252b5b4814aD', label: 'Aave V3 Pool' },
+            ],
+          },
+          deny_if: {
+            usage_limits: {
+              rolling_24h: { amount_usd_gt: 2000, tx_count_gt: 3 },
+            },
+          },
+          review_if: { amount_usd_gt: 1000 },
+        },
+        priority: 0,
+        is_active: true,
+      },
     ],
   },
   {
@@ -135,10 +219,33 @@ export const mockPacts: Pact[] = [
     riskRules: [
       { name: 'Jupiter Router Allow', type: 'contract_call', chain: 'SOL', addresses: ['JUP6...'], action: 'allow' },
     ],
+    policies: [
+      {
+        name: 'Jupiter 套利',
+        type: 'contract_call',
+        rules: {
+          when: {
+            chain_in: ['Solana'],
+            target_in: [
+              { chain_id: 'SOL', contract_addr: 'JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4' },
+            ],
+          },
+          deny_if: {
+            usage_limits: {
+              rolling_1h: { amount_usd_gt: 200, tx_count_gt: 10 },
+              rolling_24h: { amount_usd_gt: 1000, tx_count_gt: 50 },
+            },
+          },
+          review_if: { amount_usd_gt: 200 },
+        },
+        priority: 0,
+        is_active: true,
+      },
+    ],
   },
   {
     id: 'pact-003',
-    status: 'approved',
+    status: 'active',
     title: 'Aave V3 借贷管理',
     description: '当 ETH 价格下跌至清算线 120% 时自动补充抵押品，维持健康因子 > 1.5。',
     createdAt: new Date('2026-03-28T14:20:00'),
@@ -172,6 +279,47 @@ export const mockPacts: Pact[] = [
     riskRules: [
       { name: 'Aave V3 Pool Allow', type: 'contract_call', chain: 'ARB_ETH', addresses: ['0x794a61358B...'], action: 'allow' },
     ],
+    policies: [
+      {
+        name: 'Aave V3 合约操作',
+        type: 'contract_call',
+        rules: {
+          when: {
+            chain_in: ['Arbitrum'],
+            target_in: [
+              { chain_id: 'ARB_ETH', contract_addr: '0x794a61358D6845594F94dc1DB02A252b5b4814aD', label: 'Aave V3 Pool' },
+              { chain_id: 'ARB_ETH', contract_addr: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1', label: 'WETH' },
+            ],
+          },
+          deny_if: {
+            usage_limits: {
+              rolling_24h: { amount_usd_gt: 5000, tx_count_gt: 3 },
+            },
+          },
+          review_if: { amount_usd_gt: 2000 },
+        },
+        priority: 0,
+        is_active: true,
+      },
+      {
+        name: 'ETH 抵押品补充',
+        type: 'transfer',
+        rules: {
+          when: {
+            chain_in: ['Arbitrum'],
+            token_in: [{ chain_id: 'ARB_ETH', token_id: 'ETH' }],
+          },
+          deny_if: {
+            usage_limits: {
+              rolling_24h: { amount_usd_gt: 2000, tx_count_gt: 3 },
+            },
+          },
+          review_if: { amount_usd_gt: 1000 },
+        },
+        priority: 1,
+        is_active: true,
+      },
+    ],
   },
   {
     id: 'pact-004',
@@ -204,6 +352,49 @@ export const mockPacts: Pact[] = [
     exitConditions: '手动撤销 OR 14天到期',
     riskRules: [
       { name: 'Stargate Bridge Allow', type: 'contract_call', chain: 'ARB_ETH', action: 'allow' },
+    ],
+    policies: [
+      {
+        name: 'Stargate 跨链桥',
+        type: 'contract_call',
+        rules: {
+          when: {
+            chain_in: ['Arbitrum', 'Optimism'],
+            target_in: [
+              { chain_id: 'ARB_ETH', contract_addr: '0x53Bf833A5d6c4ddA888F69c22C88C9f356a41614', label: 'Stargate Router' },
+            ],
+          },
+          deny_if: {
+            usage_limits: {
+              rolling_24h: { amount_usd_gt: 50000, tx_count_gt: 20 },
+            },
+          },
+          review_if: { amount_usd_gt: 10000 },
+        },
+        priority: 0,
+        is_active: true,
+      },
+      {
+        name: 'USDC/USDT 转账',
+        type: 'transfer',
+        rules: {
+          when: {
+            chain_in: ['Arbitrum', 'Optimism'],
+            token_in: [
+              { chain_id: 'ARB_ETH', token_id: 'USDC' },
+              { chain_id: 'ARB_ETH', token_id: 'USDT' },
+            ],
+          },
+          deny_if: {
+            usage_limits: {
+              rolling_24h: { amount_usd_gt: 50000, tx_count_gt: 30 },
+            },
+          },
+          review_if: { amount_usd_gt: 10000 },
+        },
+        priority: 1,
+        is_active: true,
+      },
     ],
   },
   {
@@ -241,6 +432,103 @@ export const mockPacts: Pact[] = [
     ],
     riskRules: [
       { name: 'Lending Protocol Allow', type: 'contract_call', chain: 'BASE_ETH', action: 'allow' },
+    ],
+    policies: [
+      {
+        name: '借贷协议操作',
+        type: 'contract_call',
+        rules: {
+          when: {
+            chain_in: ['Base'],
+            target_in: [
+              { chain_id: 'BASE_ETH', contract_addr: '0x18cD499E3d7eD42FEb1A2A79b4aF26F95CE5Bfe2', label: 'Aave V3 Pool' },
+              { chain_id: 'BASE_ETH', contract_addr: '0x4200000000000000000000000000000000000006', label: 'WETH' },
+            ],
+          },
+          deny_if: {
+            usage_limits: {
+              rolling_24h: { amount_usd_gt: 10000, tx_count_gt: 10 },
+            },
+          },
+          review_if: { amount_usd_gt: 5000 },
+        },
+        priority: 0,
+        is_active: true,
+      },
+    ],
+  },
+  {
+    id: 'pact-006',
+    status: 'active',
+    title: 'NFT 市场签名授权',
+    description: '允许 Agent 在 OpenSea 上签署上架和报价消息，不涉及资金转移。',
+    createdAt: new Date('2026-04-01T09:00:00'),
+    agentName: 'NFT Manager',
+    strategyName: 'OpenSea 签名代理 (Ethereum)',
+    chain: 'ETH',
+    validityDays: 30,
+    userPrompt: '帮我在OpenSea上管理我的NFT，自动签署上架和报价消息，不要做任何转账。',
+    permissions: [
+      { type: 'write', scope: 'message sign' },
+      { type: 'write', scope: 'contract call' },
+      { type: 'read', scope: 'wallet' },
+    ],
+    executionSummary: '代理签署 OpenSea 上架/报价的 EIP-712 消息，并调用 Seaport 合约完成挂单。',
+    contractOps: [
+      { label: 'Seaport Order', description: '调用 Seaport 合约创建/取消订单' },
+    ],
+    riskControls: [
+      { label: '1h 签名上限', value: '10 次' },
+      { label: '链限制', value: '仅限 Ethereum' },
+      { label: '域名限制', value: 'opensea.io' },
+    ],
+    schedule: '按需签署，最长授权 30 天。',
+    exitConditions: '手动撤销 OR 30天到期',
+    exitConditionList: [
+      { type: 'tx_count', label: '签名次数', current: 12, target: 200 },
+      { type: 'duration', label: '有效期', current: 8, target: 30, unit: '天' },
+    ],
+    riskRules: [
+      { name: 'Seaport Allow', type: 'contract_call', chain: 'ETH', addresses: ['0x00000000000000ADc04C56Bf30aC9d3c0aAF14dC'], action: 'allow' },
+    ],
+    policies: [
+      {
+        name: 'OpenSea 消息签名',
+        type: 'message_sign',
+        rules: {
+          when: {
+            source_address_in: ['0x742d35Cc6634C0532925a3b844Bc9e7595f2bD18'],
+          },
+          deny_if: {
+            usage_limits: {
+              rolling_1h: { request_count_gt: 10 },
+            },
+          },
+          review_if: {},
+        },
+        priority: 0,
+        is_active: true,
+      },
+      {
+        name: 'Seaport 合约调用',
+        type: 'contract_call',
+        rules: {
+          when: {
+            chain_in: ['Ethereum'],
+            target_in: [
+              { chain_id: 'ETH', contract_addr: '0x00000000000000ADc04C56Bf30aC9d3c0aAF14dC', label: 'Seaport 1.5' },
+            ],
+          },
+          deny_if: {
+            usage_limits: {
+              rolling_24h: { tx_count_gt: 20 },
+            },
+          },
+          review_if: { amount_usd_gt: 500 },
+        },
+        priority: 1,
+        is_active: true,
+      },
     ],
   },
 ];

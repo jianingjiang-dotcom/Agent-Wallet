@@ -8,7 +8,7 @@ import { useT } from '@/lib/i18n';
 import { mockPacts } from '@/lib/mock-pacts';
 import type { PactStatus } from '@/types/pact';
 
-type TabValue = 'all' | 'pending' | 'approved' | 'rejected' | 'expired';
+type TabValue = 'all' | 'pending' | 'active' | 'rejected' | 'completed' | 'expired' | 'revoked';
 
 export default function PactApproval() {
   const navigate = useNavigate();
@@ -18,20 +18,22 @@ export default function PactApproval() {
   const [activeTab, setActiveTab] = useState<TabValue>(initialTab);
 
   const tabs: { value: TabValue; label: string; statuses: PactStatus[] }[] = [
-    { value: 'all', label: t.pactApproval.all, statuses: ['pending', 'approved', 'rejected', 'expired', 'active', 'completed'] },
+    { value: 'all', label: t.pactApproval.all, statuses: ['pending', 'active', 'rejected', 'completed', 'expired', 'revoked'] },
     { value: 'pending', label: t.pactApproval.pending, statuses: ['pending'] },
-    { value: 'approved', label: t.pactApproval.approved, statuses: ['approved', 'active', 'completed'] },
+    { value: 'active', label: t.pactApproval.active, statuses: ['active'] },
     { value: 'rejected', label: t.pactApproval.rejected, statuses: ['rejected'] },
+    { value: 'completed', label: t.pactApproval.completed, statuses: ['completed'] },
     { value: 'expired', label: t.pactApproval.expired, statuses: ['expired'] },
+    { value: 'revoked', label: t.pactApproval.revoked, statuses: ['revoked'] },
   ];
 
   const statusConfig: Record<PactStatus, { label: string; color: string; bg: string }> = {
     pending: { label: t.common.pending, color: 'text-amber-600', bg: 'bg-amber-50' },
-    approved: { label: t.common.approved, color: 'text-emerald-600', bg: 'bg-emerald-50' },
     active: { label: t.common.active, color: 'text-blue-600', bg: 'bg-blue-50' },
     completed: { label: t.common.completed, color: 'text-slate-600', bg: 'bg-slate-50' },
     rejected: { label: t.common.rejected, color: 'text-red-600', bg: 'bg-red-50' },
     expired: { label: t.common.expired, color: 'text-muted-foreground', bg: 'bg-muted/50' },
+    revoked: { label: t.common.revoked, color: 'text-red-600', bg: 'bg-red-50' },
   };
 
   const filtered = useMemo(() => {
@@ -101,41 +103,21 @@ export default function PactApproval() {
                     onClick={() => navigate(`/pact/${pact.id}`)}
                     className="bg-white rounded-2xl p-4 border border-border/60 shadow-sm cursor-pointer active:scale-[0.98] transition-transform"
                   >
-                    {/* Status + title */}
-                    <div className="flex items-start justify-between gap-3 mb-2">
+                    <div className="flex items-start justify-between gap-3">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
                           <span className={cn('text-[11px] font-medium px-2 py-0.5 rounded-full', status.color, status.bg)}>
                             {status.label}
                           </span>
                         </div>
-                        <h3 className="text-[15px] font-semibold text-foreground leading-snug">
+                        <h3 className="text-[14px] font-bold text-foreground leading-snug mb-1">
                           {pact.title}
                         </h3>
+                        <p className="text-[12px] text-muted-foreground line-clamp-2">
+                          {pact.description}
+                        </p>
                       </div>
                       <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0 mt-1" strokeWidth={1.5} />
-                    </div>
-
-                    {/* Description */}
-                    <p className="text-[13px] text-muted-foreground leading-relaxed line-clamp-2 mb-3">
-                      {pact.description}
-                    </p>
-
-                    {/* Meta info */}
-                    <div className="flex items-center gap-4 text-[12px] text-muted-foreground">
-                      <div className="flex items-center gap-1">
-                        <Bot className="w-3.5 h-3.5" strokeWidth={1.5} />
-                        <span>{pact.agentName}</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Clock className="w-3.5 h-3.5" strokeWidth={1.5} />
-                        <span>{t.pactApproval.validity.replace('{days}', String(pact.validityDays))}</span>
-                      </div>
-                    </div>
-
-                    {/* Timestamp */}
-                    <div className="mt-2 text-[11px] text-muted-foreground/60">
-                      {pact.createdAt.toLocaleString()}
                     </div>
                   </motion.div>
                 );

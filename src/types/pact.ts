@@ -1,4 +1,4 @@
-export type PactStatus = 'pending' | 'approved' | 'rejected' | 'expired' | 'active' | 'completed' | 'revoked';
+export type PactStatus = 'pending' | 'rejected' | 'expired' | 'active' | 'completed' | 'revoked';
 
 export interface PactPermission {
   type: 'write' | 'read';
@@ -34,6 +34,7 @@ export interface Pact {
   exitConditions: string;
   exitConditionList?: ExitCondition[];
   riskRules: PactRiskRule[];
+  policies?: PolicyRule[];
 }
 
 export type ExitConditionType = 'tx_count' | 'tx_amount' | 'duration';
@@ -52,6 +53,54 @@ export interface PactRiskRule {
   chain: string;
   addresses?: string[];
   action?: 'allow' | 'deny';
+}
+
+// ─── Policy Rule types ─────────────────────────────
+export type PolicyType = 'transfer' | 'contract_call' | 'message_sign';
+
+export interface UsageLimitWindow {
+  amount_gt?: number;
+  amount_usd_gt?: number;
+  tx_count_gt?: number;
+  request_count_gt?: number;
+}
+
+export interface PolicyWhen {
+  chain_in?: string[];
+  token_in?: { chain_id: string; token_id: string }[];
+  destination_address_in?: { chain_id: string; address: string; label?: string }[];
+  target_in?: { chain_id: string; contract_addr: string; function_id?: string; label?: string }[];
+  source_address_in?: string[];
+}
+
+export interface PolicyDenyIf {
+  usage_limits?: {
+    rolling_1h?: UsageLimitWindow;
+    rolling_24h?: UsageLimitWindow;
+    rolling_7d?: UsageLimitWindow;
+    rolling_30d?: UsageLimitWindow;
+  };
+}
+
+export interface PolicyReviewIf {
+  amount_gt?: number;
+  amount_usd_gt?: number;
+  chain_in?: string[];
+  token_in?: { chain_id: string; token_id: string }[];
+  destination_address_in?: { chain_id: string; address: string }[];
+  target_in?: { chain_id: string; contract_addr: string }[];
+}
+
+export interface PolicyRule {
+  name: string;
+  type: PolicyType;
+  rules: {
+    when?: PolicyWhen;
+    deny_if?: PolicyDenyIf;
+    review_if?: PolicyReviewIf;
+  };
+  priority: number;
+  is_active: boolean;
 }
 
 export interface DefaultPact {
