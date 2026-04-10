@@ -96,6 +96,9 @@ export default function SendPage() {
   const [confirmRisk, setConfirmRisk] = useState(false);
   const [showQRScanner, setShowQRScanner] = useState(false);
   const [feeTier, setFeeTier] = useState<FeeTier>('standard');
+  const [isGasless, setIsGasless] = useState(false);
+  const [gaslessPromptShown, setGaslessPromptShown] = useState(false);
+  const [gaslessConfirmOpen, setGaslessConfirmOpen] = useState(false);
   const [showContactDrawer, setShowContactDrawer] = useState(false);
   const [testTipDismissed, setTestTipDismissed] = useState(false);
   
@@ -806,6 +809,14 @@ export default function SendPage() {
                   selectedTier={feeTier}
                   onSelect={setFeeTier}
                   networkName={SUPPORTED_CHAINS.find(c => c.id === selectedAsset.network)?.name}
+                  isGasless={isGasless}
+                  onGaslessChange={(v) => {
+                    if (v && !gaslessPromptShown) {
+                      setGaslessConfirmOpen(true);
+                    } else {
+                      setIsGasless(v);
+                    }
+                  }}
                 />
 
                 {/* Memo */}
@@ -937,6 +948,40 @@ export default function SendPage() {
         onSelect={handleSelectContact}
         selectedNetwork={selectedAsset?.network}
       />
+
+      {/* Gasless first-time confirmation dialog */}
+      {gaslessConfirmOpen && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40" onClick={() => setGaslessConfirmOpen(false)}>
+          <div
+            className="bg-white rounded-[16px] w-[270px] overflow-hidden"
+            style={{ boxShadow: '0px 6px 24px rgba(0, 0, 0, 0.12)' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="px-6 pt-5 pb-4 text-center">
+              <p className="text-[16px] leading-[22px] font-semibold text-[#1c1c1c]">Gasless 交易</p>
+              <p className="text-[14px] leading-[20px] text-[#8E8E93] mt-2">开启 Gasless 后，交易将由赞助方代付 Gas 费用。首次使用需要签署两笔交易：第一笔为 Gasless 授权，第二笔为实际转账。</p>
+            </div>
+            <div className="flex border-t border-[#EDEEF3]">
+              <button
+                className="flex-1 py-3 text-[16px] leading-[22px] font-medium text-[#1c1c1c] border-r border-[#EDEEF3] active:bg-muted/50 transition-colors"
+                onClick={() => setGaslessConfirmOpen(false)}
+              >
+                取消
+              </button>
+              <button
+                className="flex-1 py-3 text-[16px] leading-[22px] font-medium text-[#1F32D6] active:bg-muted/50 transition-colors"
+                onClick={() => {
+                  setIsGasless(true);
+                  setGaslessPromptShown(true);
+                  setGaslessConfirmOpen(false);
+                }}
+              >
+                确认开启
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </AppLayout>
   );
