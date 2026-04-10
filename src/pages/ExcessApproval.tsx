@@ -23,7 +23,7 @@ export default function ExcessApproval() {
   if (!todo || todo.metadata.type !== 'excess_approval') {
     return (
       <SwipeBack>
-        <AppLayout showNav={false} showBack onBack={() => navigate(-1)} title="超额审批" showSecurityBanner={false}>
+        <AppLayout showNav={false} showBack onBack={() => navigate(-1)} title="Pact 交易" showSecurityBanner={false}>
           <div className="flex-1 flex items-center justify-center">
             <p className="text-muted-foreground">未找到该审批记录</p>
           </div>
@@ -55,7 +55,7 @@ export default function ExcessApproval() {
 
   return (
     <SwipeBack>
-      <AppLayout showNav={false} showBack onBack={() => navigate(-1)} title="超额交易审批" showSecurityBanner={false}
+      <AppLayout showNav={false} showBack onBack={() => navigate(-1)} title="Pact 交易" showSecurityBanner={false}
         rightAction={
           <motion.button
             onClick={() => navigate('/assistant')}
@@ -87,7 +87,7 @@ export default function ExcessApproval() {
               <p className="text-2xl font-bold text-foreground mt-4">
                 {meta.amount.toLocaleString()} {meta.symbol}
               </p>
-              <p className="text-sm text-muted-foreground mt-1">超额交易审批</p>
+              <p className="text-sm text-muted-foreground mt-1">Pact 交易审批</p>
             </motion.div>
 
             {/* Status card */}
@@ -115,12 +115,6 @@ export default function ExcessApproval() {
                   {isPending ? '待审批 — 交易金额超出 Pact 限额' : todo.status === 'approved' ? '已批准' : '已拒绝'}
                 </span>
               </div>
-              <div className="text-xs text-muted-foreground mt-2 ml-6 space-y-0.5">
-                <p>推送时间: {todo.createdAt.toLocaleString('zh-CN')}</p>
-                {todo.completedAt && !isPending && (
-                  <p>完成时间: {todo.completedAt.toLocaleString('zh-CN')}</p>
-                )}
-              </div>
             </motion.div>
 
             {/* Transaction details card */}
@@ -144,6 +138,16 @@ export default function ExcessApproval() {
                 copyValue={meta.toAddress}
                 mono
               />
+              <DetailRow
+                label="推送时间"
+                value={todo.createdAt.toLocaleString('zh-CN')}
+              />
+              {todo.completedAt && !isPending && (
+                <DetailRow
+                  label="完成时间"
+                  value={todo.completedAt.toLocaleString('zh-CN')}
+                />
+              )}
             </motion.div>
 
             {/* Associated Pact card — reuses PactHub card style */}

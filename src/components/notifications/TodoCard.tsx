@@ -1,35 +1,83 @@
 import { useNavigate } from 'react-router-dom';
-import { Shield, Key, CheckCircle2, XCircle } from 'lucide-react';
+import { Shield, Key, FileText } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { StatusBadge } from './StatusBadge';
 import { CryptoIconWithChain } from '@/components/CryptoIconWithChain';
-import type { TodoItem, TodoType, ExcessApprovalMeta, TssSigningMeta, PactApprovalMeta, StatusVariant } from '@/types/notification';
+import type { TodoItem, ExcessApprovalMeta, TssSigningMeta, PactApprovalMeta, StatusVariant } from '@/types/notification';
 import type { ChainId } from '@/types/wallet';
 
 interface TodoCardProps {
   item: TodoItem;
 }
 
+// ── txType → tag label ──
+const txTypeTagLabels: Record<string, string> = {
+  transfer: '转账',
+  contract_interaction: '合约交易',
+  message_signing: '消息签名',
+};
+
+// ── Format amount ──
 function formatAmount(amount: number, symbol: string): string {
-  const formatted = amount % 1 === 0 ? amount.toLocaleString() : parseFloat(amount.toFixed(6)).toLocaleString(undefined, { maximumFractionDigits: 6 });
+  const formatted = amount % 1 === 0
+    ? amount.toLocaleString()
+    : parseFloat(amount.toFixed(6)).toLocaleString(undefined, { maximumFractionDigits: 6 });
   return `${formatted} ${symbol}`;
 }
 
+// ── Status badge per type ──
 function getStatusBadge(item: TodoItem): { label: string; variant: StatusVariant } {
-  if (item.status === 'pending') return { label: '待处理', variant: 'warning' };
-  if (item.status === 'approved') {
-    return { label: item.type === 'tss_signing' ? '已签名' : '已通过', variant: 'success' };
+  if (item.type === 'tss_signing') {
+    if (item.status === 'pending') return { label: '待签名', variant: 'warning' };
+    if (item.status === 'approved') return { label: '已签名', variant: 'success' };
+    if (item.status === 'failed') return { label: '签名失败', variant: 'error' };
+    return { label: '已拒绝', variant: 'error' };
   }
+  if (item.status === 'pending') return { label: '待审批', variant: 'warning' };
+  if (item.status === 'approved') return { label: '已通过', variant: 'success' };
+  if (item.status === 'failed') return { label: '失败', variant: 'error' };
   return { label: '已拒绝', variant: 'error' };
+}
+
+// ── Derive display fields per type ──
+function deriveFields(item: TodoItem) {
+  const meta = item.metadata;
+
+  if (meta.type === 'tss_signing') {
+    const m = meta as TssSigningMeta;
+    return {
+      title: '交易签名',
+      tag: txTypeTagLabels[m.txType] || m.txType,
+      subtitle: m.eip712?.domain.name || m.toAddress || '',
+      amount: m.amount && m.symbol ? formatAmount(m.amount, m.symbol) : null,
+    };
+  }
+
+  if (meta.type === 'pact_approval') {
+    const m = meta as PactApprovalMeta;
+    return {
+      title: 'Pact 创建',
+      tag: m.txType ? (txTypeTagLabels[m.txType] || m.txType) : null,
+      subtitle: m.intent,
+      amount: null,
+    };
+  }
+
+  // excess_approval
+  const m = meta as ExcessApprovalMeta;
+  return {
+    title: 'Pact 交易',
+    tag: txTypeTagLabels[m.txType] || m.txType,
+    subtitle: m.pactName,
+    amount: formatAmount(m.amount, m.symbol),
+  };
 }
 
 export function TodoCard({ item }: TodoCardProps) {
   const navigate = useNavigate();
   const meta = item.metadata;
-
-  const handleClick = () => {
-    navigate(item.route);
-  };
+  const { title, tag, subtitle, amount } = deriveFields(item);
+  const statusBadge = getStatusBadge(item);
 
   // Render icon based on todo type
   const renderIcon = () => {
@@ -39,6 +87,13 @@ export function TodoCard({ item }: TodoCardProps) {
     }
     if (meta.type === 'tss_signing') {
       const m = meta as TssSigningMeta;
+      if (m.txType === 'message_signing') {
+        return (
+          <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+            <FileText className="w-5 h-5 text-blue-600 dark:text-blue-400" strokeWidth={1.5} />
+          </div>
+        );
+      }
       if (m.symbol && m.chainId) {
         return <CryptoIconWithChain symbol={m.symbol} chainId={m.chainId as ChainId} size="lg" />;
       }
@@ -56,30 +111,9 @@ export function TodoCard({ item }: TodoCardProps) {
     );
   };
 
-  // Right side amount for transaction types
-  const renderAmount = () => {
-    if (meta.type === 'excess_approval') {
-      return formatAmount((meta as ExcessApprovalMeta).amount, (meta as ExcessApprovalMeta).symbol);
-    }
-    if (meta.type === 'tss_signing') {
-      const m = meta as TssSigningMeta;
-      if (m.amount && m.symbol) return formatAmount(m.amount, m.symbol);
-    }
-    return null;
-  };
-
-  // Extra info line
-  const renderExtraInfo = () => {
-    return null;
-  };
-
-  const amountStr = renderAmount();
-  const extraInfo = renderExtraInfo();
-  const statusBadge = getStatusBadge(item);
-
   return (
     <button
-      onClick={handleClick}
+      onClick={() => navigate(item.route)}
       className="w-full p-3 rounded-xl border border-border bg-card transition-colors active:bg-muted/50 text-left"
     >
       <div className="flex items-start gap-3">
@@ -90,31 +124,30 @@ export function TodoCard({ item }: TodoCardProps) {
 
         {/* Content */}
         <div className="flex-1 min-w-0">
-          <div className="flex items-start justify-between gap-2">
-            <p className="text-sm font-normal text-foreground truncate">
-              {item.title}
-            </p>
-            {amountStr && (
+          {/* Row 1: title + tag ... amount */}
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-1.5 min-w-0 truncate">
+              <span className="text-sm font-normal text-foreground">{title}</span>
+              {tag && (
+                <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-muted/60 text-muted-foreground shrink-0">
+                  {tag}
+                </span>
+              )}
+            </div>
+            {amount && (
               <span className="text-sm font-normal text-foreground whitespace-nowrap flex-shrink-0">
-                {amountStr}
+                {amount}
               </span>
             )}
           </div>
 
+          {/* Row 2: subtitle ... status badge */}
           <div className="flex items-center justify-between gap-2 mt-0.5">
-            <p className="text-xs text-muted-foreground truncate">
-              {item.summary}
-            </p>
+            <p className="text-xs text-muted-foreground truncate">{subtitle}</p>
             <div className="flex-shrink-0">
               <StatusBadge label={statusBadge.label} variant={statusBadge.variant} />
             </div>
           </div>
-
-          {extraInfo && (
-            <p className="text-xs text-muted-foreground/70 truncate mt-0.5">
-              {extraInfo}
-            </p>
-          )}
         </div>
       </div>
     </button>

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { CheckCircle2, XCircle, Clock, ArrowRight, Sparkles } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { CheckCircle2, XCircle, Clock, ArrowRight, Sparkles, ChevronDown, FileText } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { SwipeBack } from '@/components/SwipeBack';
 import { Button } from '@/components/ui/button';
@@ -54,6 +54,9 @@ export default function TssSigningDetail() {
   };
 
   const txTypeLabel = meta.txType === 'transfer' ? '转账' : meta.txType === 'contract_interaction' ? '合约交互' : '消息签名';
+  const isMessageSign = meta.txType === 'message_signing';
+  const eip712 = meta.eip712;
+  const [msgDetailOpen, setMsgDetailOpen] = useState(false);
 
   return (
     <SwipeBack>
@@ -79,25 +82,37 @@ export default function TssSigningDetail() {
       >
         <div className="flex flex-col h-full">
           <div className="flex-1 px-4 overflow-y-auto">
-            {/* Amount display */}
+            {/* Header display */}
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               className="flex flex-col items-center pt-8 pb-6"
             >
-              {meta.symbol && meta.chainId ? (
-                <CryptoIconWithChain symbol={meta.symbol} chainId={meta.chainId as ChainId} size="lg" />
+              {isMessageSign && eip712 ? (
+                <>
+                  <div className="w-14 h-14 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                    <FileText className="w-7 h-7 text-blue-600 dark:text-blue-400" strokeWidth={1.5} />
+                  </div>
+                  <p className="text-xl font-bold text-foreground mt-3 text-center">{eip712.domain.name}</p>
+                  <p className="text-sm text-muted-foreground mt-1">消息签名请求</p>
+                </>
               ) : (
-                <CryptoIcon symbol="ETH" size="lg" />
+                <>
+                  {meta.symbol && meta.chainId ? (
+                    <CryptoIconWithChain symbol={meta.symbol} chainId={meta.chainId as ChainId} size="lg" />
+                  ) : (
+                    <CryptoIcon symbol="ETH" size="lg" />
+                  )}
+                  {meta.amount && meta.symbol ? (
+                    <p className="text-2xl font-bold text-foreground mt-4">
+                      {meta.amount.toLocaleString()} {meta.symbol}
+                    </p>
+                  ) : (
+                    <p className="text-2xl font-bold text-foreground mt-4">{txTypeLabel}</p>
+                  )}
+                  <p className="text-sm text-muted-foreground mt-1">交易签名请求</p>
+                </>
               )}
-              {meta.amount && meta.symbol ? (
-                <p className="text-2xl font-bold text-foreground mt-4">
-                  {meta.amount.toLocaleString()} {meta.symbol}
-                </p>
-              ) : (
-                <p className="text-2xl font-bold text-foreground mt-4">{txTypeLabel}</p>
-              )}
-              <p className="text-sm text-muted-foreground mt-1">交易签名请求</p>
             </motion.div>
 
             {/* Status card */}
@@ -125,12 +140,6 @@ export default function TssSigningDetail() {
                   {isPending ? '等待签名确认' : todo.status === 'approved' ? '已签名' : '已拒绝签名'}
                 </span>
               </div>
-              <div className="text-xs text-muted-foreground mt-2 ml-6 space-y-0.5">
-                <p>推送时间: {todo.createdAt.toLocaleString('zh-CN')}</p>
-                {todo.completedAt && !isPending && (
-                  <p>完成时间: {todo.completedAt.toLocaleString('zh-CN')}</p>
-                )}
-              </div>
             </motion.div>
 
             {/* Transaction details card */}
@@ -144,6 +153,24 @@ export default function TssSigningDetail() {
                 label="交易类型"
                 value={txTypeLabel}
               />
+              {isMessageSign && eip712 && (
+                <>
+                  <DetailRow
+                    label="签名类型"
+                    value={eip712.primaryType}
+                  />
+                  <DetailRow
+                    label="合约地址"
+                    value={eip712.domain.verifyingContract}
+                    copyValue={eip712.domain.verifyingContract}
+                    mono
+                  />
+                  <DetailRow
+                    label="链"
+                    value={eip712.domain.chainId === '0x1' ? 'Ethereum' : `Chain ${eip712.domain.chainId}`}
+                  />
+                </>
+              )}
               {meta.amount && meta.symbol && (
                 <DetailRow
                   label="金额"
@@ -158,7 +185,53 @@ export default function TssSigningDetail() {
                   mono
                 />
               )}
+              <DetailRow
+                label="推送时间"
+                value={todo.createdAt.toLocaleString('zh-CN')}
+              />
+              {todo.completedAt && !isPending && (
+                <DetailRow
+                  label="完成时间"
+                  value={todo.completedAt.toLocaleString('zh-CN')}
+                />
+              )}
             </motion.div>
+
+            {/* EIP-712 Message Details — collapsible */}
+            {isMessageSign && eip712 && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.15 }}
+                className="rounded-xl bg-white dark:bg-card border border-border/60 shadow-sm overflow-hidden mb-4"
+              >
+                <button
+                  onClick={() => setMsgDetailOpen(v => !v)}
+                  className="w-full flex items-center gap-3 px-4 py-3.5 text-left"
+                >
+                  <FileText className="w-4 h-4 text-primary shrink-0" strokeWidth={1.5} />
+                  <span className="flex-1 text-[14px] font-semibold text-foreground">签名详情</span>
+                  <ChevronDown className={cn('w-4 h-4 text-muted-foreground transition-transform', msgDetailOpen && 'rotate-180')} strokeWidth={1.5} />
+                </button>
+                <AnimatePresence>
+                  {msgDetailOpen && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="overflow-hidden"
+                    >
+                      <div className="px-4 pb-4">
+                        <pre className="text-[12px] font-mono text-foreground/80 bg-[#F8F9FC] dark:bg-muted/30 rounded-lg p-3 overflow-x-auto whitespace-pre-wrap break-all leading-relaxed">
+                          {JSON.stringify(eip712.message, null, 2)}
+                        </pre>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
+            )}
 
             {/* Post-action follow-up */}
             {!isPending && (

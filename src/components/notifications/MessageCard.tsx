@@ -76,15 +76,13 @@ export function MessageCard({ message, onRead }: MessageCardProps) {
   return (
     <button
       onClick={handleClick}
-      className="w-full flex items-start gap-3 px-3 py-3.5 rounded-xl transition-colors active:bg-muted/50 text-left"
+      className={cn(
+        'w-full flex items-start gap-3 p-3 rounded-xl border bg-card transition-colors active:bg-muted/50 text-left',
+        !message.isRead
+          ? 'border-primary/30 bg-primary/[0.02]'
+          : 'border-border'
+      )}
     >
-      {/* Unread dot */}
-      <div className="w-2 flex-shrink-0 pt-4">
-        {!message.isRead && (
-          <div className="w-2 h-2 rounded-full bg-primary" />
-        )}
-      </div>
-
       {/* Icon */}
       <div className="flex-shrink-0 pt-0.5">
         {renderIcon()}

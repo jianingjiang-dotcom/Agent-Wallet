@@ -34,6 +34,7 @@ import AssetDetail from "./pages/AssetDetail";
 import MessageCenter from "./pages/MessageCenter";
 import MessageCategoryPage from "./pages/MessageCategoryPage";
 import ExcessApproval from "./pages/ExcessApproval";
+import PactApprovalDetail from "./pages/PactApprovalDetail";
 import TssSigningDetail from "./pages/TssSigningDetail";
 import WalletRecovery from "./pages/WalletRecovery";
 import ExportPrivateKey from "./pages/ExportPrivateKey";
@@ -181,6 +182,7 @@ function AppRoutes() {
       <Route path="/messages" element={<ProtectedRoute bypassAuth><MessageCenter /></ProtectedRoute>} />
       <Route path="/messages/:type" element={<ProtectedRoute bypassAuth><MessageCategoryPage /></ProtectedRoute>} />
       <Route path="/excess-approval/:todoId" element={<ProtectedRoute bypassAuth><ExcessApproval /></ProtectedRoute>} />
+      <Route path="/pact-approval-detail/:todoId" element={<ProtectedRoute bypassAuth><PactApprovalDetail /></ProtectedRoute>} />
       <Route path="/tss-signing/:todoId" element={<ProtectedRoute bypassAuth><TssSigningDetail /></ProtectedRoute>} />
       <Route path="/wallet/recovery" element={<WalletRecovery />} />
       <Route path="/wallet-backup/:id" element={<ProtectedRoute><WalletBackup /></ProtectedRoute>} />

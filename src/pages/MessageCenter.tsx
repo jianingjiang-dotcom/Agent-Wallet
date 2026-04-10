@@ -1,12 +1,10 @@
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Inbox, Settings } from 'lucide-react';
+import { Inbox, Eraser } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { SwipeBack } from '@/components/SwipeBack';
-import { Drawer, DrawerContent } from '@/components/ui/drawer';
-import { Switch } from '@/components/ui/switch';
 import { useWallet } from '@/contexts/WalletContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { MessageCard } from '@/components/notifications/MessageCard';
 import { TodoCard } from '@/components/notifications/TodoCard';
 import { EmptyState } from '@/components/EmptyState';
@@ -16,26 +14,25 @@ type MainTab = 'messages' | 'todos';
 
 export default function MessageCenter() {
   const navigate = useNavigate();
+  const location = useLocation();
   const {
     messages, todoItems,
     unreadMessageCount, pendingTodoCount,
     markMessageAsRead, markAllMessagesAsRead,
   } = useWallet();
 
-  const [mainTab, setMainTab] = useState<MainTab>('messages');
-  const [settingsOpen, setSettingsOpen] = useState(false);
+  const stateTab = (location.state as { tab?: MainTab })?.tab;
+  const savedTab = sessionStorage.getItem('mc-tab') as MainTab | null;
+  const [mainTab, setMainTab] = useState<MainTab>(stateTab || savedTab || 'messages');
+
+  // Persist tab selection
+  const handleTabChange = (tab: MainTab) => {
+    setMainTab(tab);
+    sessionStorage.setItem('mc-tab', tab);
+  };
+  const [confirmClearOpen, setConfirmClearOpen] = useState(false);
 
   // Notification preferences (local state for demo)
-  const [msgPrefs, setMsgPrefs] = useState({
-    transaction: true,
-    pact: true,
-    system: true,
-  });
-  const [todoPrefs, setTodoPrefs] = useState({
-    pact_approval: true,
-    excess_approval: true,
-    tss_signing: true,
-  });
 
   // All messages sorted by time, grouped by date
   const sortedMessages = useMemo(() => {
@@ -90,19 +87,21 @@ export default function MessageCenter() {
         title="通知中心"
         showSecurityBanner={false}
         rightAction={
-          <button
-            onClick={() => setSettingsOpen(true)}
-            className="p-1 text-muted-foreground transition-colors"
-          >
-            <Settings className="w-5 h-5" strokeWidth={1.5} />
-          </button>
+          unreadMessageCount > 0 ? (
+            <button
+              onClick={() => setConfirmClearOpen(true)}
+              className="p-1 text-muted-foreground transition-colors"
+            >
+              <Eraser className="w-5 h-5" strokeWidth={1.5} />
+            </button>
+          ) : undefined
         }
       >
         <div className="flex flex-col h-full">
           {/* Main Tabs */}
           <div className="flex border-b border-border px-4">
             <button
-              onClick={() => setMainTab('messages')}
+              onClick={() => handleTabChange('messages')}
               className={cn(
                 'flex-1 py-3 text-sm font-medium text-center relative transition-colors',
                 mainTab === 'messages' ? 'text-foreground' : 'text-muted-foreground'
@@ -122,7 +121,7 @@ export default function MessageCenter() {
               )}
             </button>
             <button
-              onClick={() => setMainTab('todos')}
+              onClick={() => handleTabChange('todos')}
               className={cn(
                 'flex-1 py-3 text-sm font-medium text-center relative transition-colors',
                 mainTab === 'todos' ? 'text-foreground' : 'text-muted-foreground'
@@ -163,19 +162,21 @@ export default function MessageCenter() {
                       />
                     </div>
                   ) : (
-                    <div className="px-2">
+                    <div className="px-4">
                       {groupedMessages.map(group => (
                         <div key={group.label}>
-                          <p className="px-3 pt-3 pb-1 text-xs font-medium text-muted-foreground">
+                          <p className="px-1 pt-3 pb-2 text-xs font-medium text-muted-foreground">
                             {group.label}
                           </p>
-                          {group.items.map(msg => (
-                            <MessageCard
-                              key={msg.id}
-                              message={msg}
-                              onRead={markMessageAsRead}
-                            />
-                          ))}
+                          <div className="space-y-2.5">
+                            {group.items.map(msg => (
+                              <MessageCard
+                                key={msg.id}
+                                message={msg}
+                                onRead={markMessageAsRead}
+                              />
+                            ))}
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -223,65 +224,35 @@ export default function MessageCenter() {
         </div>
       </AppLayout>
 
-      {/* Settings Drawer */}
-      <Drawer open={settingsOpen} onOpenChange={setSettingsOpen}>
-        <DrawerContent>
-          <div className="px-6 pt-2 pb-8">
-            <h3 className="text-base font-semibold text-foreground mb-5">通知设置</h3>
-
-            {/* 消息提醒 */}
-            <p className="text-xs text-muted-foreground font-medium mb-3">消息提醒</p>
-            <div className="space-y-0 mb-6">
-              <div className="flex items-center justify-between py-3">
-                <span className="text-sm text-foreground">交易消息</span>
-                <Switch checked={msgPrefs.transaction} onCheckedChange={(v) => setMsgPrefs(p => ({ ...p, transaction: v }))} />
-              </div>
-              <div className="flex items-center justify-between py-3">
-                <span className="text-sm text-foreground">Pact 状态变更</span>
-                <Switch checked={msgPrefs.pact} onCheckedChange={(v) => setMsgPrefs(p => ({ ...p, pact: v }))} />
-              </div>
-              <div className="flex items-center justify-between py-3">
-                <span className="text-sm text-foreground">系统通知</span>
-                <Switch checked={msgPrefs.system} onCheckedChange={(v) => setMsgPrefs(p => ({ ...p, system: v }))} />
-              </div>
+      {/* Confirm clear unread dialog */}
+      {confirmClearOpen && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40" onClick={() => setConfirmClearOpen(false)}>
+          <div
+            className="bg-white rounded-[16px] w-[270px] overflow-hidden"
+            style={{ boxShadow: '0px 6px 24px rgba(0, 0, 0, 0.12)' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="px-6 pt-5 pb-4 text-center">
+              <p className="text-[16px] leading-[22px] font-semibold text-[#1c1c1c]">清除未读</p>
+              <p className="text-[14px] leading-[20px] text-[#8E8E93] mt-2">确定要将所有 {unreadMessageCount} 条消息标记为已读吗？</p>
             </div>
-
-            {/* 待办提醒 */}
-            <p className="text-xs text-muted-foreground font-medium mb-3">待办提醒</p>
-            <div className="space-y-0 mb-6">
-              <div className="flex items-center justify-between py-3">
-                <span className="text-sm text-foreground">Pact 审批</span>
-                <Switch checked={todoPrefs.pact_approval} onCheckedChange={(v) => setTodoPrefs(p => ({ ...p, pact_approval: v }))} />
-              </div>
-              <div className="flex items-center justify-between py-3">
-                <span className="text-sm text-foreground">超额交易审批</span>
-                <Switch checked={todoPrefs.excess_approval} onCheckedChange={(v) => setTodoPrefs(p => ({ ...p, excess_approval: v }))} />
-              </div>
-              <div className="flex items-center justify-between py-3">
-                <span className="text-sm text-foreground">交易签名</span>
-                <Switch checked={todoPrefs.tss_signing} onCheckedChange={(v) => setTodoPrefs(p => ({ ...p, tss_signing: v }))} />
-              </div>
-            </div>
-
-            {/* 操作 */}
-            <div className="border-t border-border pt-4">
+            <div className="flex border-t border-[#EDEEF3]">
               <button
-                onClick={() => { markAllMessagesAsRead(); setSettingsOpen(false); }}
-                disabled={unreadMessageCount === 0}
-                className={cn(
-                  'w-full flex items-center justify-between py-3 text-sm transition-colors',
-                  unreadMessageCount > 0 ? 'text-foreground' : 'text-muted-foreground/40'
-                )}
+                className="flex-1 py-3 text-[16px] leading-[22px] font-medium text-[#1c1c1c] border-r border-[#EDEEF3] active:bg-muted/50 transition-colors"
+                onClick={() => setConfirmClearOpen(false)}
               >
-                全部标记为已读
-                {unreadMessageCount > 0 && (
-                  <span className="text-xs text-muted-foreground">{unreadMessageCount} 条未读</span>
-                )}
+                取消
+              </button>
+              <button
+                className="flex-1 py-3 text-[16px] leading-[22px] font-medium text-[#1F32D6] active:bg-muted/50 transition-colors"
+                onClick={() => { markAllMessagesAsRead(); setConfirmClearOpen(false); }}
+              >
+                确定
               </button>
             </div>
           </div>
-        </DrawerContent>
-      </Drawer>
+        </div>
+      )}
     </SwipeBack>
   );
 }

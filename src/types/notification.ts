@@ -51,7 +51,7 @@ export interface Message {
 // ============================
 
 export type TodoType = 'pact_approval' | 'excess_approval' | 'tss_signing';
-export type TodoStatus = 'pending' | 'approved' | 'rejected';
+export type TodoStatus = 'pending' | 'approved' | 'rejected' | 'failed';
 
 export interface PactApprovalMeta {
   type: 'pact_approval';
@@ -60,6 +60,7 @@ export interface PactApprovalMeta {
   walletName: string;
   pactId: string;
   intent: string;
+  txType?: 'transfer' | 'contract_interaction' | 'message_signing';
 }
 
 export interface ExcessApprovalMeta {
@@ -73,6 +74,19 @@ export interface ExcessApprovalMeta {
   pactName: string;
 }
 
+export interface EIP712Domain {
+  name: string;
+  version: string;
+  chainId: string;
+  verifyingContract: string;
+}
+
+export interface EIP712Data {
+  domain: EIP712Domain;
+  primaryType: string;
+  message: Record<string, string>;
+}
+
 export interface TssSigningMeta {
   type: 'tss_signing';
   txType: 'transfer' | 'contract_interaction' | 'message_signing';
@@ -81,6 +95,7 @@ export interface TssSigningMeta {
   chainId?: string;
   toAddress?: string;
   txId: string;
+  eip712?: EIP712Data;
 }
 
 export type TodoMetadata = PactApprovalMeta | ExcessApprovalMeta | TssSigningMeta;
