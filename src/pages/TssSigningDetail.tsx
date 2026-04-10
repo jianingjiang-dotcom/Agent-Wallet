@@ -94,7 +94,6 @@ export default function TssSigningDetail() {
                     <FileText className="w-7 h-7 text-blue-600 dark:text-blue-400" strokeWidth={1.5} />
                   </div>
                   <p className="text-xl font-bold text-foreground mt-3 text-center">{eip712.domain.name}</p>
-                  <p className="text-sm text-muted-foreground mt-1">消息签名请求</p>
                 </>
               ) : (
                 <>
@@ -110,8 +109,7 @@ export default function TssSigningDetail() {
                   ) : (
                     <p className="text-2xl font-bold text-foreground mt-4">{txTypeLabel}</p>
                   )}
-                  <p className="text-sm text-muted-foreground mt-1">交易签名请求</p>
-                </>
+                    </>
               )}
             </motion.div>
 

@@ -155,34 +155,6 @@ export default function PactApprovalDetail() {
               </motion.div>
             )}
 
-            {/* Exit conditions */}
-            {pact?.exitConditionList && pact.exitConditionList.length > 0 && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.15 }}
-                className="rounded-xl bg-[#F8F9FC] dark:bg-muted/30 p-4 mb-4"
-              >
-                <div className="flex items-center gap-2 mb-3">
-                  <LogOut className="w-3.5 h-3.5 text-muted-foreground" strokeWidth={1.5} />
-                  <p className="text-[12px] font-semibold text-muted-foreground uppercase tracking-wider">退出条件</p>
-                </div>
-                <div className="space-y-2">
-                  {pact.exitConditionList.map((cond, idx) => {
-                    const targetDisplay = cond.unit === '$'
-                      ? `$${cond.target.toLocaleString()}`
-                      : `${cond.target.toLocaleString()}${cond.unit ? ` ${cond.unit}` : ''}`;
-                    return (
-                      <div key={idx} className="flex items-center justify-between text-[13px]">
-                        <span className="text-muted-foreground">{cond.label}</span>
-                        <span className="font-semibold text-foreground tabular-nums">{targetDisplay}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-              </motion.div>
-            )}
-
             {/* View full Pact detail link */}
             {pact && (
               <motion.button

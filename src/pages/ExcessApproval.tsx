@@ -87,7 +87,6 @@ export default function ExcessApproval() {
               <p className="text-2xl font-bold text-foreground mt-4">
                 {meta.amount.toLocaleString()} {meta.symbol}
               </p>
-              <p className="text-sm text-muted-foreground mt-1">Pact 交易审批</p>
             </motion.div>
 
             {/* Status card */}
@@ -150,10 +149,19 @@ export default function ExcessApproval() {
               )}
             </motion.div>
 
-            {/* Associated Pact card — reuses PactHub card style */}
+            {/* Associated Pact card */}
             {(() => {
               const pact = mockPacts.find(p => p.id === meta.pactId);
               if (!pact) return null;
+              const pactStatusConfig: Record<string, { label: string; color: string; bg: string }> = {
+                pending: { label: '待审批', color: 'text-amber-600', bg: 'bg-amber-50' },
+                active: { label: '生效中', color: 'text-blue-600', bg: 'bg-blue-50' },
+                completed: { label: '已完成', color: 'text-slate-600', bg: 'bg-slate-50' },
+                rejected: { label: '已拒绝', color: 'text-red-600', bg: 'bg-red-50' },
+                expired: { label: '已过期', color: 'text-muted-foreground', bg: 'bg-muted/50' },
+                revoked: { label: '已撤回', color: 'text-red-600', bg: 'bg-red-50' },
+              };
+              const ps = pactStatusConfig[pact.status] || pactStatusConfig.active;
               return (
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
@@ -164,28 +172,19 @@ export default function ExcessApproval() {
                   <p className="text-xs text-muted-foreground font-medium mb-2 px-1">关联 Pact</p>
                   <div
                     onClick={() => navigate(`/pact/${meta.pactId}`)}
-                    className="bg-card rounded-2xl p-4 border border-border/60 shadow-sm cursor-pointer active:scale-[0.98] transition-transform"
+                    className="bg-white rounded-2xl p-4 border border-border/60 shadow-sm cursor-pointer active:scale-[0.98] transition-transform"
                   >
-                    <div className="flex items-start justify-between gap-3 mb-3">
+                    <div className="flex items-start justify-between gap-3">
                       <div className="flex-1 min-w-0">
-                        <h3 className="text-[14px] font-semibold text-foreground leading-snug mb-1">{pact.title}</h3>
-                        <p className="text-[12px] text-muted-foreground line-clamp-1">{pact.description}</p>
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className={cn('text-[11px] font-medium px-2 py-0.5 rounded-full', ps.color, ps.bg)}>
+                            {ps.label}
+                          </span>
+                        </div>
+                        <h3 className="text-[14px] font-bold text-foreground leading-snug mb-1">{pact.title}</h3>
+                        <p className="text-[12px] text-muted-foreground line-clamp-2">{pact.description}</p>
                       </div>
-                      <ArrowRight className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
-                    </div>
-                    <div className="flex rounded-xl bg-muted/50 overflow-hidden">
-                      <div className="flex-1 py-2 px-3 text-center border-r border-border/50">
-                        <p className="text-[10px] text-muted-foreground mb-0.5">Agent</p>
-                        <p className="text-[12px] font-medium text-foreground truncate">{pact.agentName}</p>
-                      </div>
-                      <div className="flex-1 py-2 px-3 text-center border-r border-border/50">
-                        <p className="text-[10px] text-muted-foreground mb-0.5">链</p>
-                        <p className="text-[12px] font-medium text-foreground">{pact.chain}</p>
-                      </div>
-                      <div className="flex-1 py-2 px-3 text-center">
-                        <p className="text-[10px] text-muted-foreground mb-0.5">有效期</p>
-                        <p className="text-[12px] font-medium text-foreground">{pact.validityDays}天</p>
-                      </div>
+                      <ArrowRight className="w-4 h-4 text-muted-foreground shrink-0 mt-1" strokeWidth={1.5} />
                     </div>
                   </div>
                 </motion.div>
