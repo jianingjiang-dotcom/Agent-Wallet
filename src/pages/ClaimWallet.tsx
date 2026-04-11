@@ -8,6 +8,7 @@ import {
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
 import { useWallet } from '@/contexts/WalletContext';
 import { cn } from '@/lib/utils';
 import { ClaimWalletInfo, Wallet as WalletType } from '@/types/wallet';
@@ -33,13 +34,11 @@ const steps = [
 export default function ClaimWallet() {
   const navigate = useNavigate();
   const location = useLocation();
-  // Accept claimInfo from ClaimIntro navigation state
   const passedClaimInfo = (location.state as { claimInfo?: ClaimWalletInfo })?.claimInfo || null;
-  // Support resuming from a specific step via URL param
   const resumeParam = new URLSearchParams(window.location.search).get('resume');
   const initialStep = resumeParam === 'keygen' ? 2 : resumeParam === 'backup' ? 3 : 1;
   const [currentStep, setCurrentStep] = useState(initialStep);
-  const [claimInfo] = useState<ClaimWalletInfo | null>(passedClaimInfo);
+  const [claimInfo, setClaimInfo] = useState<ClaimWalletInfo | null>(passedClaimInfo);
 
   const currentComponent = steps[currentStep - 1]?.component;
 
@@ -122,10 +121,11 @@ export default function ClaimWallet() {
       {/* Step Content */}
       <div className="flex-1 px-4 overflow-auto">
         <AnimatePresence mode="wait">
-          {currentComponent === 'confirm' && claimInfo && (
+          {currentComponent === 'confirm' && (
             <ConfirmClaimStep
               key="confirm"
               claimInfo={claimInfo}
+              onClaimInfoReady={setClaimInfo}
               onComplete={handleStepComplete}
             />
           )}
@@ -148,23 +148,44 @@ export default function ClaimWallet() {
 }
 
 
-// ─── Step 2: Confirm Claim ─────────────────────────────────
+// ─── Step 1: Code Entry + Confirm Claim ───────────────────
 function ConfirmClaimStep({
   claimInfo,
+  onClaimInfoReady,
   onComplete,
 }: {
-  claimInfo: ClaimWalletInfo;
+  claimInfo: ClaimWalletInfo | null;
+  onClaimInfoReady: (info: ClaimWalletInfo) => void;
   onComplete: () => void;
 }) {
-  const { confirmClaim } = useWallet();
+  const { validateClaimCode, confirmClaim } = useWallet();
+  const [code, setCode] = useState('');
+  const [isValidating, setIsValidating] = useState(false);
+  const [codeError, setCodeError] = useState('');
   const [showBiometric, setShowBiometric] = useState(false);
   const [verified, setVerified] = useState(false);
 
+  const handleValidate = async () => {
+    if (code.length !== 6) { setCodeError('请输入完整的 6 位配对口令'); return; }
+    setIsValidating(true);
+    setCodeError('');
+    try {
+      const info = await validateClaimCode(code);
+      onClaimInfoReady(info);
+    } catch (e: any) {
+      setCodeError(e.message || '配对口令验证失败');
+    } finally {
+      setIsValidating(false);
+    }
+  };
+
   const handleVerified = async () => {
+    if (!claimInfo) return;
     await confirmClaim(claimInfo.walletId);
     setVerified(true);
   };
 
+  // Success state after biometric verification
   if (verified) {
     return (
       <motion.div
@@ -193,6 +214,50 @@ function ConfirmClaimStep({
     );
   }
 
+  // Phase 1: Code input (no claimInfo yet)
+  if (!claimInfo) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, x: 20 }}
+        animate={{ opacity: 1, x: 0 }}
+        exit={{ opacity: 0, x: -20 }}
+        className="flex flex-col items-center pt-12 space-y-6"
+      >
+        <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+          <Key className="w-8 h-8 text-primary" strokeWidth={1.5} />
+        </div>
+        <div className="text-center">
+          <h3 className="font-semibold text-lg">输入配对口令</h3>
+          <p className="text-sm text-muted-foreground mt-1">请输入 Agent 提供的 6 位配对口令</p>
+        </div>
+
+        <InputOTP maxLength={6} value={code} onChange={(v) => { setCode(v); setCodeError(''); }} disabled={isValidating}>
+          <InputOTPGroup className="gap-2.5">
+            {[0, 1, 2, 3, 4, 5].map((i) => (
+              <InputOTPSlot key={i} index={i} className="w-11 h-12 rounded-lg border border-border text-lg font-semibold" />
+            ))}
+          </InputOTPGroup>
+        </InputOTP>
+
+        {codeError && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-1.5 text-destructive text-xs">
+            <AlertTriangle className="w-3.5 h-3.5" />{codeError}
+          </motion.div>
+        )}
+
+        <Button
+          size="lg"
+          className="w-full gradient-primary"
+          onClick={handleValidate}
+          disabled={code.length !== 6 || isValidating}
+        >
+          {isValidating ? '验证中...' : '验证口令'}
+        </Button>
+      </motion.div>
+    );
+  }
+
+  // Phase 2: Wallet info confirmation (claimInfo available)
   return (
     <motion.div
       initial={{ opacity: 0, x: 20 }}

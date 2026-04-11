@@ -1484,7 +1484,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
 
   // Mock user data - can be toggled for testing different user types
   // Set to false to test existing user with wallets, true for new user onboarding
-  const [mockIsNewUser] = useState(false);
+  const [mockIsNewUser] = useState(true);
 
   const setupExistingUser = useCallback(() => {
     const mockUserInfo: UserInfo = {

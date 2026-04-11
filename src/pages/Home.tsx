@@ -39,25 +39,6 @@ import { getChainShortName } from '@/lib/chain-utils';
 // Welcome + pairing page when no wallet exists
 function EmptyWalletState() {
   const navigate = useNavigate();
-  const { validateClaimCode } = useWallet();
-  const [code, setCode] = useState('');
-  const [isValidating, setIsValidating] = useState(false);
-  const [error, setError] = useState('');
-  const [showHelp, setShowHelp] = useState(false);
-
-  const handleValidate = async () => {
-    if (code.length !== 6) { setError('请输入完整的 6 位配对口令'); return; }
-    setIsValidating(true);
-    setError('');
-    try {
-      const info = await validateClaimCode(code);
-      navigate('/claim-wallet', { state: { claimInfo: info } });
-    } catch (e: any) {
-      setError(e.message || '配对口令验证失败');
-    } finally {
-      setIsValidating(false);
-    }
-  };
 
   return (
     <AppLayout showNav>
@@ -100,55 +81,10 @@ function EmptyWalletState() {
             ))}
           </motion.div>
 
-          {/* Pairing input — centered */}
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="flex flex-col items-center space-y-4">
-            <p className="text-xs font-medium text-muted-foreground">输入配对口令</p>
-
-            <InputOTP maxLength={6} value={code} onChange={(v) => { setCode(v); setError(''); }} disabled={isValidating}>
-              <InputOTPGroup className="gap-2.5">
-                {[0, 1, 2, 3, 4, 5].map((i) => (
-                  <InputOTPSlot key={i} index={i} className="w-11 h-12 rounded-lg border border-border text-lg font-semibold" />
-                ))}
-              </InputOTPGroup>
-            </InputOTP>
-
-            {error && (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-1.5 text-destructive text-xs">
-                <AlertTriangle className="w-3.5 h-3.5" />{error}
-              </motion.div>
-            )}
-
-            {/* Help */}
-            <div className="flex flex-col items-center">
-              <button className="inline-flex items-center gap-1 text-xs text-primary py-1" onClick={() => setShowHelp(!showHelp)}>
-                <HelpCircle className="w-3.5 h-3.5" />
-                还没有配对口令？
-                <motion.div animate={{ rotate: showHelp ? 180 : 0 }} transition={{ duration: 0.2 }}>
-                  <ChevronDown className="w-3.5 h-3.5" />
-                </motion.div>
-              </button>
-              <AnimatePresence>
-                {showHelp && (
-                  <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.2 }} className="overflow-hidden w-full">
-                    <div className="mt-2 p-3 bg-muted/50 rounded-xl text-xs leading-relaxed space-y-2 text-left">
-                      <p className="font-medium text-foreground">在 Agent 环境执行以下指令</p>
-                      <div className="relative">
-                        <pre className="bg-background rounded-lg p-2.5 pr-9 text-[11px] font-mono text-foreground overflow-x-auto whitespace-pre-wrap break-all leading-relaxed">npx skills add cobosteven/cobo-agent-wallet-manual --skill cobo-agentic-wallet-sandbox --yes --global</pre>
-                        <button onClick={() => { navigator.clipboard.writeText('npx skills add cobosteven/cobo-agent-wallet-manual --skill cobo-agentic-wallet-sandbox --yes --global'); toast.success('已复制'); }} className="absolute right-1.5 top-1.5 p-1 rounded text-muted-foreground hover:text-foreground transition-colors">
-                          <Copy className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          </motion.div>
-
           {/* CTA */}
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}>
-            <Button size="lg" className="w-full text-base gradient-primary" onClick={handleValidate} disabled={code.length !== 6 || isValidating}>
-              {isValidating ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />验证中...</> : '开始关联'}
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
+            <Button size="lg" className="w-full text-base gradient-primary" onClick={() => navigate('/claim-wallet')}>
+              开始认领钱包
             </Button>
           </motion.div>
         </div>
