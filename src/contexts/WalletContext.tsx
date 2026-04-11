@@ -980,6 +980,7 @@ const defaultSecurityConfig: SecurityConfig = {
 const defaultBackupStatus: BackupStatus = {
   cloudBackup: false,
   fileBackup: false,
+  passkeyBackup: false,
 };
 
 // Mock notifications data
@@ -2501,15 +2502,16 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     return true;
   }, []);
 
-  const completeCloudBackup = useCallback(async (provider: 'icloud' | 'google_drive'): Promise<boolean> => {
+  const completeCloudBackup = useCallback(async (provider: 'icloud' | 'google_drive', withPasskey?: boolean): Promise<boolean> => {
     await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    setBackupStatus({
+
+    setBackupStatus(prev => ({
+      ...prev,
       cloudBackup: true,
       cloudProvider: provider,
       lastBackupDate: new Date(),
-      fileBackup: false,
-    });
+      passkeyBackup: withPasskey || prev.passkeyBackup,
+    }));
     
     if (currentWallet) {
       setCurrentWallet({ ...currentWallet, isBackedUp: true });

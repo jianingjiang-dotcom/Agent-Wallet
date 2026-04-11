@@ -314,6 +314,7 @@ export interface BackupStatus {
   cloudProvider?: 'icloud' | 'google_drive';
   lastBackupDate?: Date;
   fileBackup: boolean;
+  passkeyBackup: boolean;
 }
 
 // User info

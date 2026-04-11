@@ -24,6 +24,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { BiometricVerifyDrawer } from '@/components/BiometricVerifyDrawer';
+import { Switch } from '@/components/ui/switch';
 
 const steps = [
   { id: 1, title: '确认钱包', icon: Shield, component: 'confirm' },
@@ -619,6 +620,8 @@ function BackupStep({ onComplete }: { onComplete: () => void }) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [confirmed, setConfirmed] = useState(false);
+  const [passkeySetup, setPasskeySetup] = useState(false);
+  const [showPasskeyDrawer, setShowPasskeyDrawer] = useState(false);
   const { completeCloudBackup } = useWallet();
 
   const getPasswordStrength = (pwd: string): { level: 0 | 1 | 2 | 3; label: string; color: string } => {
@@ -650,7 +653,7 @@ function BackupStep({ onComplete }: { onComplete: () => void }) {
 
     setIsLoading(true);
     try {
-      await completeCloudBackup('icloud', password);
+      await completeCloudBackup('icloud', passkeySetup);
       setShowSuccess(true);
     } catch {
       setError('备份失败，请重试');
@@ -659,15 +662,15 @@ function BackupStep({ onComplete }: { onComplete: () => void }) {
     }
   };
 
+  // ── Success screen ──
   if (showSuccess) {
     return (
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.95 }}
         className="flex flex-col h-full"
       >
-        <div className="flex-1 flex flex-col items-center justify-center text-center">
+        <div className="flex-1 flex flex-col items-center justify-center text-center px-4">
           <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
@@ -682,15 +685,15 @@ function BackupStep({ onComplete }: { onComplete: () => void }) {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="mt-6 p-3 bg-muted/50 rounded-xl flex items-start gap-2"
+            className="mt-6 flex items-start gap-2 px-1"
           >
             <Info className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" strokeWidth={1.5} />
-            <p className="text-xs text-muted-foreground text-left">
+            <p className="text-[11px] text-muted-foreground text-left">
               建议在「设置 → 钱包管理」中额外创建本地备份，双重保障更安心
             </p>
           </motion.div>
         </div>
-        <div className="pb-8">
+        <div className="pb-8 px-4">
           <Button size="lg" className="w-full h-12 text-base font-medium gradient-primary" onClick={onComplete}>
             进入钱包
           </Button>
@@ -699,6 +702,7 @@ function BackupStep({ onComplete }: { onComplete: () => void }) {
     );
   }
 
+  // ── Main backup form ──
   return (
     <motion.div
       initial={{ opacity: 0, x: 20 }}
@@ -706,37 +710,48 @@ function BackupStep({ onComplete }: { onComplete: () => void }) {
       exit={{ opacity: 0, x: -20 }}
       className="flex flex-col h-full"
     >
-      <div className="flex-1 flex flex-col items-center pt-10">
-        <motion.div
-          initial={{ scale: 0.8 }}
-          animate={{ scale: 1 }}
-          transition={{ delay: 0.2 }}
-          className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center mb-4"
-        >
-          <CloudUpload className="w-8 h-8 text-accent" strokeWidth={1.5} />
-        </motion.div>
+      <div className="flex-1 overflow-y-auto pb-4">
+        {/* Header */}
+        <div className="flex flex-col items-center pt-8 mb-6">
+          <motion.div
+            initial={{ scale: 0.8 }}
+            animate={{ scale: 1 }}
+            transition={{ delay: 0.2 }}
+            className="w-14 h-14 rounded-full bg-accent/10 flex items-center justify-center mb-3"
+          >
+            <CloudUpload className="w-7 h-7 text-accent" strokeWidth={1.5} />
+          </motion.div>
+          <h2 className="text-lg font-bold text-foreground mb-1">备份手机端密钥</h2>
+          <p className="text-muted-foreground text-[13px] text-center">
+            加密备份到 iCloud，防止手机丢失后无法恢复
+          </p>
+        </div>
 
-        <h2 className="text-xl font-bold text-foreground mb-2">备份手机端密钥</h2>
-        <p className="text-muted-foreground text-sm text-center mb-6">
-          加密备份到 iCloud，防止手机丢失后无法恢复
-        </p>
+        {/* Card 1: Password backup (required) */}
+        <div className="bg-card border border-border rounded-2xl p-4 mb-3">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <Key className="w-4 h-4 text-foreground" strokeWidth={1.5} />
+              <span className="text-[14px] font-semibold text-foreground">设置备份密码</span>
+            </div>
+            <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-red-50 text-red-600">必填</span>
+          </div>
 
-        <div className="w-full space-y-4">
-          <div className="space-y-2">
+          <div className="space-y-3">
             <div className="relative">
               <Input
                 type={showPassword ? 'text' : 'password'}
                 placeholder="设置密码（8-32位，含字母和数字）"
                 value={password}
                 onChange={(e) => { setPassword(e.target.value); setError(''); }}
-                className="pr-12"
+                className="pr-12 h-11"
               />
               <button
                 type="button"
                 className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground"
                 onClick={() => setShowPassword(!showPassword)}
               >
-                {showPassword ? <EyeOff className="w-5 h-5" strokeWidth={1.5} /> : <Eye className="w-5 h-5" strokeWidth={1.5} />}
+                {showPassword ? <EyeOff className="w-4.5 h-4.5" strokeWidth={1.5} /> : <Eye className="w-4.5 h-4.5" strokeWidth={1.5} />}
               </button>
             </div>
 
@@ -754,7 +769,7 @@ function BackupStep({ onComplete }: { onComplete: () => void }) {
                   ))}
                 </div>
                 <span className={cn(
-                  'text-xs font-medium',
+                  'text-[11px] font-medium',
                   passwordStrength.level === 1 && 'text-destructive',
                   passwordStrength.level === 2 && 'text-warning',
                   passwordStrength.level === 3 && 'text-success'
@@ -763,36 +778,65 @@ function BackupStep({ onComplete }: { onComplete: () => void }) {
                 </span>
               </div>
             )}
+
+            <Input
+              type={showPassword ? 'text' : 'password'}
+              placeholder="确认密码"
+              value={confirmPassword}
+              onChange={(e) => { setConfirmPassword(e.target.value); setError(''); }}
+              className="h-11"
+            />
+
+            <label className="flex items-start gap-2 cursor-pointer pt-1">
+              <input
+                type="checkbox"
+                checked={confirmed}
+                onChange={(e) => setConfirmed(e.target.checked)}
+                className="mt-0.5 rounded border-border"
+              />
+              <span className="text-[11px] text-muted-foreground leading-relaxed">
+                我已牢记密码。如果忘记密码，将无法从备份中恢复钱包。
+              </span>
+            </label>
+
+            {error && (
+              <div className="flex items-center gap-1.5 text-destructive text-[11px]">
+                <AlertTriangle className="w-3.5 h-3.5" />
+                {error}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Card 2: Passkey backup (optional) */}
+        <div className="border border-border rounded-2xl p-4 bg-muted/20">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Shield className={cn('w-4 h-4', passkeySetup ? 'text-emerald-600' : 'text-foreground')} strokeWidth={1.5} />
+              <div>
+                <span className="text-[14px] font-semibold text-foreground">Passkey 恢复</span>
+                <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-violet-100 text-violet-700 ml-2">推荐</span>
+              </div>
+            </div>
+            <Switch
+              checked={passkeySetup}
+              onCheckedChange={(v) => {
+                if (v) {
+                  setShowPasskeyDrawer(true);
+                } else {
+                  setPasskeySetup(false);
+                }
+              }}
+            />
           </div>
 
-          <Input
-            type={showPassword ? 'text' : 'password'}
-            placeholder="确认密码"
-            value={confirmPassword}
-            onChange={(e) => { setConfirmPassword(e.target.value); setError(''); }}
-          />
-
-          <label className="flex items-start gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={confirmed}
-              onChange={(e) => setConfirmed(e.target.checked)}
-              className="mt-1 rounded border-border"
-            />
-            <span className="text-xs text-muted-foreground">
-              我已牢记密码。如果忘记密码，将无法从备份中恢复钱包。
-            </span>
-          </label>
-
-          {error && (
-            <div className="flex items-center gap-1.5 text-destructive text-xs">
-              <AlertTriangle className="w-3.5 h-3.5" />
-              {error}
-            </div>
-          )}
+          <p className="text-[11px] text-muted-foreground mt-2 leading-relaxed">
+            忘记密码时的备用恢复方式，通过 Face ID / 指纹创建独立备份，与密码互不依赖
+          </p>
         </div>
       </div>
 
+      {/* Bottom actions */}
       <div className="pb-8 space-y-3">
         <Button
           size="lg"
@@ -810,6 +854,18 @@ function BackupStep({ onComplete }: { onComplete: () => void }) {
         </button>
       </div>
 
+      {/* Passkey setup drawer */}
+      <BiometricVerifyDrawer
+        open={showPasskeyDrawer}
+        onOpenChange={(open) => {
+          setShowPasskeyDrawer(open);
+        }}
+        title="设置 Passkey"
+        description="通过 Face ID / 指纹创建独立备份密钥"
+        onVerified={() => setPasskeySetup(true)}
+      />
+
+      {/* Skip warning */}
       <AlertDialog open={showSkipWarning} onOpenChange={setShowSkipWarning}>
         <AlertDialogContent>
           <AlertDialogHeader>
