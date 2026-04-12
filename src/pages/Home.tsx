@@ -34,6 +34,7 @@ import { AddressPicker } from '@/components/AddressPicker';
 import { ChainId, SUPPORTED_CHAINS, Transaction, isAgentLinked, AddressSelection, ADDRESS_SYSTEMS } from '@/types/wallet';
 import { TokenInfo } from '@/lib/tokens';
 import { toast } from '@/lib/toast';
+import { showInAppNotification } from '@/lib/in-app-notification';
 import { getChainShortName } from '@/lib/chain-utils';
 
 // Welcome + pairing page when no wallet exists
@@ -132,7 +133,7 @@ export default function HomePage() {
       handledSidebarOpen.current = false;
     }
   }, [location.state]);
-  const { assets, transactions, currentWallet, walletStatus, addToken, removeToken, unreadMessageCount, pendingTodoCount, getAgentTxByWallet, agentTransactions } = useWallet();
+  const { assets, transactions, currentWallet, walletStatus, addToken, removeToken, unreadMessageCount, pendingTodoCount, getAgentTxByWallet, agentTransactions, systemStatus, setSystemStatus } = useWallet();
 
   // Claimed wallet states
   const needsKeyGen = walletStatus === 'claimed_no_key';
@@ -337,6 +338,28 @@ export default function HomePage() {
           </motion.button>
 
           <div className="flex items-center gap-2.5">
+            {/* TODO: 临时测试按钮，上线前删除 */}
+            <button
+              onClick={() => setSystemStatus(systemStatus === 'normal' ? 'service_down' : systemStatus === 'service_down' ? 'chain_congestion' : 'normal')}
+              className={cn('px-1.5 py-0.5 rounded text-[9px] font-medium border', systemStatus !== 'normal' ? 'bg-red-50 text-red-600 border-red-200' : 'bg-muted/50 text-muted-foreground border-border/60')}
+            >
+              {systemStatus === 'normal' ? 'SYS' : systemStatus === 'service_down' ? '故障' : '拥堵'}
+            </button>
+            {/* TODO: 临时通知测试按钮，上线前删除 */}
+            <button
+              onClick={() => {
+                const demos = [
+                  { icon: <CryptoIcon symbol="ETH" size="sm" />, title: '收到转账', subtitle: '+1.5 ETH (≈$2,847)', route: '/messages' },
+                  { icon: <Shield className="w-5 h-5 text-violet-500" />, title: '新 Pact 待审批', subtitle: 'ETH 定投策略', route: '/messages' },
+                  { icon: <Key className="w-5 h-5 text-blue-500" />, title: '交易签名请求', subtitle: '1inch Aggregation Router', route: '/messages' },
+                ];
+                const demo = demos[Math.floor(Math.random() * demos.length)];
+                showInAppNotification(demo);
+              }}
+              className="px-1.5 py-0.5 rounded text-[9px] font-medium border bg-muted/50 text-muted-foreground border-border/60"
+            >
+              通知
+            </button>
             {/* AI Assistant Entry */}
             <motion.button
               onClick={() => navigate('/assistant')}

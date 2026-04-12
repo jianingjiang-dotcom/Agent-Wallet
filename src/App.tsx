@@ -76,6 +76,8 @@ import PactDetail from "./pages/PactDetail";
 import DefaultPactManagement from "./pages/DefaultPactManagement";
 import StrategyMarketplace from "./pages/StrategyMarketplace";
 import StrategyDetail from "./pages/StrategyDetail";
+import SystemAnnouncement from "./pages/SystemAnnouncement";
+import { InAppNotification as InAppNotificationOverlay } from "./components/InAppNotification";
 
 const queryClient = new QueryClient();
 
@@ -179,6 +181,7 @@ function AppRoutes() {
       <Route path="/default-pact" element={<ProtectedRoute bypassAuth><DefaultPactManagement /></ProtectedRoute>} />
       <Route path="/pact-marketplace" element={<ProtectedRoute bypassAuth><StrategyMarketplace /></ProtectedRoute>} />
       <Route path="/pact-marketplace/:id" element={<ProtectedRoute bypassAuth><StrategyDetail /></ProtectedRoute>} />
+      <Route path="/system-announcement/:id" element={<ProtectedRoute bypassAuth><SystemAnnouncement /></ProtectedRoute>} />
       <Route path="/messages" element={<ProtectedRoute bypassAuth><MessageCenter /></ProtectedRoute>} />
       <Route path="/messages/:type" element={<ProtectedRoute bypassAuth><MessageCategoryPage /></ProtectedRoute>} />
       <Route path="/excess-approval/:todoId" element={<ProtectedRoute bypassAuth><ExcessApproval /></ProtectedRoute>} />
@@ -218,6 +221,7 @@ const App = () => (
             <TooltipProvider>
               <BrowserRouter>
                 <PhoneFrame>
+                  <InAppNotificationOverlay />
                   <Toaster />
                   <AppLockScreen />
                   <AppRoutes />

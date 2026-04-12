@@ -1246,6 +1246,10 @@ export function aggregateByChain(assets: Asset[], wallet: Wallet | null): ChainA
 }
 
 interface WalletContextType extends WalletState {
+  // System status
+  systemStatus: 'normal' | 'service_down' | 'chain_congestion';
+  setSystemStatus: (status: 'normal' | 'service_down' | 'chain_congestion') => void;
+
   // Auth actions
   login: (provider: 'apple' | 'google' | 'email') => Promise<AuthResult>;
   logout: () => void;
@@ -1253,7 +1257,7 @@ interface WalletContextType extends WalletState {
   verifyCode: (email: string, code: string) => Promise<AuthResult>;
   checkPasswordExists: (email: string) => Promise<{ hasPassword: boolean; isNewUser: boolean }>;
   loginWithPassword: (email: string, password: string) => Promise<AuthResult>;
-  
+
   // Wallet actions
   createWallet: (name: string) => Promise<Wallet>;
   switchWallet: (walletId: string) => void;
@@ -1262,7 +1266,7 @@ interface WalletContextType extends WalletState {
   // Backup actions
   setPin: (pin: string) => Promise<boolean>;
   enableBiometric: () => Promise<boolean>;
-  completeCloudBackup: (provider: 'icloud' | 'google_drive') => Promise<boolean>;
+  completeCloudBackup: (provider: 'icloud' | 'google_drive', withPasskey?: boolean) => Promise<boolean>;
   completeFileBackup: (password: string) => Promise<boolean>;
   backupWallet: (walletId: string, backupInfo: WalletBackupInfo, password?: string) => Promise<boolean>;
   verifyBackupPassword: (walletId: string, password: string) => boolean;
@@ -1409,6 +1413,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const [securityConfig, setSecurityConfig] = useState<SecurityConfig>(defaultSecurityConfig);
   const [backupStatus, setBackupStatus] = useState<BackupStatus>(defaultBackupStatus);
   const [walletStatus, setWalletStatus] = useState<WalletStatus>('not_created');
+  const [systemStatus, setSystemStatus] = useState<'normal' | 'service_down' | 'chain_congestion'>('normal');
   const [hasPin, setHasPin] = useState(false);
   const [hasBiometric, setHasBiometric] = useState(false);
   const [onboardingStep, setOnboardingStep] = useState(0);
@@ -1485,7 +1490,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
 
   // Mock user data - can be toggled for testing different user types
   // Set to false to test existing user with wallets, true for new user onboarding
-  const [mockIsNewUser] = useState(true);
+  const [mockIsNewUser] = useState(false);
 
   const setupExistingUser = useCallback(() => {
     const mockUserInfo: UserInfo = {
@@ -3211,6 +3216,8 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     securityConfig,
     backupStatus,
     walletStatus,
+    systemStatus,
+    setSystemStatus,
     hasPin,
     hasBiometric,
     login,
