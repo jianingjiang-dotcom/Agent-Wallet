@@ -51,10 +51,10 @@ export const mockRecipes: Recipe[] = [
     id: 'r-aave-v3-lending',
     slug: 'aave-v3-lending',
     title: 'Aave V3 Lending',
-    description: 'Supply and withdraw on Aave V3. Earn variable interest as a liquidity provider on BASE_ETH or ETH mainnet.',
+    description: 'Deposit collateral into Aave V3 and borrow target assets with automatic health factor calculation and liquidation threshold monitoring. Suitable for leveraged position building or liquidity mining use cases.',
     icon: '🏦',
     category: 'defi',
-    tags: ['defi', 'lending', 'aave', 'contract_call'],
+    tags: ['defi', 'lending', 'aave'],
     chains: ['BASE_ETH', 'ETH'],
     author_name: 'Cobo',
     featured: true,
@@ -63,14 +63,18 @@ export const mockRecipes: Recipe[] = [
     use_count: 56,
     content_markdown: `## Overview
 
-contract_call on BASE_ETH / ETH mainnet. Supply earns variable interest as a liquidity provider. Withdraw redeems supplied assets plus accrued interest.
+Deposit collateral into Aave V3 and borrow target assets with automatic health factor calculation and liquidation threshold monitoring. Suitable for leveraged position building or liquidity mining use cases.
 
 ## Fact
 
 - aave_v3_pool (BASE_ETH): \`0xA238Dd80C259a72e81d7e4664a9801593F98d1c5\`
 - aave_v3_pool (ETH): \`0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2\`
-- supported assets: USDC, WETH, cbETH, wstETH
-- variable rate changes with pool utilization
+- supported assets (BASE_ETH): USDC, USDbC, WETH, cbETH, wstETH
+- supported assets (ETH): USDC, WETH, WBTC, DAI, LINK, cbETH, wstETH
+- target_in: aave_v3_pool + token contract
+- approve target: token (not pool)
+- interest: variable rate; accrues as aTokens automatically
+- **coverage**: partial reference; use web search for unlisted tokens, contracts, parameters, or up-to-date addresses
 
 ## Typical Flow
 
@@ -81,12 +85,15 @@ contract_call on BASE_ETH / ETH mainnet. Supply earns variable interest as a liq
 **Withdraw — 1 tx:**
 1. \`withdraw(token, amount, to)\` on Pool
 
+Interest accrues as aTokens automatically; no claim step needed.
+
 ## Safety & Risks
 
-- Approve must confirm before supply
-- Variable rates: APY changes with pool utilization
-- Smart contract risk: use only audited pools
-- Withdrawal may fail if utilization is too high`,
+- **Approve must confirm before supply**: Supply reverts if approve is unconfirmed.
+- **Variable rates**: APY changes with pool utilization; never assume fixed rate.
+- **Utilization risk**: Near 100% utilization may temporarily block withdrawals.
+- **Policy denial**: Parse reason (per-tx limit vs daily cap); retry with compliant params.
+- **Daily cap**: Reduce amounts proactively before hitting the cap.`,
     example_prompts: [
       'Supply 1000 USDC to Aave V3 on Base',
       'Lend my WETH on Aave to earn interest',
@@ -94,14 +101,65 @@ contract_call on BASE_ETH / ETH mainnet. Supply earns variable interest as a liq
     ],
   },
   {
+    id: 'r-compound-v3-lending',
+    slug: 'compound-v3-lending',
+    title: 'Compound V3 Lending',
+    description: 'Supply USDC into Compound V3 Comet markets to earn variable interest natively, or deposit collateral assets to borrow against. Single base asset model with automatic interest accrual and configurable liquidation thresholds.',
+    icon: '💰',
+    category: 'defi',
+    tags: ['defi', 'lending', 'compound'],
+    chains: ['BASE_ETH', 'ETH'],
+    author_name: 'Cobo',
+    featured: false,
+    verified: true,
+    view_count: 876,
+    use_count: 42,
+    content_markdown: `## Overview
+
+Supply USDC into Compound V3 Comet markets to earn variable interest natively, or deposit collateral assets to borrow against. Single base asset model with automatic interest accrual and configurable liquidation thresholds.
+
+## Fact
+
+- comet_usdc (BASE_ETH): \`0xb125E6687d4313864e53df431d5425969c15Eb2F\`
+- comet_usdc (ETH): \`0xc3d688B66703497DAA19211EEdff47f25384cdc3\`
+- base asset: USDC only (earns interest; collateral does not)
+- target_in: comet_usdc + USDC contract
+- approve target: USDC (not comet)
+- **coverage**: partial reference; use web search for unlisted tokens, contracts, parameters, or up-to-date addresses
+
+## Typical Flow
+
+**Supply — 2 tx:**
+1. \`approve(comet, amount)\` on USDC contract
+2. \`supply(token, amount)\` on Comet
+
+**Withdraw — 1 tx:**
+1. \`withdraw(token, amount)\` on Comet
+
+Interest accrues natively on USDC balance in Comet; no aToken or claim step.
+
+## Safety & Risks
+
+- **Approve must confirm before supply**: Supply reverts if approve is unconfirmed.
+- **Single base asset**: Only USDC earns interest; collateral does not.
+- **Liquidation risk**: Borrowed positions liquidate when collateral drops below threshold. Supply-only (no borrow) = no liquidation risk.
+- **Variable rates**: APY changes continuously; do not assume fixed rate.
+- **Policy denial**: Parse reason (per-tx limit vs daily cap); retry with compliant params.`,
+    example_prompts: [
+      'Supply 5000 USDC to Compound V3 on Base',
+      'Lend my USDC on Compound to earn interest',
+      'Withdraw all my USDC from Compound V3',
+    ],
+  },
+  {
     id: 'r-uniswap-v3-swap',
     slug: 'uniswap-v3-swap',
     title: 'Uniswap V3 Swap',
-    description: 'Execute token swaps via Uniswap V3 Router. Supports exact input and exact output swaps with configurable slippage.',
+    description: 'Execute single-hop or multi-hop token swaps through Uniswap V3 concentrated liquidity pools. Supports exact-input and exact-output modes, auto-selects optimal tick ranges, and enables large trades with minimal slippage across EVM-compatible chains.',
     icon: '🦄',
     category: 'defi',
-    tags: ['defi', 'swap', 'uniswap', 'contract_call'],
-    chains: ['ETH', 'BASE_ETH', 'ARB_ETH'],
+    tags: ['defi', 'swap', 'uniswap', 'trading'],
+    chains: ['BASE_ETH', 'ETH'],
     author_name: 'Cobo',
     featured: true,
     verified: true,
@@ -109,28 +167,37 @@ contract_call on BASE_ETH / ETH mainnet. Supply earns variable interest as a liq
     use_count: 189,
     content_markdown: `## Overview
 
-contract_call on ETH / BASE_ETH / ARB_ETH. Swap tokens using Uniswap V3's concentrated liquidity pools for optimal pricing.
+Execute single-hop or multi-hop token swaps through Uniswap V3 concentrated liquidity pools. Supports exact-input and exact-output modes, auto-selects optimal tick ranges, and enables large trades with minimal slippage across EVM-compatible chains.
 
 ## Fact
 
-- SwapRouter (ETH): \`0xE592427A0AEce92De3Edee1F18E0157C05861564\`
-- SwapRouter02 (ETH): \`0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45\`
-- Fee tiers: 0.01%, 0.05%, 0.3%, 1%
+- swap_router_02 (BASE_ETH): \`0x2626664c2603336E57B271c5C0b26F421741e481\`
+- swap_router_02 (ETH): \`0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45\`
+- fee tiers: 100 (0.01%) / 500 (0.05%) / 3000 (0.3%) / 10000 (1%)
+- target_in: swap_router_02 + input token contract
+- approve target: token (not router)
+- gas: BASE_ETH <$0.01 | ETH $5–20+
+- **coverage**: partial reference; use web search for unlisted tokens, contracts, parameters, or up-to-date addresses
 
 ## Typical Flow
 
-**Exact Input Swap — 2 tx:**
+**Single-hop — 2 tx:**
 1. \`approve(router, amount)\` on input token
-2. \`exactInputSingle(params)\` on SwapRouter
+2. \`exactInputSingle({tokenIn, tokenOut, fee, recipient, amountIn, amountOutMinimum, sqrtPriceLimitX96: 0})\` on SwapRouter02
 
-**Params struct:**
-- tokenIn, tokenOut, fee, recipient, deadline, amountIn, amountOutMinimum, sqrtPriceLimitX96
+**Multi-hop — 2 tx:**
+1. \`approve(router, amount)\` on input token
+2. \`exactInput({path: encodePacked(tokenA, fee, tokenB, fee, tokenC), recipient, amountIn, amountOutMinimum})\` on SwapRouter02
+
+Set \`amountOutMinimum\` ≥0.5% (stables), ≥1–2% (volatile). Query pool to confirm fee tier before committing.
 
 ## Safety & Risks
 
-- Always set reasonable slippage (0.5-1% recommended)
-- Check deadline to prevent stale transactions
-- Large swaps may have significant price impact`,
+- **Approve must confirm before swap**: Unconfirmed approve causes swap revert.
+- **Slippage is agent's responsibility**: Policy validates address + USD value only; set \`amountOutMinimum\` correctly.
+- **Large swap price impact**: Split large amounts into smaller transactions.
+- **Gas cost on ETH**: $5–20+ per swap; avoid small swaps where gas exceeds value.
+- **Policy denial**: Parse reason (per-tx or cumulative cap exceeded); retry with compliant amount.`,
     example_prompts: [
       'Swap 500 USDC to ETH on Uniswap',
       'Buy $1000 of ETH using USDC on Base via Uniswap V3',
