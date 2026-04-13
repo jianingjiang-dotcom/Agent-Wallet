@@ -77,6 +77,8 @@ import DefaultPactManagement from "./pages/DefaultPactManagement";
 import StrategyMarketplace from "./pages/StrategyMarketplace";
 import StrategyDetail from "./pages/StrategyDetail";
 import SystemAnnouncement from "./pages/SystemAnnouncement";
+import RecipeMarketplace from "./pages/RecipeMarketplace";
+import RecipeDetail from "./pages/RecipeDetail";
 import { InAppNotification as InAppNotificationOverlay } from "./components/InAppNotification";
 
 const queryClient = new QueryClient();
@@ -182,6 +184,8 @@ function AppRoutes() {
       <Route path="/pact-marketplace" element={<ProtectedRoute bypassAuth><StrategyMarketplace /></ProtectedRoute>} />
       <Route path="/pact-marketplace/:id" element={<ProtectedRoute bypassAuth><StrategyDetail /></ProtectedRoute>} />
       <Route path="/system-announcement/:id" element={<ProtectedRoute bypassAuth><SystemAnnouncement /></ProtectedRoute>} />
+      <Route path="/recipes" element={<RecipeMarketplace />} />
+      <Route path="/recipes/:slug" element={<RecipeDetail />} />
       <Route path="/messages" element={<ProtectedRoute bypassAuth><MessageCenter /></ProtectedRoute>} />
       <Route path="/messages/:type" element={<ProtectedRoute bypassAuth><MessageCategoryPage /></ProtectedRoute>} />
       <Route path="/excess-approval/:todoId" element={<ProtectedRoute bypassAuth><ExcessApproval /></ProtectedRoute>} />
