@@ -1,13 +1,13 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Eye, CheckCircle2, ArrowRight } from 'lucide-react';
+import { Search, Eye, Wrench, ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { mockRecipes, categoryLabels, formatChain, type Recipe, type RecipeCategory } from '@/lib/mock-recipes';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { RecipeIcon } from '@/components/RecipeIcon';
 
 type FilterCategory = 'all' | RecipeCategory;
-type SortBy = 'popular' | 'newest' | 'views';
+type SortBy = 'popular' | 'views';
 
 const CATEGORIES: { id: FilterCategory; label: string }[] = [
   { id: 'all', label: 'All' },
@@ -22,7 +22,6 @@ const CATEGORIES: { id: FilterCategory; label: string }[] = [
 const SORT_OPTIONS: { value: SortBy; label: string }[] = [
   { value: 'popular', label: 'Most Used' },
   { value: 'views', label: 'Most Viewed' },
-  { value: 'newest', label: 'Newest' },
 ];
 
 const ITEMS_PER_PAGE = 9;
@@ -52,9 +51,7 @@ export default function RecipeMarketplace() {
     }
     list = [...list].sort((a, b) => {
       if (sortBy === 'popular') return b.use_count - a.use_count;
-      if (sortBy === 'views') return b.view_count - a.view_count;
-      // newest: rely on mock array order (first inserted = newest)
-      return mockRecipes.indexOf(a) - mockRecipes.indexOf(b);
+      return b.view_count - a.view_count;
     });
     return list;
   }, [category, search, chainFilter, sortBy]);
@@ -148,7 +145,7 @@ export default function RecipeMarketplace() {
               className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"
             >
               {paginated.map((recipe, i) => (
-                <RecipeCard key={recipe.id} recipe={recipe} delay={i * 0.04} onClick={() => navigate(`/recipes/${recipe.slug}`)} />
+                <RecipeCard key={recipe.id} recipe={recipe} delay={i * 0.04} sortBy={sortBy} onClick={() => navigate(`/recipes/${recipe.slug}`)} />
               ))}
             </motion.div>
           )}
@@ -194,7 +191,10 @@ export default function RecipeMarketplace() {
 }
 
 // ─── Recipe Card ──────────────────────────────────────
-function RecipeCard({ recipe, delay, onClick }: { recipe: Recipe; delay: number; onClick: () => void }) {
+function RecipeCard({ recipe, delay, sortBy, onClick }: { recipe: Recipe; delay: number; sortBy: SortBy; onClick: () => void }) {
+  // Top-right metric mirrors the active sort, so users see the dimension they're sorting by
+  const showUses = sortBy === 'popular';
+  const formatNum = (n: number) => (n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(n));
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}
@@ -209,31 +209,9 @@ function RecipeCard({ recipe, delay, onClick }: { recipe: Recipe; delay: number;
       {/* Top row */}
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-xl border border-gray-100">
-            {recipe.icon}
-          </div>
+          <RecipeIcon recipe={recipe} size="md" />
           <div className="min-w-0">
-            <div className="flex items-center gap-1.5 flex-wrap">
-              <h3 className="text-[15px] font-semibold text-gray-900 group-hover:text-indigo-600 transition-colors leading-snug">{recipe.title}</h3>
-              {recipe.verified && (
-                <TooltipProvider>
-                  <Tooltip delayDuration={150}>
-                    <TooltipTrigger asChild>
-                      <span
-                        onClick={(e) => e.stopPropagation()}
-                        className="inline-flex items-center gap-0.5 text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 cursor-help shrink-0"
-                      >
-                        <CheckCircle2 className="w-2.5 h-2.5" strokeWidth={2.5} />
-                        Verified
-                      </span>
-                    </TooltipTrigger>
-                    <TooltipContent side="top" className="max-w-[220px]">
-                      <p className="text-xs leading-relaxed">Reviewed and audited by Cobo.</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              )}
-            </div>
+            <h3 className="text-[15px] font-semibold text-gray-900 group-hover:text-indigo-600 transition-colors leading-snug">{recipe.title}</h3>
             <div className="flex items-center gap-1.5 mt-1">
               <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-600">
                 {categoryLabels[recipe.category]}
@@ -241,9 +219,12 @@ function RecipeCard({ recipe, delay, onClick }: { recipe: Recipe; delay: number;
             </div>
           </div>
         </div>
-        <div className="flex items-center gap-1 text-[11px] text-gray-400 shrink-0">
-          <Eye className="w-3.5 h-3.5" />
-          {recipe.view_count >= 1000 ? `${(recipe.view_count / 1000).toFixed(1)}k` : recipe.view_count}
+        <div
+          className="flex items-center gap-1 text-[11px] text-gray-400 shrink-0"
+          title={showUses ? `${recipe.use_count} uses` : `${recipe.view_count.toLocaleString()} views`}
+        >
+          {showUses ? <Wrench className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+          {showUses ? formatNum(recipe.use_count) : formatNum(recipe.view_count)}
         </div>
       </div>
 

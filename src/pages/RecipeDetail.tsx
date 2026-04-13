@@ -1,11 +1,20 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Eye, Copy, CheckCircle2, Link2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Eye, Wrench, Copy, CheckCircle2, Link2, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from '@/lib/toast';
 import { mockRecipes, categoryLabels, formatChain } from '@/lib/mock-recipes';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { RecipeIcon } from '@/components/RecipeIcon';
+
+// Telegram brand icon (paper plane) — lucide doesn't ship a branded Telegram glyph
+function TelegramIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
+      <path d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71L12.6 16.3l-1.99 1.93c-.23.23-.42.42-.83.42z" />
+    </svg>
+  );
+}
 
 // Simple Markdown renderer for Recipe content
 function MarkdownContent({ content }: { content: string }) {
@@ -37,7 +46,7 @@ function MarkdownContent({ content }: { content: string }) {
       elements.push(
         <div key={i} className="flex items-start gap-2 text-sm text-gray-600 leading-relaxed ml-1">
           <span className="text-gray-400 mt-1 shrink-0">•</span>
-          <span>{renderInlineCode(line.slice(2))}</span>
+          <span>{renderInline(line.slice(2))}</span>
         </div>
       );
     }
@@ -48,7 +57,7 @@ function MarkdownContent({ content }: { content: string }) {
         elements.push(
           <div key={i} className="flex items-start gap-2 text-sm text-gray-600 leading-relaxed ml-1">
             <span className="text-gray-400 shrink-0 w-4 text-right">{match[1]}.</span>
-            <span>{renderInlineCode(match[2])}</span>
+            <span>{renderInline(match[2])}</span>
           </div>
         );
       }
@@ -61,7 +70,7 @@ function MarkdownContent({ content }: { content: string }) {
     else {
       elements.push(
         <p key={i} className="text-sm text-gray-600 leading-relaxed">
-          {renderInlineCode(line)}
+          {renderInline(line)}
         </p>
       );
     }
@@ -71,11 +80,15 @@ function MarkdownContent({ content }: { content: string }) {
   return <div className="space-y-1">{elements}</div>;
 }
 
-function renderInlineCode(text: string) {
-  const parts = text.split(/(`[^`]+`)/g);
+// Render inline `code` and **bold** within a line
+function renderInline(text: string) {
+  const parts = text.split(/(`[^`]+`|\*\*[^*]+\*\*)/g);
   return parts.map((part, i) => {
     if (part.startsWith('`') && part.endsWith('`')) {
       return <code key={i} className="px-1.5 py-0.5 rounded bg-gray-100 text-[12px] font-mono text-gray-800">{part.slice(1, -1)}</code>;
+    }
+    if (part.startsWith('**') && part.endsWith('**')) {
+      return <strong key={i} className="font-semibold text-gray-900">{part.slice(2, -2)}</strong>;
     }
     return <span key={i}>{part}</span>;
   });
@@ -153,26 +166,9 @@ export default function RecipeDetail() {
         {/* Meta */}
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
           <div className="flex items-start gap-4 mb-5">
-            <span className="text-4xl shrink-0">{recipe.icon}</span>
+            <RecipeIcon recipe={recipe} size="lg" />
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 flex-wrap">
-                <h1 className="text-2xl font-bold text-gray-900">{recipe.title}</h1>
-                {recipe.verified && (
-                  <TooltipProvider>
-                    <Tooltip delayDuration={150}>
-                      <TooltipTrigger asChild>
-                        <span className="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 cursor-help">
-                          <CheckCircle2 className="w-3 h-3" strokeWidth={2.5} />
-                          Verified
-                        </span>
-                      </TooltipTrigger>
-                      <TooltipContent side="top" className="max-w-[240px]">
-                        <p className="text-xs leading-relaxed">Reviewed and audited by Cobo. Contract addresses, flows, and risk notes have been verified.</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                )}
-              </div>
+              <h1 className="text-2xl font-bold text-gray-900">{recipe.title}</h1>
               <p className="text-gray-500 mt-1">{recipe.description}</p>
             </div>
           </div>
@@ -223,9 +219,16 @@ export default function RecipeDetail() {
                 <span className="text-sm font-semibold text-gray-900">{recipe.author_name}</span>
                 <span className="text-xs text-gray-400">· Author</span>
               </div>
-              <div className="flex items-center gap-1 text-xs text-gray-500 mt-0.5">
-                <Eye className="w-3.5 h-3.5" />
-                <span>{recipe.view_count.toLocaleString()} views</span>
+              <div className="flex items-center gap-3 text-xs text-gray-500 mt-0.5">
+                <span className="flex items-center gap-1">
+                  <Eye className="w-3.5 h-3.5" />
+                  {recipe.view_count.toLocaleString()} views
+                </span>
+                <span className="text-gray-300">·</span>
+                <span className="flex items-center gap-1">
+                  <Wrench className="w-3.5 h-3.5" />
+                  {recipe.use_count.toLocaleString()} uses
+                </span>
               </div>
             </div>
           </div>
@@ -251,9 +254,9 @@ export default function RecipeDetail() {
               onClick={handleShareTelegram}
               aria-label="Share on Telegram"
               title="Share on Telegram"
-              className="w-9 h-9 rounded-lg border border-gray-200 hover:bg-gray-50 hover:border-gray-300 flex items-center justify-center transition-colors text-sm text-gray-600"
+              className="w-9 h-9 rounded-lg border border-gray-200 hover:bg-gray-50 hover:border-gray-300 flex items-center justify-center transition-colors text-gray-600"
             >
-              ✈
+              <TelegramIcon className="w-4 h-4" />
             </button>
           </div>
         </motion.div>
@@ -277,25 +280,47 @@ export default function RecipeDetail() {
             transition={{ delay: 0.2 }}
             className="mt-10 lg:mt-0 lg:sticky lg:top-20 lg:self-start lg:max-h-[calc(100vh-96px)] lg:overflow-y-auto lg:pr-2 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:bg-gray-200 [&::-webkit-scrollbar-thumb]:rounded [&::-webkit-scrollbar-track]:bg-transparent"
           >
-            {/* Try These Prompts */}
-            <div>
-              <h3 className="text-base font-bold text-gray-900 mb-3">Try These Prompts</h3>
-              <div className="space-y-2">
+            {/* Try These Prompts — premium CTA */}
+            <div className="relative">
+              {/* Section header with subtle accent */}
+              <div className="flex items-center gap-2 mb-1">
+                <Sparkles className="w-4 h-4 text-indigo-500" strokeWidth={2.25} />
+                <h3 className="text-base font-bold bg-gradient-to-br from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                  Try with your agent
+                </h3>
+              </div>
+              <p className="text-[11px] text-gray-400 mb-4 ml-6">Tap any prompt to copy.</p>
+
+              <div className="space-y-2.5">
                 {recipe.example_prompts.map((prompt, idx) => (
-                  <div
+                  <button
                     key={idx}
                     onClick={() => handleCopyPrompt(prompt, idx)}
-                    className="flex items-center justify-between gap-2 p-3 rounded-xl border border-gray-200 hover:border-indigo-300 hover:bg-indigo-50/30 cursor-pointer transition-all group"
+                    className="w-full text-left relative group p-4 rounded-xl bg-gradient-to-br from-white via-white to-indigo-50/30 border border-gray-200 hover:border-indigo-300 hover:shadow-[0_8px_24px_-12px_rgba(99,102,241,0.35)] hover:-translate-y-0.5 transition-all duration-300 overflow-hidden"
                   >
-                    <p className="text-[13px] text-gray-700 leading-relaxed">"{prompt}"</p>
-                    <div className="shrink-0">
+                    {/* Corner glow on hover */}
+                    <div className="absolute -top-12 -right-12 w-24 h-24 rounded-full bg-indigo-500/10 blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+                    {/* Prompt mark */}
+                    <span className="absolute top-3.5 left-3 text-indigo-400/70 font-mono text-sm leading-none select-none">›</span>
+
+                    <p className="text-[13px] text-gray-700 leading-[1.55] pl-4 pr-12 font-medium">
+                      {prompt}
+                    </p>
+
+                    {/* Action — copy state */}
+                    <div className="absolute top-3 right-3">
                       {copiedPrompt === idx ? (
-                        <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                        <span className="inline-flex items-center justify-center w-7 h-7 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-600">
+                          <CheckCircle2 className="w-3.5 h-3.5" strokeWidth={2.5} />
+                        </span>
                       ) : (
-                        <Copy className="w-4 h-4 text-gray-300 group-hover:text-indigo-500 transition-colors" />
+                        <span className="inline-flex items-center justify-center w-7 h-7 rounded-md bg-white border border-gray-200 text-gray-400 group-hover:text-indigo-600 group-hover:border-indigo-300 group-hover:bg-indigo-50 transition-all">
+                          <Copy className="w-3.5 h-3.5" />
+                        </span>
                       )}
                     </div>
-                  </div>
+                  </button>
                 ))}
               </div>
             </div>
@@ -313,7 +338,7 @@ export default function RecipeDetail() {
                         onClick={() => { navigate(`/recipes/${r.slug}`); window.scrollTo(0, 0); }}
                         className="flex items-center gap-3 p-3 rounded-xl border border-gray-200 hover:border-indigo-300 hover:bg-indigo-50/30 cursor-pointer transition-all group"
                       >
-                        <span className="text-2xl shrink-0">{r.icon}</span>
+                        <RecipeIcon recipe={r} size="sm" />
                         <div className="min-w-0 flex-1">
                           <h4 className="text-[13px] font-semibold text-gray-900 truncate group-hover:text-indigo-600 transition-colors">{r.title}</h4>
                           <span className="text-[10px] text-gray-500">{categoryLabels[r.category]}</span>
