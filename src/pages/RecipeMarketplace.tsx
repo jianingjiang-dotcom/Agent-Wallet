@@ -62,11 +62,86 @@ export default function RecipeMarketplace() {
   return (
     <div className="min-h-screen bg-[#FAFBFC]">
 
-      {/* ══ Hero Section ══ */}
-      <div className="relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #f0faf4 0%, #e8f4f0 30%, #eef2fb 60%, #f5f0ff 100%)' }}>
-        {/* Decorative blobs */}
-        <div className="absolute top-0 right-0 w-[500px] h-[400px] opacity-30" style={{ background: 'radial-gradient(circle at 70% 30%, rgba(99, 200, 150, 0.3) 0%, transparent 60%)' }} />
-        <div className="absolute bottom-0 left-1/3 w-[400px] h-[300px] opacity-20" style={{ background: 'radial-gradient(circle, rgba(100, 130, 255, 0.2) 0%, transparent 60%)' }} />
+      {/* ══ Hero Section — animated aurora background ══ */}
+      <div className="relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #f4fbf7 0%, #eef5f1 30%, #f1f4fb 60%, #f7f3ff 100%)' }}>
+        {/* Aurora animation styles — scoped via unique class names */}
+        <style>{`
+          @keyframes aurora-drift-1 {
+            0%   { transform: translate3d(0, 0, 0) scale(1); opacity: 0.7; }
+            25%  { transform: translate3d(180px, 120px, 0) scale(1.25); opacity: 0.95; }
+            50%  { transform: translate3d(60px, 220px, 0) scale(0.9); opacity: 0.6; }
+            75%  { transform: translate3d(-140px, 80px, 0) scale(1.15); opacity: 0.85; }
+            100% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.7; }
+          }
+          @keyframes aurora-drift-2 {
+            0%   { transform: translate3d(0, 0, 0) scale(1); opacity: 0.55; }
+            33%  { transform: translate3d(-220px, 150px, 0) scale(1.3); opacity: 0.9; }
+            66%  { transform: translate3d(120px, 260px, 0) scale(0.85); opacity: 0.5; }
+            100% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.55; }
+          }
+          @keyframes aurora-drift-3 {
+            0%   { transform: translate3d(0, 0, 0) scale(1); opacity: 0.65; }
+            30%  { transform: translate3d(180px, -120px, 0) scale(1.2); opacity: 0.95; }
+            60%  { transform: translate3d(-100px, -60px, 0) scale(0.95); opacity: 0.55; }
+            85%  { transform: translate3d(-180px, 80px, 0) scale(1.1); opacity: 0.8; }
+            100% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.65; }
+          }
+          @keyframes aurora-drift-4 {
+            0%   { transform: translate3d(0, 0, 0) scale(1); opacity: 0.4; }
+            40%  { transform: translate3d(-150px, -100px, 0) scale(1.25); opacity: 0.7; }
+            70%  { transform: translate3d(100px, 60px, 0) scale(0.9); opacity: 0.35; }
+            100% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.4; }
+          }
+          .aurora-blob {
+            position: absolute;
+            border-radius: 9999px;
+            filter: blur(80px);
+            will-change: transform, opacity;
+            pointer-events: none;
+            mix-blend-mode: multiply;
+          }
+          .aurora-blob-1 {
+            top: -15%;
+            left: -10%;
+            width: 780px;
+            height: 580px;
+            background: radial-gradient(circle, rgba(99, 200, 150, 0.85) 0%, rgba(99, 200, 150, 0) 65%);
+            animation: aurora-drift-1 14s ease-in-out infinite;
+          }
+          .aurora-blob-2 {
+            top: 5%;
+            right: -15%;
+            width: 720px;
+            height: 540px;
+            background: radial-gradient(circle, rgba(100, 130, 255, 0.8) 0%, rgba(100, 130, 255, 0) 65%);
+            animation: aurora-drift-2 18s ease-in-out infinite;
+          }
+          .aurora-blob-3 {
+            bottom: -30%;
+            left: 20%;
+            width: 660px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(181, 159, 255, 0.8) 0%, rgba(181, 159, 255, 0) 65%);
+            animation: aurora-drift-3 16s ease-in-out infinite;
+          }
+          .aurora-blob-4 {
+            top: 30%;
+            left: 35%;
+            width: 500px;
+            height: 380px;
+            background: radial-gradient(circle, rgba(130, 230, 200, 0.6) 0%, rgba(130, 230, 200, 0) 65%);
+            animation: aurora-drift-4 20s ease-in-out infinite;
+          }
+          @media (prefers-reduced-motion: reduce) {
+            .aurora-blob-1, .aurora-blob-2, .aurora-blob-3, .aurora-blob-4 { animation: none; }
+          }
+        `}</style>
+
+        {/* Animated aurora layers */}
+        <div className="aurora-blob aurora-blob-1" />
+        <div className="aurora-blob aurora-blob-2" />
+        <div className="aurora-blob aurora-blob-3" />
+        <div className="aurora-blob aurora-blob-4" />
 
         <div className="max-w-6xl mx-auto px-6 pt-14 pb-8 relative z-10">
           <h1 className="text-4xl md:text-[44px] font-bold text-gray-900 leading-[1.1] tracking-tight max-w-2xl">
