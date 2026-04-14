@@ -17,7 +17,10 @@ export default function WalletBackupPage() {
   const navigate = useNavigate();
   const { wallets, backupWallet, verifyBackupPassword } = useWallet();
 
-  const wallet = wallets.find(w => w.id === walletId);
+  // "all" mode = global backup for all wallets
+  const isGlobalMode = walletId === 'all';
+  const wallet = isGlobalMode ? wallets[0] : wallets.find(w => w.id === walletId);
+  const targetWallets = isGlobalMode ? wallets : wallet ? [wallet] : [];
 
   const [backupType, setBackupType] = useState<'cloud' | 'local' | null>(null);
   const [showVerifyPassword, setShowVerifyPassword] = useState(false);
@@ -33,7 +36,7 @@ export default function WalletBackupPage() {
   const [verifyError, setVerifyError] = useState('');
   const [confirmed, setConfirmed] = useState(false);
 
-  if (!wallet) {
+  if (!wallet || targetWallets.length === 0) {
     return (
       <AppLayout showNav={false} title="备份钱包" showBack>
         <div className="flex items-center justify-center h-full">
@@ -42,6 +45,9 @@ export default function WalletBackupPage() {
       </AppLayout>
     );
   }
+
+  const pageTitle = isGlobalMode ? '备份管理' : '备份钱包';
+  const walletLabel = isGlobalMode ? `全部 ${targetWallets.length} 个钱包` : `「${wallet.name}」`;
 
   const validatePassword = () => {
     if (password.length < 8 || password.length > 32) return '密码需要 8-32 位';
@@ -64,6 +70,18 @@ export default function WalletBackupPage() {
     setVerifyError('');
   };
 
+  const backupAllTargets = async (method: 'cloud' | 'local', pwd?: string) => {
+    const info = {
+      method,
+      ...(method === 'cloud'
+        ? { cloudProvider: 'icloud' as const, lastBackupTime: new Date() }
+        : { fileBackupTime: new Date() }),
+    };
+    for (const w of targetWallets) {
+      await backupWallet(w.id, info, pwd);
+    }
+  };
+
   const handleBackup = async () => {
     const validationError = validatePassword();
     if (validationError) { setError(validationError); return; }
@@ -71,12 +89,7 @@ export default function WalletBackupPage() {
 
     setIsLoading(true);
     try {
-      await backupWallet(walletId!, {
-        method: backupType!,
-        ...(backupType === 'cloud'
-          ? { cloudProvider: 'icloud' as const, lastBackupTime: new Date() }
-          : { fileBackupTime: new Date() }),
-      }, password);
+      await backupAllTargets('local', password);
       setShowSuccess(true);
       toast.success('备份完成');
     } catch {
@@ -89,7 +102,7 @@ export default function WalletBackupPage() {
   // Success screen
   if (showSuccess) {
     return (
-      <AppLayout showNav={false} title="备份钱包" showBack>
+      <AppLayout showNav={false} title={pageTitle} showBack>
         <div className="flex flex-col h-full px-4">
           <div className="flex-1 flex flex-col items-center justify-center text-center">
             <motion.div
@@ -104,7 +117,7 @@ export default function WalletBackupPage() {
               {backupType === 'cloud' ? '云备份完成' : '本地备份完成'}
             </h2>
             <p className="text-muted-foreground text-sm max-w-[280px] mb-2">
-              「{wallet.name}」{backupType === 'cloud' ? '已安全备份到云端' : '备份文件已保存到本地'}
+              {walletLabel}{backupType === 'cloud' ? '已安全备份到云端' : '备份文件已保存到本地'}
             </p>
           </div>
           <div className="pb-6">
@@ -126,7 +139,7 @@ export default function WalletBackupPage() {
     return (
       <AppLayout
         showNav={false}
-        title="备份钱包"
+        title={pageTitle}
         showBack
         onBack={() => { setShowVerifyPassword(false); setOldPassword(''); setVerifyError(''); }}
       >
@@ -194,7 +207,7 @@ export default function WalletBackupPage() {
   // Password form (set new password) — only for local/file backup
   if (showPasswordForm && backupType === 'local') {
     return (
-      <AppLayout showNav={false} title="备份钱包" showBack onBack={() => setShowPasswordForm(false)}>
+      <AppLayout showNav={false} title={pageTitle} showBack onBack={() => setShowPasswordForm(false)}>
         <div className="flex flex-col h-full px-4">
           <div className="flex-1 py-4">
             <div className="text-center mb-6">
@@ -202,7 +215,7 @@ export default function WalletBackupPage() {
                 设置备份文件密码
               </h2>
               <p className="text-muted-foreground text-sm">
-                此密码用于加密「{wallet.name}」的本地备份数据
+                此密码用于加密{walletLabel}的本地备份数据
               </p>
             </div>
 
@@ -286,9 +299,12 @@ export default function WalletBackupPage() {
   const hasCloudBackup = wallet.isBackedUp && wallet.backupInfo?.method === 'cloud';
   const cloudProviderName = wallet.backupInfo?.cloudProvider === 'icloud' ? 'iCloud' : 'Google Drive';
 
+  const anyBackedUp = targetWallets.some(w => w.isBackedUp);
+  const unbackedCount = targetWallets.filter(w => !w.isBackedUp).length;
+
   // Backup type selection
   return (
-    <AppLayout showNav={false} title="备份钱包" showBack>
+    <AppLayout showNav={false} title={pageTitle} showBack>
       <div className="flex flex-col h-full px-4">
         <div className="flex-1 flex flex-col items-center justify-center text-center">
           <motion.div
@@ -301,12 +317,14 @@ export default function WalletBackupPage() {
           </motion.div>
 
           <h2 className="text-lg font-bold text-foreground mb-2">
-            {wallet.isBackedUp ? '管理备份' : '备份钱包'}
+            {anyBackedUp ? '管理备份' : '备份钱包'}
           </h2>
           <p className="text-muted-foreground text-sm max-w-[280px] mb-6">
-            {wallet.isBackedUp
-              ? `「${wallet.name}」已备份，您可以添加其他备份方式`
-              : `为「${wallet.name}」创建备份，确保资产安全`
+            {isGlobalMode
+              ? '每次备份都会将您账户下所有的钱包完成备份'
+              : anyBackedUp
+                ? `${walletLabel}已备份，您可以添加其他备份方式`
+                : `为${walletLabel}创建备份，确保资产安全`
             }
           </p>
 
@@ -319,11 +337,7 @@ export default function WalletBackupPage() {
                   setBackupType('cloud');
                   setIsLoading(true);
                   try {
-                    await backupWallet(walletId!, {
-                      method: 'cloud',
-                      cloudProvider: 'icloud' as const,
-                      lastBackupTime: new Date(),
-                    });
+                    await backupAllTargets('cloud');
                     setShowSuccess(true);
                     toast.success('备份完成');
                   } catch {
@@ -333,29 +347,22 @@ export default function WalletBackupPage() {
                   }
                 }}
                 disabled={isLoading}
-                className="w-full p-4 rounded-xl border border-success/30 bg-success/5 transition-colors text-left disabled:opacity-50"
+                className="w-full p-4 rounded-xl border border-border bg-card transition-colors text-left disabled:opacity-50"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-success/10 flex items-center justify-center shrink-0">
+                  <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center shrink-0">
                     {isLoading && backupType === 'cloud' ? (
-                      <Loader2 className="w-5 h-5 text-success animate-spin" />
+                      <Loader2 className="w-5 h-5 text-muted-foreground animate-spin" />
                     ) : (
-                      <CheckCircle2 className="w-5 h-5 text-success" />
+                      <Cloud className="w-5 h-5 text-muted-foreground" />
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-1.5">
-                      <p className="font-medium text-foreground text-sm">
-                        {isLoading && backupType === 'cloud' ? '正在备份...' : '云端备份'}
-                      </p>
-                      {!(isLoading && backupType === 'cloud') && (
-                        <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-success/10 text-success">
-                          已完成
-                        </span>
-                      )}
-                    </div>
+                    <p className="font-medium text-foreground text-sm">
+                      {isLoading && backupType === 'cloud' ? '正在备份...' : '云端备份'}
+                    </p>
                     <p className="text-xs text-muted-foreground">
-                      {cloudProviderName} 备份
+                      {cloudProviderName}
                       {wallet.backupInfo?.lastBackupTime && ` · ${formatTimeAgo(wallet.backupInfo.lastBackupTime)}`}
                     </p>
                   </div>
@@ -373,11 +380,7 @@ export default function WalletBackupPage() {
                   setBackupType('cloud');
                   setIsLoading(true);
                   try {
-                    await backupWallet(walletId!, {
-                      method: 'cloud',
-                      cloudProvider: 'icloud' as const,
-                      lastBackupTime: new Date(),
-                    });
+                    await backupAllTargets('cloud');
                     setShowSuccess(true);
                     toast.success('备份完成');
                   } catch {
