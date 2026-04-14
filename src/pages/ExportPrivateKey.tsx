@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  ChevronLeft, Key, Fingerprint, Check, Copy,
-  AlertTriangle, CheckCircle2, Eye, EyeOff,
+  ShieldAlert, EyeOff as EyeOffIcon, Copy,
+  AlertTriangle, CheckCircle2, Eye, KeyRound, Key,
 } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -10,9 +10,41 @@ import { Button } from '@/components/ui/button';
 import { cn, copyToClipboard } from '@/lib/utils';
 import { toast } from '@/lib/toast';
 import { useWallet } from '@/contexts/WalletContext';
+import { BiometricVerifyDrawer } from '@/components/BiometricVerifyDrawer';
+import type { WalletAddress, AddressSystem } from '@/types/wallet';
 
-// Mock private key for demo
-const MOCK_PRIVATE_KEY = '0x3a5f8c2d1e9b7a4f6c3d2e1f0a8b9c7d6e5f4a3b2c1d0e9f8a7b6c5d4e3f2a1b';
+// ─── Mock private keys per address system ─────────────────────
+function generateMockKey(system: AddressSystem, address: string): string {
+  // Deterministic but fake — hash the address to produce a consistent key
+  const seed = address.slice(2, 18);
+  if (system === 'solana') {
+    return `${seed}5Kd4cVdEj3a7x9bNFqR2mLpW8nYtH6cU0fJ1gI3kL4mN5pQ6rS7tU8vW9xY0zA1bC2dE3fG4hI5jK6lM7nO8pQ`;
+  }
+  return `0x${seed}a3b4c5d6e7f8091a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d5e6f70819`;
+}
+
+const SYSTEM_LABELS: Record<AddressSystem, string> = {
+  evm: 'EVM',
+  tron: 'Tron',
+  solana: 'Solana',
+};
+
+function truncateAddress(addr: string): string {
+  if (addr.length <= 16) return addr;
+  return `${addr.slice(0, 10)}...${addr.slice(-6)}`;
+}
+
+// ─── Export synthesis stages ──────────────────────────────────
+const exportStages = [
+  { delay: 0, title: '正在连接安全服务器...', sub: '与 Cobo 节点建立加密通道' },
+  { delay: 2000, title: '请求密钥分片...', sub: '从服务器获取协同计算所需分片' },
+  { delay: 4500, title: '正在合成完整私钥...', sub: '手机端与服务器协同计算中' },
+  { delay: 8000, title: '验证私钥完整性...', sub: '确认导出私钥可正确签名' },
+  { delay: 11000, title: '准备导出数据...', sub: '加密封装所有链的私钥信息' },
+];
+
+// ─── Steps ────────────────────────────────────────────────────
+type Step = 'inform' | 'confirm' | 'synthesis' | 'display';
 
 export default function ExportPrivateKeyPage() {
   const navigate = useNavigate();
@@ -20,244 +52,104 @@ export default function ExportPrivateKeyPage() {
   const { wallets } = useWallet();
   const wallet = wallets.find(w => w.id === walletId);
 
-  const [step, setStep] = useState(0);
-  const [isBioLoading, setIsBioLoading] = useState(false);
+  const [step, setStep] = useState<Step>('inform');
+
+  // Step: confirm
+  const [check1, setCheck1] = useState(false);
+  const [check2, setCheck2] = useState(false);
+
+  // Biometric drawer
+  const [bioDrawerOpen, setBioDrawerOpen] = useState(false);
+
+  // Step: synthesis
   const [synthesisProgress, setSynthesisProgress] = useState(0);
-  const [showKey, setShowKey] = useState(false);
-  const [copied, setCopied] = useState(false);
+  const [stageIndex, setStageIndex] = useState(0);
+  const [displayedSub, setDisplayedSub] = useState('');
 
-  // Step 0: Biometric verification
-  const handleBiometricAuth = async () => {
-    setIsBioLoading(true);
-    // Simulate biometric authentication
-    await new Promise(resolve => setTimeout(resolve, 800));
-    setIsBioLoading(false);
-    setStep(1);
-    // Start key synthesis animation
-    startSynthesis();
-  };
+  // Step: display
+  const [visibleKeys, setVisibleKeys] = useState<Record<string, boolean>>({});
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [copiedAll, setCopiedAll] = useState(false);
 
-  // Step 1: Key synthesis animation
-  const startSynthesis = () => {
+  // Stage timer for synthesis
+  useEffect(() => {
+    if (step !== 'synthesis') return;
+    const timers = exportStages.slice(1).map((stage, i) =>
+      setTimeout(() => setStageIndex(i + 1), stage.delay)
+    );
+    return () => timers.forEach(clearTimeout);
+  }, [step]);
+
+  // Typewriter effect for synthesis subtitle
+  const currentSub = exportStages[stageIndex]?.sub || '';
+  useEffect(() => {
+    if (step !== 'synthesis') return;
+    setDisplayedSub('');
+    let i = 0;
+    const interval = setInterval(() => {
+      i++;
+      setDisplayedSub(currentSub.slice(0, i));
+      if (i >= currentSub.length) clearInterval(interval);
+    }, 40);
+    return () => clearInterval(interval);
+  }, [stageIndex, step, currentSub]);
+
+  // Auto-hide keys after 10s
+  useEffect(() => {
+    const visibleEntries = Object.entries(visibleKeys).filter(([, v]) => v);
+    if (visibleEntries.length === 0) return;
+    const timer = setTimeout(() => {
+      setVisibleKeys({});
+    }, 10000);
+    return () => clearTimeout(timer);
+  }, [visibleKeys]);
+
+  // Key pairs from wallet addresses
+  const keyPairs = (wallet?.walletAddresses ?? []).map(addr => ({
+    ...addr,
+    privateKey: generateMockKey(addr.system, addr.address),
+  }));
+
+  // ─── Handlers ─────────────────────────────────────────────
+
+  const startSynthesis = useCallback(() => {
+    setStep('synthesis');
+    setStageIndex(0);
+    setSynthesisProgress(0);
+    // Total ~13s to match stage timers
     let progress = 0;
     const interval = setInterval(() => {
-      progress += 10;
-      setSynthesisProgress(progress);
+      progress += 4;
+      setSynthesisProgress(Math.min(progress, 100));
       if (progress >= 100) {
         clearInterval(interval);
-        setTimeout(() => setStep(2), 500);
+        setTimeout(() => setStep('display'), 600);
       }
     }, 500);
-  };
+  }, []);
 
-  // Step 2: Copy private key
-  const handleCopyKey = async () => {
-    const ok = await copyToClipboard(MOCK_PRIVATE_KEY);
+  const handleCopyKey = useCallback(async (keyId: string, key: string) => {
+    const ok = await copyToClipboard(key);
     if (ok) {
-      setCopied(true);
-      toast.success('已复制到剪贴板');
-      setTimeout(() => setCopied(false), 3000);
-    } else {
-      toast.error('复制失败，请手动复制');
+      setCopiedId(keyId);
+      toast.success('已复制私钥');
+      setTimeout(() => setCopiedId(null), 2000);
     }
-  };
+  }, []);
 
-  const handleComplete = () => {
-    navigate(-1);
-  };
-
-  // ─── Step 0: Biometric Verification ───
-  const renderBiometricStep = () => (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="flex flex-col items-center justify-center min-h-[400px]"
-    >
-      <motion.div
-        animate={isBioLoading ? { scale: [1, 1.1, 1] } : {}}
-        transition={isBioLoading ? { duration: 1, repeat: Infinity } : {}}
-        className={cn(
-          'w-24 h-24 rounded-full flex items-center justify-center mb-8',
-          isBioLoading ? 'bg-accent/20' : 'bg-accent/10'
-        )}
-      >
-        <Fingerprint
-          className={cn(
-            'w-12 h-12',
-            isBioLoading ? 'text-accent animate-pulse' : 'text-accent'
-          )}
-        />
-      </motion.div>
-
-      <h2 className="text-lg font-semibold text-foreground mb-2">请验证身份</h2>
-      <p className="text-sm text-muted-foreground text-center mb-8">
-        导出私钥前需进行生物识别验证
-      </p>
-
-      <Button
-        className="w-full max-w-xs"
-        onClick={handleBiometricAuth}
-        disabled={isBioLoading}
-      >
-        <Fingerprint className="w-4 h-4 mr-2" />
-        {isBioLoading ? '验证中...' : '开始验证'}
-      </Button>
-    </motion.div>
-  );
-
-  // ─── Step 1: Key Synthesis Animation ───
-  const renderSynthesis = () => (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="flex flex-col items-center justify-center min-h-[400px]"
-    >
-      <motion.div
-        animate={{ rotate: 360 }}
-        transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
-        className="w-20 h-20 rounded-full border-4 border-accent/20 border-t-accent mb-8"
-      />
-
-      <h2 className="text-lg font-semibold text-foreground mb-2">正在准备私钥</h2>
-      <p className="text-sm text-muted-foreground text-center mb-8">
-        请勿关闭此页面
-      </p>
-
-      <div className="w-full max-w-xs mb-6">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-sm text-muted-foreground">合成进度</span>
-          <span className="text-sm font-medium text-foreground">{synthesisProgress}%</span>
-        </div>
-        <div className="h-2 bg-muted rounded-full overflow-hidden">
-          <motion.div
-            initial={{ width: 0 }}
-            animate={{ width: `${synthesisProgress}%` }}
-            className="h-full bg-accent rounded-full"
-          />
-        </div>
-      </div>
-
-      <div className="space-y-2 text-sm">
-        {[
-          { label: '获取本地密钥分片', threshold: 20 },
-          { label: '验证分片完整性', threshold: 40 },
-          { label: '请求服务器分片', threshold: 60 },
-          { label: '合成完整私钥', threshold: 80 },
-          { label: '完成', threshold: 100 },
-        ].map(({ label, threshold }) => (
-          <div key={label} className="flex items-center gap-2 text-muted-foreground">
-            <Check className={cn('w-4 h-4', synthesisProgress >= threshold ? 'text-success' : '')} />
-            <span>{label}</span>
-          </div>
-        ))}
-      </div>
-    </motion.div>
-  );
-
-  // ─── Step 2: Show Private Key ───
-  const renderShowKey = () => (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="space-y-6"
-    >
-      <div className="text-center">
-        <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ type: 'spring', delay: 0.1 }}
-          className="w-16 h-16 rounded-full bg-accent/10 mx-auto mb-4 flex items-center justify-center"
-        >
-          <Key className="w-8 h-8 text-accent" />
-        </motion.div>
-        <h2 className="text-lg font-semibold text-foreground mb-1">您的私钥</h2>
-        <p className="text-sm text-muted-foreground">
-          {wallet?.name || '我的钱包'}
-        </p>
-      </div>
-
-      {/* Security Warning */}
-      <div className="p-4 bg-destructive/10 border border-destructive/30 rounded-xl">
-        <div className="flex items-start gap-3">
-          <div className="w-8 h-8 rounded-full bg-destructive/20 flex items-center justify-center shrink-0">
-            <AlertTriangle className="w-4 h-4 text-destructive" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-destructive mb-1.5">请务必妥善保管</p>
-            <ul className="text-xs text-muted-foreground space-y-1">
-              <li>• 切勿将私钥分享给任何人</li>
-              <li>• 任何获得私钥的人可完全控制您的资产</li>
-              <li>• 建议抄写到纸上并离线保存</li>
-              <li>• 请勿截屏或复制到不安全的地方</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      {/* Private Key Display */}
-      <div className="relative">
-        <div
-          className={cn(
-            'p-4 rounded-xl border border-border bg-muted/50 font-mono text-sm break-all leading-relaxed transition-all',
-            !showKey && 'select-none'
-          )}
-        >
-          {showKey ? (
-            MOCK_PRIVATE_KEY
-          ) : (
-            <span className="blur-sm pointer-events-none select-none">
-              {MOCK_PRIVATE_KEY}
-            </span>
-          )}
-        </div>
-
-        {/* Toggle visibility */}
-        <button
-          onClick={() => setShowKey(!showKey)}
-          className="absolute top-3 right-3 p-1.5 rounded-md bg-background/80 transition-colors"
-        >
-          {showKey ? (
-            <EyeOff className="w-4 h-4 text-muted-foreground" />
-          ) : (
-            <Eye className="w-4 h-4 text-muted-foreground" />
-          )}
-        </button>
-      </div>
-
-      {/* Copy Button */}
-      <Button
-        variant="outline"
-        className="w-full"
-        onClick={handleCopyKey}
-      >
-        {copied ? (
-          <>
-            <CheckCircle2 className="w-4 h-4 mr-2 text-success" />
-            已复制
-          </>
-        ) : (
-          <>
-            <Copy className="w-4 h-4 mr-2" />
-            复制私钥
-          </>
-        )}
-      </Button>
-
-      {/* Complete Button */}
-      <Button className="w-full" onClick={handleComplete}>
-        完成
-      </Button>
-    </motion.div>
-  );
-
-  const renderContent = () => {
-    switch (step) {
-      case 0: return renderBiometricStep();
-      case 1: return renderSynthesis();
-      case 2: return renderShowKey();
-      default: return renderBiometricStep();
+  const handleCopyAll = useCallback(async () => {
+    const text = keyPairs.map(kp =>
+      `${SYSTEM_LABELS[kp.system]} (${truncateAddress(kp.address)})\n${kp.privateKey}`
+    ).join('\n\n');
+    const ok = await copyToClipboard(text);
+    if (ok) {
+      setCopiedAll(true);
+      toast.success('已复制全部私钥');
+      setTimeout(() => setCopiedAll(false), 2000);
     }
-  };
+  }, [keyPairs]);
+
+  // ─── Not found ────────────────────────────────────────────
 
   if (!wallet) {
     return (
@@ -269,48 +161,382 @@ export default function ExportPrivateKeyPage() {
     );
   }
 
+  // ─── Step 1: Security Inform ──────────────────────────────
+
+  const renderInform = () => (
+    <motion.div
+      key="inform"
+      initial={{ opacity: 0, x: 40 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -40 }}
+      className="flex flex-col h-full"
+    >
+      <div className="flex-1 flex flex-col items-center justify-center px-6">
+        {/* Icon — layered shield with subtle glow */}
+        <motion.div
+          initial={{ scale: 0.7, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ type: 'spring', duration: 0.6 }}
+          className="relative mb-10"
+        >
+          <div className="w-[88px] h-[88px] rounded-[28px] bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/40 dark:to-orange-950/40 border border-amber-200/60 dark:border-amber-800/40 flex items-center justify-center shadow-sm">
+            <ShieldAlert className="w-10 h-10 text-amber-500" strokeWidth={1.75} />
+          </div>
+          <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-amber-500 flex items-center justify-center shadow-sm">
+            <AlertTriangle className="w-3 h-3 text-white" strokeWidth={2.5} />
+          </div>
+        </motion.div>
+
+        {/* Step indicator */}
+        <div className="flex items-center gap-2 mb-3">
+          <div className="w-5 h-1 rounded-full bg-foreground" />
+          <div className="w-5 h-1 rounded-full bg-muted" />
+        </div>
+
+        {/* Title */}
+        <h2 className="text-[22px] font-bold text-foreground tracking-tight mb-3">
+          脱离 MPC 保护
+        </h2>
+
+        {/* Description — concise */}
+        <p className="text-[15px] text-muted-foreground leading-relaxed text-center max-w-[280px] mb-6">
+          导出后可在任何钱包中使用私钥发起交易，无需 Cobo 参与。
+        </p>
+
+        {/* Warning card — refined */}
+        <div className="w-full max-w-[300px] p-4 rounded-2xl bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200/50 dark:border-amber-800/30">
+          <p className="text-[13px] text-amber-700 dark:text-amber-400 leading-relaxed text-center font-medium">
+            私钥一旦泄露，资产将无法找回
+          </p>
+        </div>
+      </div>
+
+      <div className="px-6 pb-6 space-y-2.5">
+        <Button size="lg" className="w-full text-[15px] font-semibold h-12 rounded-xl" onClick={() => setStep('confirm')}>
+          我已了解风险
+        </Button>
+        <Button size="lg" variant="ghost" className="w-full text-[15px] text-muted-foreground h-12 rounded-xl" onClick={() => navigate(-1)}>
+          取消
+        </Button>
+      </div>
+    </motion.div>
+  );
+
+  // ─── Step 2: Risk Confirm ─────────────────────────────────
+
+  const renderConfirm = () => (
+    <motion.div
+      key="confirm"
+      initial={{ opacity: 0, x: 40 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -40 }}
+      className="flex flex-col h-full"
+    >
+      <div className="flex-1 flex flex-col items-center justify-center px-6">
+        {/* Icon */}
+        <motion.div
+          initial={{ scale: 0.7, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ type: 'spring', duration: 0.6 }}
+          className="relative mb-10"
+        >
+          <div className="w-[88px] h-[88px] rounded-[28px] bg-gradient-to-br from-slate-50 to-gray-100 dark:from-slate-900/60 dark:to-gray-900/40 border border-gray-200/60 dark:border-gray-700/40 flex items-center justify-center shadow-sm">
+            <EyeOffIcon className="w-10 h-10 text-gray-500" strokeWidth={1.75} />
+          </div>
+        </motion.div>
+
+        {/* Step indicator */}
+        <div className="flex items-center gap-2 mb-3">
+          <div className="w-5 h-1 rounded-full bg-foreground" />
+          <div className="w-5 h-1 rounded-full bg-foreground" />
+        </div>
+
+        {/* Title */}
+        <h2 className="text-[22px] font-bold text-foreground tracking-tight mb-2">
+          确认环境安全
+        </h2>
+        <p className="text-sm text-muted-foreground mb-8">
+          请仔细阅读并确认以下事项
+        </p>
+
+        {/* Checkboxes */}
+        <div className="w-full max-w-[320px] space-y-3">
+          <label
+            className={cn(
+              'flex items-start gap-3 p-4 rounded-2xl border cursor-pointer transition-all',
+              check1
+                ? 'border-accent/40 bg-accent/5'
+                : 'border-border bg-card hover:bg-muted/30'
+            )}
+          >
+            <input
+              type="checkbox"
+              checked={check1}
+              onChange={(e) => setCheck1(e.target.checked)}
+              className="mt-0.5 w-[18px] h-[18px] accent-accent shrink-0 rounded"
+            />
+            <span className="text-[14px] text-foreground leading-relaxed">
+              周围无人旁观，没有摄像和录屏
+            </span>
+          </label>
+
+          <label
+            className={cn(
+              'flex items-start gap-3 p-4 rounded-2xl border cursor-pointer transition-all',
+              check2
+                ? 'border-accent/40 bg-accent/5'
+                : 'border-border bg-card hover:bg-muted/30'
+            )}
+          >
+            <input
+              type="checkbox"
+              checked={check2}
+              onChange={(e) => setCheck2(e.target.checked)}
+              className="mt-0.5 w-[18px] h-[18px] accent-accent shrink-0 rounded"
+            />
+            <span className="text-[14px] text-foreground leading-relaxed">
+              私钥一旦导出，Cobo 无法帮我找回或冻结
+            </span>
+          </label>
+        </div>
+      </div>
+
+      <div className="px-6 pb-6 space-y-2.5">
+        <Button
+          size="lg"
+          className="w-full text-[15px] font-semibold h-12 rounded-xl"
+          disabled={!check1 || !check2}
+          onClick={() => setBioDrawerOpen(true)}
+        >
+          确认导出
+        </Button>
+        <Button size="lg" variant="ghost" className="w-full text-[15px] text-muted-foreground h-12 rounded-xl" onClick={() => navigate(-1)}>
+          取消
+        </Button>
+      </div>
+    </motion.div>
+  );
+
+  // ─── Step 3: Synthesis — orbital animation ─────────────────
+
+  const renderSynthesis = () => (
+    <motion.div
+      key="synthesis"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="flex flex-col h-full items-center justify-center text-center px-6"
+    >
+      {/* Orbital animation */}
+      <div className="relative w-40 h-40 mb-10">
+        {/* Outer pulse ring */}
+        <motion.div
+          className="absolute inset-0 rounded-full border-2 border-accent/20"
+          animate={{ scale: [1, 1.15, 1], opacity: [0.3, 0.1, 0.3] }}
+          transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+        />
+        {/* Rotating arc */}
+        <svg
+          className="absolute inset-0 w-full h-full animate-spin"
+          style={{ animationDuration: '4s', animationTimingFunction: 'linear' }}
+          viewBox="0 0 160 160"
+        >
+          <circle
+            cx="80" cy="80" r="72"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeDasharray="120 452"
+            className="text-accent"
+          />
+        </svg>
+        {/* Secondary reverse orbit */}
+        <svg
+          className="absolute inset-0 w-full h-full"
+          style={{ animation: 'spin 8s linear infinite reverse' }}
+          viewBox="0 0 160 160"
+        >
+          <circle
+            cx="80" cy="80" r="60"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1"
+            strokeLinecap="round"
+            strokeDasharray="40 200"
+            className="text-accent/25"
+          />
+        </svg>
+        {/* Center icon with breathing glow */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <motion.div
+            className="relative"
+            animate={{ scale: [1, 1.05, 1] }}
+            transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+          >
+            <motion.div
+              className="absolute -inset-4 rounded-full bg-accent/10 blur-xl"
+              animate={{ opacity: [0.3, 0.6, 0.3] }}
+              transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+            />
+            <div className="relative w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center">
+              <Key className="w-8 h-8 text-accent" />
+            </div>
+          </motion.div>
+        </div>
+      </div>
+
+      {/* Stage title — animated swap */}
+      <AnimatePresence mode="wait">
+        <motion.p
+          key={stageIndex}
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -8 }}
+          transition={{ duration: 0.3 }}
+          className="text-base font-semibold text-foreground"
+        >
+          {exportStages[stageIndex]?.title}
+        </motion.p>
+      </AnimatePresence>
+
+      {/* Typewriter subtitle */}
+      <p className="text-xs text-muted-foreground mt-2 mb-8 leading-relaxed max-w-[260px] min-h-[1.5em]">
+        {displayedSub}
+        <motion.span
+          animate={{ opacity: [1, 0] }}
+          transition={{ duration: 0.5, repeat: Infinity, repeatType: 'reverse' }}
+          className="inline-block w-px h-3 bg-muted-foreground/50 ml-0.5 align-middle"
+        />
+      </p>
+    </motion.div>
+  );
+
+  // ─── Step 5: Display Key Pairs ────────────────────────────
+
+  const renderDisplay = () => (
+    <motion.div
+      key="display"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0 }}
+      className="space-y-4"
+    >
+      {/* Persistent warning */}
+      <div className="p-3 rounded-xl bg-destructive/10 border border-destructive/20 flex items-center gap-2">
+        <AlertTriangle className="w-4 h-4 text-destructive shrink-0" />
+        <p className="text-xs text-destructive font-medium">请妥善保管私钥，不要截屏或分享给任何人</p>
+      </div>
+
+      {/* Key pair cards */}
+      {keyPairs.map((kp) => {
+        const isVisible = visibleKeys[kp.id] ?? false;
+        const isCopied = copiedId === kp.id;
+
+        return (
+          <motion.div
+            key={kp.id}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="rounded-xl border border-border bg-card overflow-hidden"
+          >
+            {/* Chain header */}
+            <div className="px-4 py-2.5 border-b border-border bg-muted/30 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <KeyRound className="w-3.5 h-3.5 text-muted-foreground" />
+                <span className="text-sm font-semibold text-foreground">{SYSTEM_LABELS[kp.system]}</span>
+              </div>
+              <span className="text-[11px] text-muted-foreground font-mono">{truncateAddress(kp.address)}</span>
+            </div>
+
+            {/* Key area */}
+            <div className="px-4 py-3">
+              {isVisible ? (
+                <div>
+                  <p className="font-mono text-xs text-foreground break-all leading-relaxed select-all">
+                    {kp.privateKey}
+                  </p>
+                  <div className="flex items-center gap-2 mt-3">
+                    <button
+                      onClick={() => handleCopyKey(kp.id, kp.privateKey)}
+                      className="flex items-center gap-1.5 h-8 px-3 rounded-lg border border-border text-xs font-medium text-muted-foreground hover:bg-muted/50 transition-colors"
+                    >
+                      {isCopied ? (
+                        <><CheckCircle2 className="w-3.5 h-3.5 text-success" /> 已复制</>
+                      ) : (
+                        <><Copy className="w-3.5 h-3.5" /> 复制私钥</>
+                      )}
+                    </button>
+                    <button
+                      onClick={() => setVisibleKeys(prev => ({ ...prev, [kp.id]: false }))}
+                      className="flex items-center gap-1.5 h-8 px-3 rounded-lg border border-border text-xs font-medium text-muted-foreground hover:bg-muted/50 transition-colors"
+                    >
+                      <EyeOffIcon className="w-3.5 h-3.5" /> 隐藏
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setVisibleKeys(prev => ({ ...prev, [kp.id]: true }))}
+                  className="w-full py-4 flex flex-col items-center gap-2 group cursor-pointer"
+                >
+                  <div className="text-muted-foreground text-sm font-mono tracking-[0.3em]">
+                    ••••••••••••••••••••
+                  </div>
+                  <span className="flex items-center gap-1 text-xs text-accent font-medium group-hover:underline">
+                    <Eye className="w-3.5 h-3.5" />
+                    点击查看私钥
+                  </span>
+                </button>
+              )}
+            </div>
+          </motion.div>
+        );
+      })}
+
+      {/* Copy all + Done */}
+      <div className="pt-2 space-y-2">
+        <Button variant="outline" className="w-full" onClick={handleCopyAll}>
+          {copiedAll ? (
+            <><CheckCircle2 className="w-4 h-4 mr-2 text-success" /> 已复制全部</>
+          ) : (
+            <><Copy className="w-4 h-4 mr-2" /> 复制全部私钥</>
+          )}
+        </Button>
+        <Button className="w-full" onClick={() => navigate('/profile/wallets')}>
+          完成
+        </Button>
+      </div>
+    </motion.div>
+  );
+
+  // ─── Render ───────────────────────────────────────────────
+
   return (
     <AppLayout showNav={false}>
       <div className="h-full flex flex-col">
         {/* Header */}
-        <div className="px-4 py-3 border-b border-border flex items-center gap-3">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => {
-              if (step === 0) {
-                navigate(-1);
-              }
-            }}
-            disabled={step > 0}
-          >
-            <ChevronLeft className="w-6 h-6" />
-          </Button>
+        <div className="px-4 py-3 border-b border-border flex items-center justify-center">
           <h1 className="text-lg font-bold text-foreground">导出私钥</h1>
         </div>
 
-        {/* Progress indicator (shown for steps 1-2) */}
-        {step > 0 && (
-          <div className="px-4 py-2">
-            <div className="flex items-center gap-2">
-              {[1, 2].map(s => (
-                <div
-                  key={s}
-                  className={cn(
-                    'flex-1 h-1 rounded-full transition-colors',
-                    s <= step ? 'bg-accent' : 'bg-muted'
-                  )}
-                />
-              ))}
-            </div>
-          </div>
-        )}
-
-        <div className="flex-1 overflow-auto px-4 py-6">
+        <div className="flex-1 overflow-auto px-4 py-4">
           <AnimatePresence mode="wait">
-            {renderContent()}
+            {step === 'inform' && renderInform()}
+            {step === 'confirm' && renderConfirm()}
+            {step === 'synthesis' && renderSynthesis()}
+            {step === 'display' && renderDisplay()}
           </AnimatePresence>
         </div>
+
+        {/* Biometric drawer — triggered from confirm step */}
+        <BiometricVerifyDrawer
+          open={bioDrawerOpen}
+          onOpenChange={setBioDrawerOpen}
+          title="验证身份"
+          description="导出私钥需要验证生物识别"
+          onVerified={startSynthesis}
+        />
       </div>
     </AppLayout>
   );
