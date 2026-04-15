@@ -86,9 +86,9 @@ export function AgentOperationsCard() {
   if (!hasAnyActivity) return null;
 
   const riskColors = {
-    green: 'text-emerald-600 dark:text-emerald-400',
-    yellow: 'text-amber-600 dark:text-amber-400',
-    red: 'text-red-600 dark:text-red-400',
+    green: 'text-success',
+    yellow: 'text-warning',
+    red: 'text-destructive',
   };
   const riskLabels = { green: '低风险', yellow: '中风险', red: '高风险' };
 
@@ -135,7 +135,7 @@ export function AgentOperationsCard() {
               <p className="text-[10px] text-muted-foreground">今日总额</p>
             </div>
             <div className="text-center">
-              <p className={`text-lg font-bold ${stats.successRate >= 90 ? 'text-emerald-600 dark:text-emerald-400' : stats.successRate >= 70 ? 'text-amber-600 dark:text-amber-400' : 'text-red-600 dark:text-red-400'}`}>
+              <p className={`text-lg font-bold ${stats.successRate >= 90 ? 'text-success' : stats.successRate >= 70 ? 'text-warning' : 'text-destructive'}`}>
                 {stats.successRate}%
               </p>
               <p className="text-[10px] text-muted-foreground">成功率</p>
@@ -186,9 +186,9 @@ export function AgentOperationsCard() {
               onClick={() => navigate('/agent-review')}
               className="flex-1 p-2.5 rounded-xl status-glow-danger flex items-center gap-2 active:scale-[0.98] transition-transform"
             >
-              <AlertTriangle className="w-4 h-4 text-red-600 dark:text-red-400 shrink-0" strokeWidth={1.5} />
+              <AlertTriangle className="w-4 h-4 text-destructive shrink-0" strokeWidth={1.5} />
               <div className="text-left min-w-0">
-                <p className="text-xs font-medium text-red-700 dark:text-red-400">
+                <p className="text-xs font-medium text-destructive">
                   {stats.failedCount} 笔失败
                 </p>
               </div>
@@ -202,9 +202,9 @@ export function AgentOperationsCard() {
               onClick={() => navigate('/agent-settings')}
               className="flex-1 p-2.5 rounded-xl status-glow-warning flex items-center gap-2 active:scale-[0.98] transition-transform"
             >
-              <PauseCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" strokeWidth={1.5} />
+              <PauseCircle className="w-4 h-4 text-warning shrink-0" strokeWidth={1.5} />
               <div className="text-left min-w-0">
-                <p className="text-xs font-medium text-amber-700 dark:text-amber-400">
+                <p className="text-xs font-medium text-warning">
                   {stats.pausedWallets} 个钱包暂停
                 </p>
               </div>
@@ -226,9 +226,9 @@ export function AgentOperationsCard() {
             animate={{ rotate: 360 }}
             transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
           >
-            <TrendingUp className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" strokeWidth={1.5} />
+            <TrendingUp className="w-4 h-4 text-primary shrink-0" strokeWidth={1.5} />
           </motion.div>
-          <p className="text-xs font-medium text-blue-700 dark:text-blue-400">
+          <p className="text-xs font-medium text-primary">
             {stats.processingCount} 笔交易链上处理中
           </p>
         </motion.button>

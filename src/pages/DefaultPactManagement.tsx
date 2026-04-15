@@ -23,7 +23,7 @@ function PactRuleCard({ pact, onToggle, onTap, t }: { pact: DefaultPact; onToggl
         <div className="flex items-center gap-2">
           <span className={cn(
             'text-[11px] font-medium px-2 py-0.5 rounded-full',
-            pact.enabled ? 'bg-emerald-50 text-emerald-600' : 'bg-muted text-muted-foreground'
+            pact.enabled ? 'bg-success/8 text-success' : 'bg-muted text-muted-foreground'
           )}>
             {pact.enabled ? t.common.enabled : t.common.disabled}
           </span>
@@ -47,13 +47,13 @@ function PactRuleCard({ pact, onToggle, onTap, t }: { pact: DefaultPact; onToggl
             {/* Key limits */}
             <div className="flex flex-wrap gap-2">
               {pact.maxPerTx > 0 && (
-                <span className="text-[11px] bg-blue-50 text-blue-600 px-2 py-1 rounded-md flex items-center gap-1">
+                <span className="text-[11px] bg-primary/8 text-primary px-2 py-1 rounded-md flex items-center gap-1">
                   <DollarSign className="w-3 h-3" strokeWidth={1.5} />
                   {t.defaultPact.perTx} ${pact.maxPerTx.toLocaleString()}
                 </span>
               )}
               {pact.rolling24h > 0 && (
-                <span className="text-[11px] bg-purple-50 text-purple-600 px-2 py-1 rounded-md flex items-center gap-1">
+                <span className="text-[11px] bg-primary/8 text-primary px-2 py-1 rounded-md flex items-center gap-1">
                   <Timer className="w-3 h-3" strokeWidth={1.5} />
                   {t.defaultPact.rolling24h} ${pact.rolling24h.toLocaleString()}
                 </span>
@@ -63,7 +63,7 @@ function PactRuleCard({ pact, onToggle, onTap, t }: { pact: DefaultPact; onToggl
                 {pact.allowedChains.length} {t.defaultPact.chains}
               </span>
               {pact.maxPerTx === 0 && (
-                <span className="text-[11px] bg-amber-50 text-amber-600 px-2 py-1 rounded-md">
+                <span className="text-[11px] bg-warning/8 text-warning px-2 py-1 rounded-md">
                   {t.common.readOnly}
                 </span>
               )}
@@ -142,7 +142,7 @@ export default function DefaultPactManagement() {
                 <h3 className="text-[17px] font-bold text-foreground">{selectedPact.name}</h3>
                 <span className={cn(
                   'text-[11px] font-medium px-2 py-0.5 rounded-full',
-                  selectedPact.enabled ? 'bg-emerald-50 text-emerald-600' : 'bg-muted text-muted-foreground'
+                  selectedPact.enabled ? 'bg-success/8 text-success' : 'bg-muted text-muted-foreground'
                 )}>
                   {selectedPact.enabled ? t.common.enabled : t.common.disabled}
                 </span>

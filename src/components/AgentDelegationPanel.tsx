@@ -266,7 +266,7 @@ export function AgentDelegationPanel({
                             title={tokenCardVariant === 'create-wallet' ? '复制包含 Token 的 Prompt' : '复制 Token'}
                           >
                             {copied ? (
-                              <Check className="w-3.5 h-3.5 text-emerald-500" />
+                              <Check className="w-3.5 h-3.5 text-success" />
                             ) : (
                               <Copy className="w-3.5 h-3.5 text-muted-foreground" />
                             )}
@@ -348,8 +348,8 @@ export function AgentDelegationPanel({
                           : 'active:bg-muted/50',
                       )}
                     >
-                      <div className="w-9 h-9 rounded-full bg-purple-100 dark:bg-purple-900/40 flex items-center justify-center shrink-0">
-                        <Bot className="w-4 h-4 text-purple-600 dark:text-purple-400" strokeWidth={1.5} />
+                      <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                        <Bot className="w-4 h-4 text-primary" strokeWidth={1.5} />
                       </div>
 
                       <div className="flex-1 min-w-0">
@@ -358,7 +358,7 @@ export function AgentDelegationPanel({
                             {agent.displayName || agent.principalId.slice(0, 12)}
                           </span>
                           {delegatedForThisWallet && (
-                            <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium shrink-0 bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400">
+                            <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium shrink-0 bg-success/10 text-success">
                               已关联
                             </span>
                           )}
@@ -384,7 +384,7 @@ export function AgentDelegationPanel({
                       </div>
 
                       {delegatedForThisWallet ? (
-                        <Check className="w-4 h-4 text-emerald-500 shrink-0" />
+                        <Check className="w-4 h-4 text-success shrink-0" />
                       ) : (
                         <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
                       )}

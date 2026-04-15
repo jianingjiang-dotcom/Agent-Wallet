@@ -4,7 +4,7 @@ import { WalletControlMode } from '@/types/wallet';
 
 const modeConfig: Record<WalletControlMode, { label: string; icon: typeof ShieldOff; color: string; bg: string }> = {
   block: { label: '拦截', icon: ShieldOff, color: 'text-orange-700 dark:text-orange-400', bg: 'bg-orange-100 dark:bg-orange-900/40' },
-  manual_review: { label: '审批', icon: UserCheck, color: 'text-blue-700 dark:text-blue-400', bg: 'bg-blue-100 dark:bg-blue-900/40' },
+  manual_review: { label: '审批', icon: UserCheck, color: 'text-primary', bg: 'bg-primary/10' },
 };
 
 interface WalletModeBadgeProps {

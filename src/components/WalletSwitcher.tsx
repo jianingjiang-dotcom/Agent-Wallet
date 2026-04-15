@@ -42,13 +42,13 @@ export function WalletSwitcher({ isOpen, onClose, onCreateNew }: WalletSwitcherP
         {/* Wallet Icon */}
         <div className={cn(
           "w-10 h-10 rounded-full flex items-center justify-center shrink-0",
-          isActive ? (isAgentLinked(wallet) ? "bg-purple-100 dark:bg-purple-900/40" : "gradient-primary") :
-          isAgentLinked(wallet) ? "bg-purple-50 dark:bg-purple-900/20" : "bg-muted"
+          isActive ? (isAgentLinked(wallet) ? "bg-primary/10" : "gradient-primary") :
+          isAgentLinked(wallet) ? "bg-primary/8" : "bg-muted"
         )}>
           {isAgentLinked(wallet) ? (
             <Bot className={cn(
               "w-5 h-5",
-              isActive ? "text-purple-600 dark:text-purple-400" : "text-purple-500 dark:text-purple-400"
+              isActive ? "text-primary" : "text-primary"
             )} />
           ) : (
             <Wallet className={cn(
@@ -68,7 +68,7 @@ export function WalletSwitcher({ isOpen, onClose, onCreateNew }: WalletSwitcherP
               {wallet.name}
             </p>
             {isAgentLinked(wallet) && (
-              <span className="text-[10px] px-1.5 py-0.5 bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded shrink-0">
+              <span className="text-[10px] px-1.5 py-0.5 bg-primary/10 text-primary rounded shrink-0">
                 Agent
               </span>
             )}

@@ -178,7 +178,7 @@ export function SecurityBanner() {
           className={cn(
             'p-4 border rounded-xl',
             isError
-              ? 'bg-red-50 dark:bg-red-900/15 border-red-200/50 dark:border-red-800/40'
+              ? 'bg-destructive/8 border-destructive/20/50 dark:border-red-800/40'
               : 'bg-warning-surface border-warning/30'
           )}
           onClick={() => config.actionPath && navigate(config.actionPath)}
@@ -188,9 +188,9 @@ export function SecurityBanner() {
           <div className="flex items-center gap-3">
             <div className={cn(
               'w-8 h-8 rounded-full flex items-center justify-center shrink-0',
-              isError ? 'bg-red-100 dark:bg-red-800/30' : 'bg-warning/20'
+              isError ? 'bg-destructive/10' : 'bg-warning/20'
             )}>
-              <Icon className={cn('w-4 h-4', isError ? 'text-red-600' : 'text-warning')} />
+              <Icon className={cn('w-4 h-4', isError ? 'text-destructive' : 'text-warning')} />
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-foreground">{config.title}</p>
@@ -206,7 +206,7 @@ export function SecurityBanner() {
             ) : config.action ? (
               <span className={cn(
                 'flex items-center gap-0.5 text-[12px] font-medium shrink-0',
-                isError ? 'text-red-600' : 'text-warning'
+                isError ? 'text-destructive' : 'text-warning'
               )}>
                 {config.action}
                 <ChevronRight className="w-3.5 h-3.5" />

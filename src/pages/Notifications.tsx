@@ -93,8 +93,8 @@ export default function NotificationsPage() {
             </div>
 
             <div className="p-3 flex items-center gap-3 border-b border-border">
-              <div className="w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center">
-                <ArrowUpRight className="w-4 h-4 text-blue-500" />
+              <div className="w-8 h-8 rounded-full bg-primary/80/10 flex items-center justify-center">
+                <ArrowUpRight className="w-4 h-4 text-primary" />
               </div>
               <div className="flex-1">
                 <p className="text-sm font-medium">转账成功通知</p>
@@ -139,8 +139,8 @@ export default function NotificationsPage() {
           <h3 className="text-xs font-medium text-muted-foreground mb-2 px-1">审核通知</h3>
           <div className="card-elevated overflow-hidden">
             <div className="p-3 flex items-center gap-3 border-b border-border">
-              <div className="w-8 h-8 rounded-full bg-amber-500/10 flex items-center justify-center">
-                <ClipboardCheck className="w-4 h-4 text-amber-500" />
+              <div className="w-8 h-8 rounded-full bg-warning/80/10 flex items-center justify-center">
+                <ClipboardCheck className="w-4 h-4 text-warning" />
               </div>
               <div className="flex-1">
                 <p className="text-sm font-medium">Agent 交易审核提醒</p>
@@ -153,8 +153,8 @@ export default function NotificationsPage() {
             </div>
 
             <div className="p-3 flex items-center gap-3 border-b border-border">
-              <div className="w-8 h-8 rounded-full bg-emerald-500/10 flex items-center justify-center">
-                <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+              <div className="w-8 h-8 rounded-full bg-success/80/10 flex items-center justify-center">
+                <CheckCircle2 className="w-4 h-4 text-success" />
               </div>
               <div className="flex-1">
                 <p className="text-sm font-medium">自动批准执行通知</p>
@@ -167,8 +167,8 @@ export default function NotificationsPage() {
             </div>
 
             <div className="p-3 flex items-center gap-3 border-b border-border">
-              <div className="w-8 h-8 rounded-full bg-emerald-500/10 flex items-center justify-center">
-                <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+              <div className="w-8 h-8 rounded-full bg-success/80/10 flex items-center justify-center">
+                <CheckCircle2 className="w-4 h-4 text-success" />
               </div>
               <div className="flex-1">
                 <p className="text-sm font-medium">交易结算通知</p>
@@ -181,8 +181,8 @@ export default function NotificationsPage() {
             </div>
 
             <div className="p-3 flex items-center gap-3 border-b border-border">
-              <div className="w-8 h-8 rounded-full bg-red-500/10 flex items-center justify-center">
-                <AlertTriangle className="w-4 h-4 text-red-500" />
+              <div className="w-8 h-8 rounded-full bg-destructive/80/10 flex items-center justify-center">
+                <AlertTriangle className="w-4 h-4 text-destructive" />
               </div>
               <div className="flex-1">
                 <p className="text-sm font-medium">交易异常提醒</p>
@@ -195,8 +195,8 @@ export default function NotificationsPage() {
             </div>
 
             <div className="p-3 flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center">
-                <Key className="w-4 h-4 text-blue-500" />
+              <div className="w-8 h-8 rounded-full bg-primary/80/10 flex items-center justify-center">
+                <Key className="w-4 h-4 text-primary" />
               </div>
               <div className="flex-1">
                 <p className="text-sm font-medium">API 密钥变动通知</p>
@@ -219,8 +219,8 @@ export default function NotificationsPage() {
           <h3 className="text-xs font-medium text-muted-foreground mb-2 px-1">系统通知</h3>
           <div className="card-elevated overflow-hidden">
             <div className="p-3 flex items-center gap-3 border-b border-border">
-              <div className="w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center">
-                <Megaphone className="w-4 h-4 text-blue-500" />
+              <div className="w-8 h-8 rounded-full bg-primary/80/10 flex items-center justify-center">
+                <Megaphone className="w-4 h-4 text-primary" />
               </div>
               <div className="flex-1">
                 <p className="text-sm font-medium">产品更新通知</p>

@@ -107,7 +107,7 @@ export default function RecipeDetail() {
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
           <p className="text-gray-400 text-lg mb-2">Recipe not found</p>
-          <button onClick={() => navigate('/recipes')} className="text-blue-600 text-sm font-medium">
+          <button onClick={() => navigate('/recipes')} className="text-primary text-sm font-medium">
             ← Back to Recipes
           </button>
         </div>
@@ -239,7 +239,7 @@ export default function RecipeDetail() {
               onClick={handleCopyUrl}
               className="flex items-center gap-1.5 h-9 px-3 rounded-lg border border-gray-200 hover:bg-gray-50 hover:border-gray-300 transition-colors text-xs text-gray-600 font-medium"
             >
-              {copiedUrl ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" /> : <Link2 className="w-3.5 h-3.5" />}
+              {copiedUrl ? <CheckCircle2 className="w-3.5 h-3.5 text-success" /> : <Link2 className="w-3.5 h-3.5" />}
               {copiedUrl ? 'Copied!' : 'Copy URL'}
             </button>
             <button
@@ -311,7 +311,7 @@ export default function RecipeDetail() {
                     {/* Action — copy state */}
                     <div className="absolute top-3 right-3">
                       {copiedPrompt === idx ? (
-                        <span className="inline-flex items-center justify-center w-7 h-7 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-600">
+                        <span className="inline-flex items-center justify-center w-7 h-7 rounded-md bg-success/8 border border-success/20 text-success">
                           <CheckCircle2 className="w-3.5 h-3.5" strokeWidth={2.5} />
                         </span>
                       ) : (

@@ -58,7 +58,7 @@ export function BiometricVerifyDrawer({
             transition={{ repeat: Infinity, duration: 1.2 }}
           >
             {status === 'success' ? (
-              <CheckCircle2 className="w-10 h-10 text-emerald-500" />
+              <CheckCircle2 className="w-10 h-10 text-success" />
             ) : (
               <Fingerprint
                 className={`w-10 h-10 ${status === 'verifying' ? 'text-primary animate-pulse' : 'text-muted-foreground'}`}

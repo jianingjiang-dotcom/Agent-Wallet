@@ -97,14 +97,14 @@ export function AgentReviewDrawer({ tx, open, onOpenChange, onApprove, onReject,
 
           {/* Risk reasons */}
           {tx.riskReasons && tx.riskReasons.length > 0 && (
-            <div className="bg-amber-50 dark:bg-amber-950/20 rounded-xl p-3 border border-amber-200 dark:border-amber-800/40">
+            <div className="bg-warning/8 rounded-xl p-3 border border-warning/20">
               <div className="flex items-center gap-1.5 mb-2">
-                <AlertTriangle className="w-4 h-4 text-amber-600" />
-                <span className="text-xs font-medium text-amber-700 dark:text-amber-400">风险提示</span>
+                <AlertTriangle className="w-4 h-4 text-warning" />
+                <span className="text-xs font-medium text-warning">风险提示</span>
               </div>
               <ul className="space-y-1">
                 {tx.riskReasons.map((r, i) => (
-                  <li key={i} className="text-xs text-amber-700 dark:text-amber-400">• {r}</li>
+                  <li key={i} className="text-xs text-warning">• {r}</li>
                 ))}
               </ul>
             </div>
@@ -118,7 +118,7 @@ export function AgentReviewDrawer({ tx, open, onOpenChange, onApprove, onReject,
             <DetailRow label="网络" value={tx.network} icon={<ChainIcon chainId={tx.network} className="w-4 h-4" />} />
             {tx.memo && <DetailRow label="备注" value={tx.memo} />}
             {isPending && (
-              <DetailRow label="剩余时间" value={formatCountdown(tx.expiresAt)} icon={<Clock className="w-3.5 h-3.5 text-amber-500" />} />
+              <DetailRow label="剩余时间" value={formatCountdown(tx.expiresAt)} icon={<Clock className="w-3.5 h-3.5 text-warning" />} />
             )}
           </div>
 

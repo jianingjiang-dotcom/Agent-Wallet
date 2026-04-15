@@ -96,20 +96,20 @@ export default function ExcessApproval() {
               transition={{ delay: 0.05 }}
               className={cn(
                 'rounded-xl px-4 py-3 mb-4',
-                isPending && 'bg-[#FEF3E7] dark:bg-amber-900/20',
-                todo.status === 'approved' && 'bg-[#ECFBF2] dark:bg-green-900/20',
-                todo.status === 'rejected' && 'bg-[#FBEFF6] dark:bg-red-900/20',
+                isPending && 'bg-[#FEF3E7]',
+                todo.status === 'approved' && 'bg-[#ECFBF2] dark:bg-success/900/20',
+                todo.status === 'rejected' && 'bg-[#FBEFF6]',
               )}
             >
               <div className="flex items-center gap-2">
-                {isPending && <AlertTriangle className="w-4 h-4 text-amber-600" strokeWidth={1.5} />}
-                {todo.status === 'approved' && <CheckCircle2 className="w-4 h-4 text-emerald-600" strokeWidth={1.5} />}
-                {todo.status === 'rejected' && <XCircle className="w-4 h-4 text-red-600" strokeWidth={1.5} />}
+                {isPending && <AlertTriangle className="w-4 h-4 text-warning" strokeWidth={1.5} />}
+                {todo.status === 'approved' && <CheckCircle2 className="w-4 h-4 text-success" strokeWidth={1.5} />}
+                {todo.status === 'rejected' && <XCircle className="w-4 h-4 text-destructive" strokeWidth={1.5} />}
                 <span className={cn(
                   'text-sm font-medium',
-                  isPending && 'text-amber-700',
-                  todo.status === 'approved' && 'text-emerald-700',
-                  todo.status === 'rejected' && 'text-red-700',
+                  isPending && 'text-warning',
+                  todo.status === 'approved' && 'text-success',
+                  todo.status === 'rejected' && 'text-destructive',
                 )}>
                   {isPending ? '待审批 — 交易金额超出 Pact 限额' : todo.status === 'approved' ? '已批准' : '已拒绝'}
                 </span>
@@ -154,12 +154,12 @@ export default function ExcessApproval() {
               const pact = mockPacts.find(p => p.id === meta.pactId);
               if (!pact) return null;
               const pactStatusConfig: Record<string, { label: string; color: string; bg: string }> = {
-                pending: { label: '待审批', color: 'text-amber-600', bg: 'bg-amber-50' },
-                active: { label: '生效中', color: 'text-blue-600', bg: 'bg-blue-50' },
+                pending: { label: '待审批', color: 'text-warning', bg: 'bg-warning/8' },
+                active: { label: '生效中', color: 'text-primary', bg: 'bg-primary/8' },
                 completed: { label: '已完成', color: 'text-slate-600', bg: 'bg-slate-50' },
-                rejected: { label: '已拒绝', color: 'text-red-600', bg: 'bg-red-50' },
+                rejected: { label: '已拒绝', color: 'text-destructive', bg: 'bg-destructive/8' },
                 expired: { label: '已过期', color: 'text-muted-foreground', bg: 'bg-muted/50' },
-                revoked: { label: '已撤回', color: 'text-red-600', bg: 'bg-red-50' },
+                revoked: { label: '已撤回', color: 'text-destructive', bg: 'bg-destructive/8' },
               };
               const ps = pactStatusConfig[pact.status] || pactStatusConfig.active;
               return (

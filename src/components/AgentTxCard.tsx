@@ -13,14 +13,14 @@ interface AgentTxCardProps {
 }
 
 const statusConfig = {
-  pending_approval: { label: '待审核', icon: Clock, color: 'text-amber-600 dark:text-amber-400', bg: 'status-glow-warning' },
-  approved: { label: '已批准', icon: CheckCircle2, color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-card border border-border' },
-  rejected: { label: '已拒绝', icon: XCircle, color: 'text-red-600 dark:text-red-400', bg: 'bg-card border border-border' },
+  pending_approval: { label: '待审核', icon: Clock, color: 'text-warning', bg: 'status-glow-warning' },
+  approved: { label: '已批准', icon: CheckCircle2, color: 'text-success', bg: 'bg-card border border-border' },
+  rejected: { label: '已拒绝', icon: XCircle, color: 'text-destructive', bg: 'bg-card border border-border' },
   expired: { label: '已过期', icon: TimerOff, color: 'text-gray-500 dark:text-gray-400', bg: 'bg-card border border-border' },
-  broadcasting: { label: '广播中', icon: Radio, color: 'text-blue-600 dark:text-blue-400', bg: 'status-glow-info' },
-  confirming: { label: '确认中', icon: Loader2, color: 'text-purple-600 dark:text-purple-400', bg: 'status-glow-info' },
-  settled: { label: '已结算', icon: CheckCircle2, color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-card border border-border' },
-  failed: { label: '失败', icon: AlertTriangle, color: 'text-red-600 dark:text-red-400', bg: 'status-glow-danger' },
+  broadcasting: { label: '广播中', icon: Radio, color: 'text-primary', bg: 'status-glow-info' },
+  confirming: { label: '确认中', icon: Loader2, color: 'text-primary', bg: 'status-glow-info' },
+  settled: { label: '已结算', icon: CheckCircle2, color: 'text-success', bg: 'bg-card border border-border' },
+  failed: { label: '失败', icon: AlertTriangle, color: 'text-destructive', bg: 'status-glow-danger' },
 };
 
 const riskConfig = {
@@ -95,7 +95,7 @@ export function AgentTxCard({ tx, onClick, className }: AgentTxCardProps) {
           {tx.status === 'confirming' && tx.confirmations != null && tx.requiredConfirmations && (
             <div className="mt-2 space-y-1">
               <div className="flex items-center justify-between text-[11px]">
-                <span className="text-purple-600 dark:text-purple-400 font-medium">确认进度</span>
+                <span className="text-primary font-medium">确认进度</span>
                 <span className="text-muted-foreground">{tx.confirmations}/{tx.requiredConfirmations}</span>
               </div>
               <Progress value={(tx.confirmations / tx.requiredConfirmations) * 100} className="h-1.5" />

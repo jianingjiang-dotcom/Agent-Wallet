@@ -78,7 +78,7 @@ export function NetworkFeeSelector({ selectedTier, onSelect, networkName = 'Ethe
             <div className="flex items-center gap-2">
               <span className="text-sm text-muted-foreground">预计网络费用</span>
               {isGasless ? (
-                <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700">
+                <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-success/10 text-success">
                   Gasless
                 </span>
               ) : (
@@ -90,7 +90,7 @@ export function NetworkFeeSelector({ selectedTier, onSelect, networkName = 'Ethe
             <div className="flex items-center gap-1">
               <span className={cn(
                 'text-sm font-medium',
-                isGasless ? 'text-emerald-600' : 'text-foreground'
+                isGasless ? 'text-success' : 'text-foreground'
               )}>
                 {isGasless ? '$0.00' : `$${currentOption.fee.toFixed(2)}`}
               </span>

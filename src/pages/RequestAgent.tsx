@@ -148,9 +148,9 @@ export default function RequestAgentPage() {
     <AppLayout showNav={false} title={getTitle()} showBack onBack={handleBack}>
       {/* Agent notice banner */}
       <div className="px-4 pt-2 pb-1">
-        <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-purple-50 dark:bg-purple-950/20 border border-purple-200 dark:border-purple-800/40">
-          <Bot className="w-4 h-4 text-purple-600 dark:text-purple-400 shrink-0" />
-          <p className="text-xs text-purple-700 dark:text-purple-400">
+        <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-primary/8 border border-primary/20">
+          <Bot className="w-4 h-4 text-primary shrink-0" />
+          <p className="text-xs text-primary">
             此钱包由 Agent 签名，转账请求将提交给 Agent 执行
           </p>
         </div>
@@ -451,9 +451,9 @@ export default function RequestAgentPage() {
               </div>
 
               {/* Agent execution notice */}
-              <div className="card-elevated p-4 border-purple-200 dark:border-purple-800/40 bg-purple-50 dark:bg-purple-950/20">
+              <div className="card-elevated p-4 border-primary/20 bg-primary/8">
                 <div className="flex items-start gap-3">
-                  <Info className="w-5 h-5 text-purple-600 dark:text-purple-400 shrink-0 mt-0.5" />
+                  <Info className="w-5 h-5 text-primary shrink-0 mt-0.5" />
                   <div>
                     <p className="font-medium text-foreground text-sm">Agent 执行转账</p>
                     <p className="text-xs text-muted-foreground mt-1">
@@ -477,9 +477,9 @@ export default function RequestAgentPage() {
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ type: 'spring', stiffness: 200, delay: 0.2 }}
-                className="w-24 h-24 rounded-full bg-purple-100 dark:bg-purple-900/40 flex items-center justify-center mb-6"
+                className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center mb-6"
               >
-                <Bot className="w-12 h-12 text-purple-600 dark:text-purple-400" />
+                <Bot className="w-12 h-12 text-primary" />
               </motion.div>
               <h2 className="text-xl font-bold text-foreground mb-2">
                 请求已提交

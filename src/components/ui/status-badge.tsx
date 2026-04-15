@@ -10,14 +10,14 @@ const statusBadgeVariants = cva(
     variants: {
       variant: {
         success:
-          "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400",
+          "bg-success/10 text-success",
         warning:
-          "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400",
+          "bg-warning/10 text-warning",
         danger:
-          "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400",
-        info: "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400",
+          "bg-destructive/10 text-destructive",
+        info: "bg-primary/10 text-primary",
         purple:
-          "bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-400",
+          "bg-primary/10 text-primary",
         muted: "bg-muted text-muted-foreground",
         accent: "bg-accent/10 text-accent",
       },

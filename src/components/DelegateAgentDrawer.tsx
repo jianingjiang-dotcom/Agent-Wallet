@@ -258,8 +258,8 @@ export function DelegateAgentDrawer({
                   </div>
 
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center shrink-0">
-                      <Bot className="w-4 h-4 text-blue-500" />
+                    <div className="w-8 h-8 rounded-full bg-primary/80/10 flex items-center justify-center shrink-0">
+                      <Bot className="w-4 h-4 text-primary" />
                     </div>
                     <div className="min-w-0">
                       <p className="text-xs text-muted-foreground">Agent 名称</p>
@@ -268,8 +268,8 @@ export function DelegateAgentDrawer({
                   </div>
 
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-purple-500/10 flex items-center justify-center shrink-0">
-                      <Shield className="w-4 h-4 text-purple-500" />
+                    <div className="w-8 h-8 rounded-full bg-primary/80/10 flex items-center justify-center shrink-0">
+                      <Shield className="w-4 h-4 text-primary" />
                     </div>
                     <div className="min-w-0">
                       <p className="text-xs text-muted-foreground">Principal ID</p>

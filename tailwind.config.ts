@@ -14,8 +14,11 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
-        mono: ['JetBrains Mono', 'monospace'],
+        sans: [
+          'SF Pro Display', 'SF Pro Text', '-apple-system', 'BlinkMacSystemFont',
+          'Inter', 'Helvetica Neue', 'sans-serif',
+        ],
+        mono: ['SF Mono', 'JetBrains Mono', 'ui-monospace', 'monospace'],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -39,7 +42,6 @@ export default {
           DEFAULT: "hsl(var(--muted))",
           foreground: "hsl(var(--muted-foreground))",
         },
-        // Text hierarchy tokens
         "text-secondary": "hsl(var(--text-secondary))",
         "text-placeholder": "hsl(var(--text-placeholder))",
         accent: {
@@ -89,16 +91,6 @@ export default {
         'sm': 'var(--shadow-sm)',
         'md': 'var(--shadow-md)',
         'lg': 'var(--shadow-lg)',
-        'xl': 'var(--shadow-xl)',
-        'layered': 'var(--shadow-layered)',
-        'glow-primary': 'var(--shadow-glow-primary)',
-        'glow-success': 'var(--shadow-glow-success)',
-        'glow-warning': 'var(--shadow-glow-warning)',
-        'glow-destructive': 'var(--shadow-glow-destructive)',
-      },
-      backgroundImage: {
-        'gradient-mesh': 'var(--gradient-mesh)',
-        'gradient-balance': 'var(--gradient-balance)',
       },
       keyframes: {
         "accordion-down": {
@@ -129,18 +121,6 @@ export default {
           "0%, 100%": { opacity: "1" },
           "50%": { opacity: "0.6" },
         },
-        "shimmer": {
-          from: { backgroundPosition: "200% 0" },
-          to: { backgroundPosition: "-200% 0" },
-        },
-        "gradient-shift": {
-          "0%, 100%": { backgroundPosition: "0% 50%" },
-          "50%": { backgroundPosition: "100% 50%" },
-        },
-        "glow-pulse": {
-          "0%, 100%": { opacity: "0.6" },
-          "50%": { opacity: "1" },
-        },
         "float": {
           "0%, 100%": { transform: "translateY(0px)" },
           "50%": { transform: "translateY(-4px)" },
@@ -158,9 +138,6 @@ export default {
         "slide-down": "slide-down 0.4s ease-out",
         "scale-in": "scale-in 0.3s ease-out",
         "pulse-soft": "pulse-soft 2s ease-in-out infinite",
-        "shimmer": "shimmer 2s linear infinite",
-        "gradient-shift": "gradient-shift 6s ease-in-out infinite",
-        "glow-pulse": "glow-pulse 3s ease-in-out infinite",
         "float": "float 3s ease-in-out infinite",
         "cursor-blink": "cursor-blink 0.8s steps(1) infinite",
       },

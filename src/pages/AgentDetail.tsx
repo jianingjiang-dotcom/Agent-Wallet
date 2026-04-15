@@ -20,20 +20,20 @@ import { AgentPermissions, AGENT_PERMISSION_LIST, DEFAULT_AGENT_PERMISSIONS } fr
 const PERM_ICONS: Record<string, React.ComponentType<{ className?: string }>> = { Eye, Send, FileCode, Settings };
 
 const statusConfig: Record<string, { label: string; color: string }> = {
-  active: { label: '运行中', color: 'text-emerald-600 bg-emerald-100 dark:bg-emerald-900/40 dark:text-emerald-400' },
+  active: { label: '运行中', color: 'text-success bg-success/10' },
   paused: { label: '已暂停', color: 'text-yellow-600 bg-yellow-100 dark:bg-yellow-900/40 dark:text-yellow-400' },
-  revoked: { label: '已撤销', color: 'text-red-600 bg-red-100 dark:bg-red-900/40 dark:text-red-400' },
+  revoked: { label: '已撤销', color: 'text-destructive bg-destructive/10' },
 };
 
 const txStatusConfig: Record<string, { label: string; color: string }> = {
   pending_approval: { label: '待审批', color: 'text-yellow-600 bg-yellow-100 dark:bg-yellow-900/40 dark:text-yellow-400' },
-  approved: { label: '已批准', color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/40 dark:text-blue-400' },
-  settled: { label: '已结算', color: 'text-emerald-600 bg-emerald-100 dark:bg-emerald-900/40 dark:text-emerald-400' },
-  failed: { label: '失败', color: 'text-red-600 bg-red-100 dark:bg-red-900/40 dark:text-red-400' },
-  rejected: { label: '已拒绝', color: 'text-red-600 bg-red-100 dark:bg-red-900/40 dark:text-red-400' },
+  approved: { label: '已批准', color: 'text-primary bg-primary/10' },
+  settled: { label: '已结算', color: 'text-success bg-success/10' },
+  failed: { label: '失败', color: 'text-destructive bg-destructive/10' },
+  rejected: { label: '已拒绝', color: 'text-destructive bg-destructive/10' },
   expired: { label: '已过期', color: 'text-gray-500 bg-gray-100 dark:bg-gray-800 dark:text-gray-400' },
-  broadcasting: { label: '广播中', color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/40 dark:text-blue-400' },
-  confirming: { label: '确认中', color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/40 dark:text-blue-400' },
+  broadcasting: { label: '广播中', color: 'text-primary bg-primary/10' },
+  confirming: { label: '确认中', color: 'text-primary bg-primary/10' },
 };
 
 function formatDate(date?: Date): string {
@@ -171,8 +171,8 @@ export default function AgentDetail() {
           className="card-elevated p-4"
         >
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-full bg-purple-100 dark:bg-purple-900/40 flex items-center justify-center flex-shrink-0">
-              <Bot className="w-6 h-6 text-purple-600 dark:text-purple-400" strokeWidth={1.5} />
+            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+              <Bot className="w-6 h-6 text-primary" strokeWidth={1.5} />
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
@@ -192,12 +192,12 @@ export default function AgentDetail() {
                 <span
                   className={cn(
                     'w-2 h-2 rounded-full flex-shrink-0',
-                    agent.tssNodeStatus === 'active' ? 'bg-emerald-500' : 'bg-gray-400'
+                    agent.tssNodeStatus === 'active' ? 'bg-success/80' : 'bg-gray-400'
                   )}
                 />
                 <span className={cn(
                   'text-xs',
-                  agent.tssNodeStatus === 'active' ? 'text-emerald-600 dark:text-emerald-400' : 'text-muted-foreground'
+                  agent.tssNodeStatus === 'active' ? 'text-success' : 'text-muted-foreground'
                 )}>
                   {agent.tssNodeStatus === 'active' ? 'TSS Node 活跃' : 'TSS Node 非活跃'}
                 </span>
@@ -275,10 +275,10 @@ export default function AgentDetail() {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.05 }}
-            className="card-elevated p-4 flex items-center gap-3 border-red-200 dark:border-red-800"
+            className="card-elevated p-4 flex items-center gap-3 border-destructive/20 dark:border-red-800"
           >
-            <AlertTriangle className="w-5 h-5 text-red-500 flex-shrink-0" />
-            <p className="text-sm text-red-600 dark:text-red-400">该 Agent 的授权已被撤销，无法执行任何操作。</p>
+            <AlertTriangle className="w-5 h-5 text-destructive flex-shrink-0" />
+            <p className="text-sm text-destructive">该 Agent 的授权已被撤销，无法执行任何操作。</p>
           </motion.div>
         )}
 
@@ -420,7 +420,7 @@ export default function AgentDetail() {
             {agent.status === 'revoked' && agent.revokedAt && (
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground">撤销时间</span>
-                <span className="text-red-600 dark:text-red-400">{formatDate(agent.revokedAt)}</span>
+                <span className="text-destructive">{formatDate(agent.revokedAt)}</span>
               </div>
             )}
           </div>

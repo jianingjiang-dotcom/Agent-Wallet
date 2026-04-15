@@ -4,231 +4,144 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
-/* Cobo Merchant Wallet Design System
-   Professional, bank-grade aesthetic with trust & security focus
-   All colors MUST be HSL.
+/* Cobo Agentic Wallet — Apple × Cobo Design System
 
-   === COMPONENT SIZE STANDARDS ===
-   
-   Button Heights:
-   - sm: 32px (h-8) - Small actions, tags
-   - md: 40px (h-10) - Secondary buttons, form inputs
-   - lg/default: 48px (h-12) - Primary CTAs, main actions
-   
-   Border Radius:
-   - rounded-lg (8px) - Buttons, inputs, small elements
-   - rounded-xl (12px) - Cards, dialogs, modals
-   - rounded-2xl (16px) - Large containers, drawer top corners
-   
-   Icon Containers (with icons half the container size):
-   - sm: 32px (w-8 h-8) + icon 16px (w-4 h-4) - List items, menu icons
-   - md: 40px (w-10 h-10) + icon 20px (w-5 h-5) - Card icons, feature icons  
-   - lg: 48px (w-12 h-12) + icon 24px (w-6 h-6) - Hero icons, primary features
-   - xl: 64px (w-16 h-16) + icon 32px (w-8 h-8) - Page hero, onboarding steps
-   - 2xl: 80px (w-20 h-20) + icon 40px (w-10 h-10) - Success states, completion
-   
-   === TYPOGRAPHY STANDARDS ===
-   
-   Font Sizes (for forms/inputs):
-   - text-base (16px) - All form inputs, textareas, selects (default)
-   - text-sm (14px) - Labels, helper text, secondary info
-   - text-xs (12px) - Captions, timestamps, meta info
-   
-   Text Colors:
-   - foreground - Primary text, key information
-   - muted-foreground / text-secondary - Secondary labels, descriptions
-   - text-placeholder - Input placeholders, prompts (lighter grey)
-   
-   === STATUS COLORS ===
-   Use semantic tokens instead of hardcoded colors:
-   - success (green) - Positive states, completed, online, received
-   - warning (amber/orange) - Caution, pending, large amounts
-   - destructive (red) - Errors, risks, failures, dangerous actions
-   - trust (teal) - iCloud, Apple-related positive states
-   - accent/primary (blue) - Interactive elements, links
+   Philosophy: Whitespace is content. Every pixel earns its place.
+   Accent: Cobo brand blue (#1F32D6) — the only color.
+   Reference: Apple.com, iOS Settings, Apple Wallet.
+
+   See DESIGN.md for full specification.
 */
 
 @layer base {
   :root {
-    /* Core palette - Cobo Brand Colors */
+    /* Core — Apple white surfaces */
     --background: 0 0% 100%;
-    --foreground: 0 0% 11%;
-    
+    --foreground: 0 0% 11.4%;
+
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 11%;
-    
+    --card-foreground: 0 0% 11.4%;
+
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 11%;
-    
-    /* Primary - #1F32D6 */
+    --popover-foreground: 0 0% 11.4%;
+
+    /* Primary — Cobo brand blue #1F32D6 */
     --primary: 233.8 74.7% 48%;
     --primary-foreground: 0 0% 100%;
 
-    /* Secondary - Soft slate */
-    --secondary: 225 40% 98%;
-    --secondary-foreground: 0 0% 11%;
+    /* Secondary — Apple grouped background #F2F2F7 */
+    --secondary: 240 6% 95%;
+    --secondary-foreground: 0 0% 11.4%;
 
-    --muted: 225 40% 98%;
-    --muted-foreground: 225 9.4% 49.8%;
+    --muted: 240 6% 95%;
+    --muted-foreground: 240 1% 53%;
 
-    /* Text hierarchy - darker for key info, lighter for placeholders */
-    --text-secondary: 225 9.4% 49.8%;
-    --text-placeholder: 225 9.4% 74.9%;
-    
-    /* Accent - Same as primary for simplified design system */
+    /* Text hierarchy */
+    --text-secondary: 240 1% 53%;
+    --text-placeholder: 240 1% 68%;
+
+    /* Accent = Primary */
     --accent: var(--primary);
     --accent-foreground: var(--primary-foreground);
-    
-    /* Status colors */
-    --success: 152 69% 40%;
+
+    /* Status — Apple system colors */
+    --success: 142 71% 49%;
     --success-foreground: 0 0% 100%;
-    
-    --warning: 38 92% 50%;
+
+    --warning: 28 100% 50%;
     --warning-foreground: 0 0% 100%;
-    --warning-surface: 42 85% 95%; /* #FCF5EA equivalent */
-    
-    --destructive: 0 84% 60%;
+    --warning-surface: 38 75% 95%;
+
+    --destructive: 4 100% 60%;
     --destructive-foreground: 0 0% 100%;
-    
-    /* Trust green for positive actions */
-    --trust: 158 64% 42%;
+
+    --trust: 142 71% 49%;
     --trust-foreground: 0 0% 100%;
-    
-    /* 分割线描边 #EDEEF3 */
-    --border: 230 20% 94.1%;
-    --input: 230 20% 94.1%;
-    --ring: 238 64% 59%;
+
+    /* Borders — Apple separator #E5E5EA */
+    --border: 240 6% 90%;
+    --input: 240 6% 95%;
+    --ring: 233.8 74.7% 48%;
 
     --radius: 0.75rem;
-    
-    /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(238 64% 52%) 0%, hsl(248 68% 45%) 100%);
-    --gradient-accent: linear-gradient(135deg, hsl(238 64% 59%) 0%, hsl(248 68% 52%) 100%);
-    --gradient-success: linear-gradient(135deg, hsl(158 64% 42%) 0%, hsl(152 69% 40%) 100%);
-    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(220 20% 98%) 100%);
-    
-    /* Shadows */
-    --shadow-sm: 0 1px 2px 0 hsl(0 0% 11% / 0.05);
-    --shadow-md: 0 4px 6px -1px hsl(0 0% 11% / 0.07), 0 2px 4px -2px hsl(0 0% 11% / 0.05);
-    --shadow-lg: 0 10px 15px -3px hsl(0 0% 11% / 0.08), 0 4px 6px -4px hsl(0 0% 11% / 0.05);
-    --shadow-xl: 0 20px 25px -5px hsl(0 0% 11% / 0.1), 0 8px 10px -6px hsl(0 0% 11% / 0.05);
 
-    /* Layered shadow for premium depth */
-    --shadow-layered:
-      0 1px 2px hsl(0 0% 11% / 0.04),
-      0 4px 8px hsl(0 0% 11% / 0.04),
-      0 12px 24px hsl(0 0% 11% / 0.06);
+    /* Shadows — Apple-level subtlety */
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+    --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.12);
 
-    /* Colored glow shadows */
-    --shadow-glow-primary: 0 0 20px hsl(238 64% 59% / 0.15), 0 0 40px hsl(238 64% 59% / 0.05);
-    --shadow-glow-success: 0 0 20px hsl(152 69% 40% / 0.15), 0 0 40px hsl(152 69% 40% / 0.05);
-    --shadow-glow-warning: 0 0 20px hsl(38 92% 50% / 0.15), 0 0 40px hsl(38 92% 50% / 0.05);
-    --shadow-glow-destructive: 0 0 20px hsl(0 84% 60% / 0.15), 0 0 40px hsl(0 84% 60% / 0.05);
-
-    /* Balance card gradient */
-    --gradient-balance: linear-gradient(135deg, hsl(238 65% 52%) 0%, hsl(248 68% 60%) 40%, hsl(235 72% 68%) 100%);
-
-    /* Mesh gradient for page backgrounds */
-    --gradient-mesh: radial-gradient(ellipse at 20% 0%, hsl(238 64% 59% / 0.06) 0%, transparent 50%),
-                     radial-gradient(ellipse at 80% 100%, hsl(152 69% 40% / 0.04) 0%, transparent 50%);
-    
     /* Sidebar */
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 238 64% 59%;
+    --sidebar-background: 240 6% 97%;
+    --sidebar-foreground: 0 0% 11.4%;
+    --sidebar-primary: 233.8 74.7% 48%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 228 18% 94%;
-    --sidebar-ring: 238 64% 59%;
+    --sidebar-accent: 240 6% 95%;
+    --sidebar-accent-foreground: 0 0% 11.4%;
+    --sidebar-border: 240 6% 90%;
+    --sidebar-ring: 233.8 74.7% 48%;
 
-    /* System toast surface (bottom-center) */
-    --toast-surface: 220 20% 96%;
-    --toast-surface-foreground: 0 0% 11%;
+    /* Toast */
+    --toast-surface: 240 6% 95%;
+    --toast-surface-foreground: 0 0% 11.4%;
   }
 
   .dark {
-    --background: 222 47% 6%;
-    --foreground: 210 40% 98%;
-    
-    --card: 222 47% 9%;
-    --card-foreground: 210 40% 98%;
-    
-    --popover: 222 47% 9%;
-    --popover-foreground: 210 40% 98%;
-    
-    /* Primary - #1F32D6 */
-    --primary: 233.8 74.7% 48%;
+    --background: 0 0% 11%;
+    --foreground: 240 7% 97%;
+
+    --card: 0 0% 11%;
+    --card-foreground: 240 7% 97%;
+
+    --popover: 0 0% 11%;
+    --popover-foreground: 240 7% 97%;
+
+    --primary: 233 74% 63%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 222 30% 14%;
-    --secondary-foreground: 210 40% 98%;
-    
-    --muted: 222 30% 14%;
-    --muted-foreground: 220 9% 60%;
-    
-    /* Text hierarchy - darker for key info, lighter for placeholders */
-    --text-secondary: 220 9% 60%;
-    --text-placeholder: 220 9% 45%;
-    
+    --secondary: 0 0% 17%;
+    --secondary-foreground: 240 7% 97%;
+
+    --muted: 0 0% 17%;
+    --muted-foreground: 240 1% 64%;
+
+    --text-secondary: 240 1% 64%;
+    --text-placeholder: 240 1% 40%;
+
     --accent: var(--primary);
     --accent-foreground: var(--primary-foreground);
-    
-    --success: 152 69% 45%;
+
+    --success: 142 69% 52%;
     --success-foreground: 0 0% 100%;
-    
-    --warning: 38 92% 55%;
+
+    --warning: 32 100% 52%;
     --warning-foreground: 0 0% 0%;
-    --warning-surface: 38 40% 20%; /* Dark mode equivalent */
-    
-    --destructive: 0 72% 51%;
-    --destructive-foreground: 210 40% 98%;
-    
-    --trust: 158 64% 45%;
+    --warning-surface: 32 40% 18%;
+
+    --destructive: 0 100% 61%;
+    --destructive-foreground: 240 7% 97%;
+
+    --trust: 142 69% 52%;
     --trust-foreground: 0 0% 100%;
-    
-    --border: 222 30% 18%;
-    --input: 222 30% 18%;
-    --ring: 238 64% 62%;
 
-    /* Dark mode gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(238 64% 55%) 0%, hsl(248 68% 48%) 100%);
-    --gradient-accent: linear-gradient(135deg, hsl(238 64% 62%) 0%, hsl(248 68% 55%) 100%);
-    --gradient-success: linear-gradient(135deg, hsl(158 64% 45%) 0%, hsl(152 69% 45%) 100%);
-    --gradient-card: linear-gradient(180deg, hsl(222 47% 9%) 0%, hsl(222 47% 7%) 100%);
-    
-    --shadow-sm: 0 1px 2px 0 hsl(0 0% 0% / 0.3);
-    --shadow-md: 0 4px 6px -1px hsl(0 0% 0% / 0.4), 0 2px 4px -2px hsl(0 0% 0% / 0.3);
-    --shadow-lg: 0 10px 15px -3px hsl(0 0% 0% / 0.4), 0 4px 6px -4px hsl(0 0% 0% / 0.3);
-    --shadow-xl: 0 20px 25px -5px hsl(0 0% 0% / 0.5), 0 8px 10px -6px hsl(0 0% 0% / 0.4);
+    --border: 0 0% 22%;
+    --input: 0 0% 17%;
+    --ring: 233 74% 63%;
 
-    --shadow-layered:
-      0 1px 2px hsl(0 0% 0% / 0.2),
-      0 4px 8px hsl(0 0% 0% / 0.2),
-      0 12px 24px hsl(0 0% 0% / 0.3);
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.2);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.4);
 
-    --shadow-glow-primary: 0 0 20px hsl(238 64% 62% / 0.2), 0 0 40px hsl(238 64% 62% / 0.08);
-    --shadow-glow-success: 0 0 20px hsl(152 69% 45% / 0.2), 0 0 40px hsl(152 69% 45% / 0.08);
-    --shadow-glow-warning: 0 0 20px hsl(38 92% 55% / 0.2), 0 0 40px hsl(38 92% 55% / 0.08);
-    --shadow-glow-destructive: 0 0 20px hsl(0 72% 51% / 0.2), 0 0 40px hsl(0 72% 51% / 0.08);
-
-    --gradient-balance: linear-gradient(135deg, hsl(238 65% 50%) 0%, hsl(248 68% 58%) 40%, hsl(235 72% 66%) 100%);
-
-    --gradient-mesh: radial-gradient(ellipse at 20% 0%, hsl(238 64% 62% / 0.08) 0%, transparent 50%),
-                     radial-gradient(ellipse at 80% 100%, hsl(152 69% 45% / 0.06) 0%, transparent 50%);
-
-    --sidebar-background: 222 47% 8%;
-    --sidebar-foreground: 210 40% 90%;
-    --sidebar-primary: 238 64% 62%;
+    --sidebar-background: 0 0% 9%;
+    --sidebar-foreground: 240 7% 90%;
+    --sidebar-primary: 233 74% 63%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 222 30% 14%;
-    --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-border: 222 30% 18%;
-    --sidebar-ring: 217 91% 60%;
+    --sidebar-accent: 0 0% 17%;
+    --sidebar-accent-foreground: 240 7% 97%;
+    --sidebar-border: 0 0% 22%;
+    --sidebar-ring: 233 74% 63%;
 
-    /* System toast surface (bottom-center) */
-    --toast-surface: 222 30% 14%;
-    --toast-surface-foreground: 210 40% 98%;
+    --toast-surface: 0 0% 17%;
+    --toast-surface-foreground: 240 7% 97%;
   }
 }
 
@@ -236,89 +149,66 @@
   * {
     @apply border-border;
   }
-  
+
   html {
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: 'SF Pro Display', 'SF Pro Text', -apple-system, BlinkMacSystemFont, 'Inter', 'Helvetica Neue', sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    letter-spacing: -0.01em;
   }
 
   body {
     @apply bg-background text-foreground;
   }
-  
+
   .font-mono {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'SF Mono', 'JetBrains Mono', ui-monospace, monospace;
   }
 
-  /* Global icon stroke width - consistent 1.5px across all icons */
+  /* Apple-style tight headings */
+  h1, h2, h3 {
+    letter-spacing: -0.025em;
+  }
+
+  /* Global icon stroke width */
   .lucide,
   [class*="lucide-"] {
     stroke-width: 1.5 !important;
   }
 
-  /* Remove icon margins inside buttons - button gap-2 handles spacing */
   button svg,
   [role="button"] svg {
     margin: 0 !important;
   }
 
-  /* Hide scrollbars globally */
+  /* Hide scrollbars */
   ::-webkit-scrollbar {
     display: none;
   }
-
   * {
     scrollbar-width: none;
   }
 }
 
 @layer components {
-  /* Card styles: rounded-xl (12px) for cards */
+  /* Card — Apple level 1 elevation */
   .card-elevated {
-    @apply bg-card rounded-xl border border-border/60;
-    box-shadow: var(--shadow-layered);
+    @apply bg-card rounded-xl;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid hsl(var(--border) / 0.5);
   }
 
-  .card-glass {
-    @apply rounded-xl;
-    background: hsl(var(--card) / 0.6);
-    backdrop-filter: blur(20px) saturate(1.8);
-    -webkit-backdrop-filter: blur(20px) saturate(1.8);
-    border: 1px solid hsl(var(--border) / 0.3);
-    box-shadow: var(--shadow-layered), inset 0 1px 0 hsl(0 0% 100% / 0.06);
+  /* Frosted glass — for nav bars, modals */
+  .backdrop-blur-nav {
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    background-color: rgba(255, 255, 255, 0.72);
+  }
+  .dark .backdrop-blur-nav {
+    background-color: rgba(28, 28, 30, 0.72);
   }
 
-  .card-premium {
-    @apply rounded-xl relative overflow-hidden;
-    background: var(--gradient-balance);
-    background-size: 200% 200%;
-    box-shadow: var(--shadow-layered), var(--shadow-glow-primary);
-  }
-
-  /* Gradient icon containers */
-  .icon-gradient-primary {
-    background: linear-gradient(135deg, hsl(var(--primary) / 0.15) 0%, hsl(var(--primary) / 0.05) 100%);
-    color: hsl(var(--primary));
-  }
-  .icon-gradient-success {
-    background: linear-gradient(135deg, hsl(var(--success) / 0.15) 0%, hsl(var(--success) / 0.05) 100%);
-    color: hsl(var(--success));
-  }
-  .icon-gradient-warning {
-    background: linear-gradient(135deg, hsl(var(--warning) / 0.15) 0%, hsl(var(--warning) / 0.05) 100%);
-    color: hsl(var(--warning));
-  }
-  .icon-gradient-destructive {
-    background: linear-gradient(135deg, hsl(var(--destructive) / 0.15) 0%, hsl(var(--destructive) / 0.05) 100%);
-    color: hsl(var(--destructive));
-  }
-  .icon-gradient-purple {
-    background: linear-gradient(135deg, hsl(271 81% 56% / 0.15) 0%, hsl(271 81% 56% / 0.05) 100%);
-    color: hsl(271 81% 56%);
-  }
-
-  /* Page background: gray in light mode, dark surface in dark mode */
+  /* Page background */
   .bg-page {
     background-color: #ffffff;
   }
@@ -326,64 +216,80 @@
     background-color: #1c1c1e;
   }
 
-  /* Suppress card shadow inside page containers */
-  .no-card-shadow .card-elevated,
-  .no-card-shadow .card-glass,
-  .no-card-shadow.card-elevated {
-    box-shadow: 0 4px 40px rgba(0, 0, 0, 0.02) !important;
+  /* Grouped background (Apple Settings style) */
+  .bg-grouped {
+    background-color: hsl(var(--muted));
   }
 
+  /* Legacy compat — gradient classes now render flat */
+  .gradient-primary {
+    background: hsl(var(--primary));
+  }
+  .gradient-accent {
+    background: hsl(var(--accent));
+  }
+  .gradient-success {
+    background: hsl(var(--success));
+  }
 
-  /* Status glow cards */
-  .status-glow-danger {
+  /* Legacy compat — card variants now render as card-elevated */
+  .card-glass {
+    @apply card-elevated;
+    backdrop-filter: blur(20px) saturate(1.8);
+    -webkit-backdrop-filter: blur(20px) saturate(1.8);
+  }
+  .card-premium {
+    @apply card-elevated;
+    background: hsl(var(--primary));
+    color: white;
+  }
+
+  /* Legacy compat — icon gradient containers now flat tint */
+  .icon-gradient-primary {
+    background: hsl(var(--primary) / 0.08);
+    color: hsl(var(--primary));
+  }
+  .icon-gradient-success {
+    background: hsl(var(--success) / 0.08);
+    color: hsl(var(--success));
+  }
+  .icon-gradient-warning {
+    background: hsl(var(--warning) / 0.08);
+    color: hsl(var(--warning));
+  }
+  .icon-gradient-destructive {
     background: hsl(var(--destructive) / 0.08);
-    border: 1px solid hsl(var(--destructive) / 0.2);
-    box-shadow: inset 0 0 20px hsl(var(--destructive) / 0.05), var(--shadow-glow-destructive);
+    color: hsl(var(--destructive));
+  }
+  .icon-gradient-purple {
+    background: hsl(271 81% 56% / 0.08);
+    color: hsl(271 81% 56%);
+  }
+
+  /* Legacy compat — status glow now flat tint */
+  .status-glow-danger {
+    background: hsl(var(--destructive) / 0.06);
+    border: 1px solid hsl(var(--destructive) / 0.15);
   }
   .status-glow-warning {
-    background: hsl(var(--warning) / 0.08);
-    border: 1px solid hsl(var(--warning) / 0.2);
-    box-shadow: inset 0 0 20px hsl(var(--warning) / 0.05), var(--shadow-glow-warning);
+    background: hsl(var(--warning) / 0.06);
+    border: 1px solid hsl(var(--warning) / 0.15);
   }
   .status-glow-success {
-    background: hsl(var(--success) / 0.08);
-    border: 1px solid hsl(var(--success) / 0.2);
-    box-shadow: inset 0 0 20px hsl(var(--success) / 0.05), var(--shadow-glow-success);
+    background: hsl(var(--success) / 0.06);
+    border: 1px solid hsl(var(--success) / 0.15);
   }
   .status-glow-info {
-    background: hsl(var(--primary) / 0.08);
-    border: 1px solid hsl(var(--primary) / 0.2);
-    box-shadow: inset 0 0 20px hsl(var(--primary) / 0.05), var(--shadow-glow-primary);
+    background: hsl(var(--primary) / 0.06);
+    border: 1px solid hsl(var(--primary) / 0.15);
   }
-  
-  .gradient-primary {
-    background: var(--gradient-primary);
-  }
-  
-  .gradient-accent {
-    background: var(--gradient-accent);
-  }
-  
-  .gradient-success {
-    background: var(--gradient-success);
-  }
-  
+
   .text-balance {
     text-wrap: balance;
   }
-
 }
 
-/* Gradient shift animation for premium cards */
-@keyframes gradient-shift {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-}
-.animate-gradient-shift {
-  animation: gradient-shift 6s ease-in-out infinite;
-}
-
-/* Thin checkbox tick */
+/* Thin checkbox */
 .checkbox-thin {
   position: relative;
   appearance: none;
@@ -394,12 +300,10 @@
   cursor: pointer;
   transition: all 0.15s ease;
 }
-
 .checkbox-thin:checked {
   background: hsl(var(--accent));
   border-color: hsl(var(--accent));
 }
-
 .checkbox-thin:checked::after {
   content: '';
   position: absolute;

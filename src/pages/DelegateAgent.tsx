@@ -22,7 +22,7 @@ import type { HumanAgent, DelegatedAgentStatus } from '@/types/wallet';
 const delegatedStatusConfig: Record<DelegatedAgentStatus, { label: string; color: string }> = {
   active: {
     label: '活跃',
-    color: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400',
+    color: 'bg-success/10 text-success',
   },
   paused: {
     label: '已暂停',
@@ -30,7 +30,7 @@ const delegatedStatusConfig: Record<DelegatedAgentStatus, { label: string; color
   },
   revoked: {
     label: '已撤销',
-    color: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400',
+    color: 'bg-destructive/10 text-destructive',
   },
 };
 
@@ -255,8 +255,8 @@ export default function DelegateAgent() {
                 onClick={() => openDelegateDrawer(agent)}
                 className="card-elevated p-3 w-full flex items-center gap-3 text-left active:bg-muted/50 transition-colors"
               >
-                <div className="w-9 h-9 rounded-full bg-purple-100 dark:bg-purple-900/40 flex items-center justify-center shrink-0">
-                  <Bot className="w-4 h-4 text-purple-600 dark:text-purple-400" strokeWidth={1.5} />
+                <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                  <Bot className="w-4 h-4 text-primary" strokeWidth={1.5} />
                 </div>
 
                 <div className="flex-1 min-w-0">
@@ -264,7 +264,7 @@ export default function DelegateAgent() {
                     <span className="font-medium text-sm truncate">
                       {agent.displayName || agent.principalId.slice(0, 12)}
                     </span>
-                    <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium shrink-0 bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400">
+                    <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium shrink-0 bg-primary/10 text-primary">
                       待授权
                     </span>
                   </div>
@@ -299,7 +299,7 @@ export default function DelegateAgent() {
                   className={cn(
                     'shrink-0 text-xs px-3 py-1 rounded-full font-medium transition-colors',
                     selectedWalletFilter === ALL_WALLETS
-                      ? 'bg-purple-600 text-white dark:bg-purple-500'
+                      ? 'bg-primary text-white dark:bg-primary/80'
                       : 'bg-muted text-muted-foreground'
                   )}
                 >
@@ -312,7 +312,7 @@ export default function DelegateAgent() {
                     className={cn(
                       'shrink-0 text-xs px-3 py-1 rounded-full font-medium transition-colors whitespace-nowrap',
                       selectedWalletFilter === opt.walletId
-                        ? 'bg-purple-600 text-white dark:bg-purple-500'
+                        ? 'bg-primary text-white dark:bg-primary/80'
                         : 'bg-muted text-muted-foreground'
                     )}
                   >
@@ -336,12 +336,12 @@ export default function DelegateAgent() {
                   className="card-elevated p-3 w-full flex items-center gap-3 text-left active:bg-muted/50 transition-colors"
                 >
                   {/* Icon with TSS Node status indicator */}
-                  <div className="relative w-9 h-9 rounded-full bg-purple-100 dark:bg-purple-900/40 flex items-center justify-center shrink-0">
-                    <Bot className="w-4 h-4 text-purple-600 dark:text-purple-400" strokeWidth={1.5} />
+                  <div className="relative w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                    <Bot className="w-4 h-4 text-primary" strokeWidth={1.5} />
                     <span
                       className={cn(
                         'absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-white dark:border-gray-900',
-                        isTssActive ? 'bg-emerald-500' : 'bg-gray-400'
+                        isTssActive ? 'bg-success/80' : 'bg-gray-400'
                       )}
                       title={isTssActive ? 'TSS Node 活跃' : 'TSS Node 非活跃'}
                     />
@@ -381,12 +381,12 @@ export default function DelegateAgent() {
                   className="card-elevated p-3 w-full flex items-center gap-3 text-left opacity-50"
                 >
                   {/* Icon with TSS Node status indicator */}
-                  <div className="relative w-9 h-9 rounded-full bg-purple-100 dark:bg-purple-900/40 flex items-center justify-center shrink-0">
-                    <Bot className="w-4 h-4 text-purple-600 dark:text-purple-400" strokeWidth={1.5} />
+                  <div className="relative w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                    <Bot className="w-4 h-4 text-primary" strokeWidth={1.5} />
                     <span
                       className={cn(
                         'absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-white dark:border-gray-900',
-                        isTssActive ? 'bg-emerald-500' : 'bg-gray-400'
+                        isTssActive ? 'bg-success/80' : 'bg-gray-400'
                       )}
                       title={isTssActive ? 'TSS Node 活跃' : 'TSS Node 非活跃'}
                     />
@@ -507,7 +507,7 @@ export default function DelegateAgent() {
                     className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
                   >
                     {tokenCopied ? (
-                      <><Check className="w-3.5 h-3.5 text-emerald-500" /> 已复制 Token</>
+                      <><Check className="w-3.5 h-3.5 text-success" /> 已复制 Token</>
                     ) : (
                       <><Copy className="w-3.5 h-3.5" /> 仅复制 Token</>
                     )}

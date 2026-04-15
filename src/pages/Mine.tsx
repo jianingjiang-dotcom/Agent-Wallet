@@ -34,14 +34,14 @@ export default function Mine() {
 
         {/* Profile Header */}
         <motion.div
-          className="bg-[#F7F8FA] rounded-xl flex items-center gap-3 px-4 py-3 mb-4 cursor-pointer"
+          className="bg-muted rounded-xl flex items-center gap-3 px-4 py-3 mb-4 cursor-pointer"
           onClick={() => navigate('/profile/info/edit')}
           whileTap={{ scale: 0.98 }}
           transition={{ type: 'spring', stiffness: 400, damping: 25 }}
         >
           <Avatar className="relative w-14 h-14 shrink-0">
             <AvatarImage src={userInfo?.avatar} alt="User avatar" />
-            <AvatarFallback className="bg-gradient-to-br from-primary/30 to-primary/10 text-primary text-xl font-semibold">
+            <AvatarFallback className="bg-muted text-foreground text-xl font-semibold">
               {displayName[0]?.toUpperCase() || 'U'}
             </AvatarFallback>
           </Avatar>
@@ -55,7 +55,7 @@ export default function Mine() {
         {/* Agent 管理 */}
         <div className="mb-4">
           <SectionHeader title="Agent 管理" />
-          <div className="bg-[#F7F8FA] rounded-xl overflow-hidden">
+          <div className="bg-muted rounded-xl overflow-hidden">
             {[
               { icon: Bot, label: 'Agent 授权管理', path: '/agent-management' },
               { icon: Settings2, label: 'Agent 风控管理', path: '/agent-settings' },
@@ -78,7 +78,7 @@ export default function Mine() {
         {/* 钱包管理 */}
         <div className="mb-4">
           <SectionHeader title="钱包管理" />
-          <div className="bg-[#F7F8FA] rounded-xl overflow-hidden">
+          <div className="bg-muted rounded-xl overflow-hidden">
             {[
               { icon: Wallet, label: '钱包管理', path: '/profile/wallets' },
               { icon: BookUser, label: '地址簿', path: '/profile/contacts' },

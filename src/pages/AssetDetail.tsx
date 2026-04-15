@@ -27,15 +27,9 @@ export default function AssetDetailPage() {
   // Address filter: 'all' means show all addresses combined
   const [selectedAddressId, setSelectedAddressId] = useState<string>('all');
 
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const { assets, transactions, currentWallet } = useWallet();
   const isAgent = isAgentLinked(currentWallet);
-
-  // Simulate initial loading
-  useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 600);
-    return () => clearTimeout(timer);
-  }, []);
 
   // Get chain-aggregated asset data
   const chainAssets = useMemo(() => aggregateByChain(assets, currentWallet), [assets, currentWallet]);

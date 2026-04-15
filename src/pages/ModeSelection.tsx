@@ -22,9 +22,9 @@ const modes = [
     title: '关联 Agent 钱包',
     description: '关联 Agent 已创建的钱包，由 Agent 签名执行',
     features: ['Agent 签名', '风控审批', '实时监控'],
-    color: 'border-purple-500 bg-purple-50 dark:bg-purple-950/30',
-    iconBg: 'bg-purple-100 dark:bg-purple-900/40',
-    iconColor: 'text-purple-600 dark:text-purple-400',
+    color: 'border-purple-500 bg-primary/8',
+    iconBg: 'bg-primary/10',
+    iconColor: 'text-primary',
     route: '/link-agent-wallet',
   },
 ];

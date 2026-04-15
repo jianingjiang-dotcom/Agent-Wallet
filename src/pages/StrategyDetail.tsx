@@ -62,7 +62,7 @@ export default function StrategyDetail() {
               <span className={cn('text-[10px] font-medium px-2 py-0.5 rounded-full', risk.bg, risk.color)}>
                 {risk.label}
               </span>
-              <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-blue-50 text-blue-700">
+              <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-primary/8 text-primary">
                 {categoryLabels[strategy.category]}
               </span>
               {strategy.tags.map(tag => (
@@ -80,8 +80,8 @@ export default function StrategyDetail() {
               </div>
               {strategy.estimatedApy && (
                 <div className="flex items-center gap-1">
-                  <TrendingUp className="w-3.5 h-3.5 text-emerald-500" strokeWidth={1.5} />
-                  <span>预估 APY <span className="font-semibold text-emerald-600">{strategy.estimatedApy}</span></span>
+                  <TrendingUp className="w-3.5 h-3.5 text-success" strokeWidth={1.5} />
+                  <span>预估 APY <span className="font-semibold text-success">{strategy.estimatedApy}</span></span>
                 </div>
               )}
             </div>

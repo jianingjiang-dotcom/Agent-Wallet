@@ -16,9 +16,9 @@ interface MessageCardProps {
 
 // Generic icon mapping for non-crypto messages
 const genericIconMap: Partial<Record<MessageSubType, { icon: LucideIcon; bg: string; color: string }>> = {
-  message_signing:  { icon: FileText,      bg: 'bg-blue-100 dark:bg-blue-900/30',    color: 'text-blue-600 dark:text-blue-400' },
-  backup_reminder:  { icon: CloudOff,      bg: 'bg-amber-100 dark:bg-amber-900/30',  color: 'text-amber-600 dark:text-amber-400' },
-  upgrade_prompt:   { icon: ArrowUpCircle, bg: 'bg-blue-100 dark:bg-blue-900/30',    color: 'text-blue-600 dark:text-blue-400' },
+  message_signing:  { icon: FileText,      bg: 'bg-primary/10',    color: 'text-primary' },
+  backup_reminder:  { icon: CloudOff,      bg: 'bg-warning/10',  color: 'text-warning' },
+  upgrade_prompt:   { icon: ArrowUpCircle, bg: 'bg-primary/10',    color: 'text-primary' },
 };
 
 // All Pact subTypes share one icon
@@ -101,7 +101,7 @@ export function MessageCard({ message, onRead }: MessageCardProps) {
           {message.amount && (
             <span className={cn(
               'text-sm font-normal whitespace-nowrap flex-shrink-0',
-              message.amount.startsWith('+') ? 'text-emerald-600 dark:text-emerald-400' : 'text-foreground'
+              message.amount.startsWith('+') ? 'text-success' : 'text-foreground'
             )}>
               {message.amount}
             </span>

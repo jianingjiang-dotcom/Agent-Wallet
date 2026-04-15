@@ -179,10 +179,10 @@ export default function ExportPrivateKeyPage() {
           transition={{ type: 'spring', duration: 0.6 }}
           className="relative mb-10"
         >
-          <div className="w-[88px] h-[88px] rounded-[28px] bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/40 dark:to-orange-950/40 border border-amber-200/60 dark:border-amber-800/40 flex items-center justify-center shadow-sm">
-            <ShieldAlert className="w-10 h-10 text-amber-500" strokeWidth={1.75} />
+          <div className="w-[88px] h-[88px] rounded-[28px] bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/40 dark:to-orange-950/40 border border-warning/20/60 flex items-center justify-center shadow-sm">
+            <ShieldAlert className="w-10 h-10 text-warning" strokeWidth={1.75} />
           </div>
-          <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-amber-500 flex items-center justify-center shadow-sm">
+          <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-warning/80 flex items-center justify-center shadow-sm">
             <AlertTriangle className="w-3 h-3 text-white" strokeWidth={2.5} />
           </div>
         </motion.div>
@@ -204,8 +204,8 @@ export default function ExportPrivateKeyPage() {
         </p>
 
         {/* Warning card — refined */}
-        <div className="w-full max-w-[300px] p-4 rounded-2xl bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200/50 dark:border-amber-800/30">
-          <p className="text-[13px] text-amber-700 dark:text-amber-400 leading-relaxed text-center font-medium">
+        <div className="w-full max-w-[300px] p-4 rounded-2xl bg-warning/8/80 border border-warning/20/50 dark:border-amber-800/30">
+          <p className="text-[13px] text-warning leading-relaxed text-center font-medium">
             私钥一旦泄露，资产将无法找回
           </p>
         </div>

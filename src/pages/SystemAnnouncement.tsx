@@ -58,9 +58,9 @@ export default function SystemAnnouncement() {
             <div className="flex items-center gap-3 mb-4">
               <div className={cn(
                 'w-9 h-9 rounded-full flex items-center justify-center shrink-0',
-                isError ? 'bg-red-100 dark:bg-red-800/30' : 'bg-amber-100 dark:bg-amber-800/30'
+                isError ? 'bg-destructive/10' : 'bg-warning/10'
               )}>
-                <Icon className={cn('w-4.5 h-4.5', isError ? 'text-red-600' : 'text-amber-600')} strokeWidth={1.5} />
+                <Icon className={cn('w-4.5 h-4.5', isError ? 'text-destructive' : 'text-warning')} strokeWidth={1.5} />
               </div>
               <div>
                 <h2 className="text-[15px] font-bold text-foreground">{announcement.title}</h2>

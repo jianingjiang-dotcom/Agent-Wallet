@@ -28,12 +28,12 @@ export default function PactApproval() {
   ];
 
   const statusConfig: Record<PactStatus, { label: string; color: string; bg: string }> = {
-    pending: { label: t.common.pending, color: 'text-amber-600', bg: 'bg-amber-50' },
-    active: { label: t.common.active, color: 'text-blue-600', bg: 'bg-blue-50' },
+    pending: { label: t.common.pending, color: 'text-warning', bg: 'bg-warning/8' },
+    active: { label: t.common.active, color: 'text-primary', bg: 'bg-primary/8' },
     completed: { label: t.common.completed, color: 'text-slate-600', bg: 'bg-slate-50' },
-    rejected: { label: t.common.rejected, color: 'text-red-600', bg: 'bg-red-50' },
+    rejected: { label: t.common.rejected, color: 'text-destructive', bg: 'bg-destructive/8' },
     expired: { label: t.common.expired, color: 'text-muted-foreground', bg: 'bg-muted/50' },
-    revoked: { label: t.common.revoked, color: 'text-red-600', bg: 'bg-red-50' },
+    revoked: { label: t.common.revoked, color: 'text-destructive', bg: 'bg-destructive/8' },
   };
 
   const filtered = useMemo(() => {
@@ -63,7 +63,7 @@ export default function PactApproval() {
             >
               {tab.label}
               {tab.value === 'pending' && pendingCount > 0 && (
-                <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-red-500 text-white text-[10px] flex items-center justify-center font-bold">
+                <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-destructive/80 text-white text-[10px] flex items-center justify-center font-bold">
                   {pendingCount}
                 </span>
               )}

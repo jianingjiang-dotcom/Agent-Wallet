@@ -176,8 +176,8 @@ function TokenInputStep({
       className="space-y-5 pt-6"
     >
       <div className="flex flex-col items-center mb-2">
-        <div className="w-20 h-20 rounded-full bg-purple-100 dark:bg-purple-900/40 flex items-center justify-center mb-4">
-          <Link2 className="w-10 h-10 text-purple-600 dark:text-purple-400" />
+        <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+          <Link2 className="w-10 h-10 text-primary" />
         </div>
         <h3 className="font-semibold text-lg text-center">输入设置令牌</h3>
         <p className="text-sm text-muted-foreground text-center mt-1">
@@ -249,7 +249,7 @@ function ConfirmWalletStep({
         <div className="flex items-center justify-between">
           <span className="text-sm text-muted-foreground">Agent 名称</span>
           <span className="text-sm font-medium flex items-center gap-1.5">
-            <Bot className="w-4 h-4 text-purple-500" />
+            <Bot className="w-4 h-4 text-primary" />
             {wallet.agentInfo?.agentName || 'Trading Agent'}
           </span>
         </div>
@@ -274,14 +274,14 @@ function ConfirmWalletStep({
         <div className="border-t border-border" />
         <div className="flex items-center justify-between">
           <span className="text-sm text-muted-foreground">签名方式</span>
-          <span className="text-sm text-purple-600 dark:text-purple-400 font-medium">Agent 签名</span>
+          <span className="text-sm text-primary font-medium">Agent 签名</span>
         </div>
       </div>
 
-      <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/40 rounded-xl p-3">
+      <div className="bg-warning/8 border border-warning/20 rounded-xl p-3">
         <div className="flex items-start gap-2">
-          <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-          <p className="text-xs text-amber-700 dark:text-amber-400">
+          <AlertTriangle className="w-4 h-4 text-warning shrink-0 mt-0.5" />
+          <p className="text-xs text-warning">
             此钱包由 Agent 控制签名权。您可以审批交易和查看资产，但无法直接发起转账。
           </p>
         </div>

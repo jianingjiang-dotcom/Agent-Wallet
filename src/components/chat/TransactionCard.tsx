@@ -21,7 +21,7 @@ export function TransactionCard({ data }: { data: TransactionCardData }) {
             {tx.type === 'receive' ? (
               <ArrowDownLeft className="w-4 h-4 text-green-500" />
             ) : (
-              <ArrowUpRight className="w-4 h-4 text-red-500" />
+              <ArrowUpRight className="w-4 h-4 text-destructive" />
             )}
             <div>
               <span className="text-xs font-medium">

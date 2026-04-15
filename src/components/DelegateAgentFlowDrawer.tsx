@@ -260,7 +260,7 @@ export function DelegateAgentFlowDrawer({
                       className={cn(
                         'flex-1 py-2.5 px-3 rounded-xl border text-sm font-medium transition-all',
                         defaultAction === 'allow'
-                          ? 'border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-600'
+                          ? 'border-emerald-500 bg-success/8 text-success dark:border-emerald-600'
                           : 'border-border text-muted-foreground'
                       )}
                     >
@@ -271,7 +271,7 @@ export function DelegateAgentFlowDrawer({
                       className={cn(
                         'flex-1 py-2.5 px-3 rounded-xl border text-sm font-medium transition-all',
                         defaultAction === 'deny'
-                          ? 'border-red-500 bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-400 dark:border-red-600'
+                          ? 'border-red-500 bg-destructive/8 text-destructive dark:border-red-600'
                           : 'border-border text-muted-foreground'
                       )}
                     >
@@ -340,7 +340,7 @@ export function DelegateAgentFlowDrawer({
                     <span className="text-muted-foreground">默认动作</span>
                     <span className={cn(
                       'font-medium',
-                      defaultAction === 'allow' ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'
+                      defaultAction === 'allow' ? 'text-success' : 'text-destructive'
                     )}>
                       {defaultAction === 'allow' ? '允许' : '拒绝'}
                     </span>

@@ -5,7 +5,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { ChainId, SUPPORTED_CHAINS } from '@/types/wallet';
 import { ChainIcon } from '@/components/ChainIcon';
@@ -22,24 +21,27 @@ export function ChainDropdown({
   className,
 }: ChainDropdownProps) {
   const selectedChainInfo = SUPPORTED_CHAINS.find(c => c.id === selectedChain);
+  const label = selectedChainInfo?.name || '全部网络';
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button
-          variant="ghost"
+        <button
           className={cn(
-            "h-8 px-2 gap-1.5 bg-secondary/80 rounded-xl focus-visible:ring-0 focus-visible:ring-offset-0",
+            "flex items-center gap-2 h-8 px-3 rounded-lg",
+            "bg-muted active:bg-muted/70 transition-colors",
+            "focus:outline-none",
             className
           )}
         >
-          <ChainIcon chainId={selectedChainInfo?.icon || 'all'} size="md" />
+          <ChainIcon chainId={selectedChainInfo?.icon || 'all'} size="sm" />
+          <span className="text-xs font-medium text-foreground">{label}</span>
           <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
-        </Button>
+        </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
-        align="start"
-        className="w-48 bg-popover border border-border shadow-xl z-50"
+        align="end"
+        className="w-48 bg-popover border border-border shadow-lg z-50"
         container={document.getElementById('phone-frame-container') || undefined}
       >
         {SUPPORTED_CHAINS.map((chain) => {
@@ -49,14 +51,14 @@ export function ChainDropdown({
               key={chain.id}
               onClick={() => onSelectChain(chain.id)}
               className={cn(
-                "flex items-center gap-3 py-2.5 px-3 cursor-pointer focus:bg-muted/50",
+                "flex items-center gap-3 py-2.5 px-3 cursor-pointer",
                 isSelected && "bg-muted/50"
               )}
             >
-              <ChainIcon chainId={chain.icon} size="md" className="shrink-0" />
+              <ChainIcon chainId={chain.icon} size="sm" className="shrink-0" />
               <span className="flex-1 text-sm font-medium">{chain.name}</span>
               {isSelected && (
-                <Check className="w-4 h-4 text-accent shrink-0" />
+                <Check className="w-4 h-4 text-primary shrink-0" />
               )}
             </DropdownMenuItem>
           );

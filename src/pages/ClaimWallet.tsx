@@ -199,9 +199,9 @@ function ConfirmClaimStep({
             initial={{ scale: 0 }}
             animate={{ scale: [0, 1.2, 1] }}
             transition={{ duration: 0.5, ease: 'easeOut' }}
-            className="w-20 h-20 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center mb-6"
+            className="w-20 h-20 rounded-full bg-success/10 flex items-center justify-center mb-6"
           >
-            <CheckCircle2 className="w-10 h-10 text-emerald-500" strokeWidth={1.5} />
+            <CheckCircle2 className="w-10 h-10 text-success" strokeWidth={1.5} />
           </motion.div>
           <h2 className="text-xl font-bold text-foreground mb-2">认领确认成功</h2>
           <p className="text-muted-foreground text-sm">身份验证通过，接下来为您生成安全密钥</p>
@@ -300,7 +300,7 @@ function ConfirmClaimStep({
         <div className="border-t border-border" />
         <div className="flex items-center justify-between">
           <span className="text-sm text-muted-foreground">当前管理者</span>
-          <span className="text-xs font-mono text-purple-600 dark:text-purple-400">{claimInfo.agentId}</span>
+          <span className="text-xs font-mono text-primary">{claimInfo.agentId}</span>
         </div>
       </div>
 
@@ -502,9 +502,9 @@ function KeyShareGenStep({
             initial={{ scale: 0 }}
             animate={{ scale: [0, 1.2, 1] }}
             transition={{ duration: 0.5, ease: 'easeOut' }}
-            className="w-20 h-20 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center mb-6"
+            className="w-20 h-20 rounded-full bg-success/10 flex items-center justify-center mb-6"
           >
-            <CheckCircle2 className="w-10 h-10 text-emerald-500" strokeWidth={1.5} />
+            <CheckCircle2 className="w-10 h-10 text-success" strokeWidth={1.5} />
           </motion.div>
           <h2 className="text-xl font-bold text-foreground mb-2">安全密钥生成完毕</h2>
           <p className="text-muted-foreground text-sm">您的手机端密钥已就绪，建议立即备份以防丢失</p>
@@ -675,9 +675,9 @@ function BackupStep({ onComplete }: { onComplete: () => void }) {
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ type: 'spring', duration: 0.5 }}
-            className="w-20 h-20 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center mb-6"
+            className="w-20 h-20 rounded-full bg-success/10 flex items-center justify-center mb-6"
           >
-            <CheckCircle2 className="w-10 h-10 text-emerald-500" strokeWidth={1.5} />
+            <CheckCircle2 className="w-10 h-10 text-success" strokeWidth={1.5} />
           </motion.div>
           <h2 className="text-xl font-bold text-foreground mb-2">备份完成</h2>
           <p className="text-muted-foreground text-sm">您的手机端密钥已加密备份到 iCloud</p>
@@ -734,7 +734,7 @@ function BackupStep({ onComplete }: { onComplete: () => void }) {
               <Key className="w-4 h-4 text-foreground" strokeWidth={1.5} />
               <span className="text-[14px] font-semibold text-foreground">设置备份密码</span>
             </div>
-            <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-red-50 text-red-600">必填</span>
+            <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-destructive/8 text-destructive">必填</span>
           </div>
 
           <div className="space-y-3">
@@ -812,7 +812,7 @@ function BackupStep({ onComplete }: { onComplete: () => void }) {
         <div className="border border-border rounded-2xl p-4 bg-muted/20">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Shield className={cn('w-4 h-4', passkeySetup ? 'text-emerald-600' : 'text-foreground')} strokeWidth={1.5} />
+              <Shield className={cn('w-4 h-4', passkeySetup ? 'text-success' : 'text-foreground')} strokeWidth={1.5} />
               <div>
                 <span className="text-[14px] font-semibold text-foreground">Passkey 恢复</span>
                 <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-violet-100 text-violet-700 ml-2">推荐</span>

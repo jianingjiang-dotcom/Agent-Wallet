@@ -98,22 +98,22 @@ export function AgentActivationDrawer({
                 {/* MPC diagram */}
                 <div className="grid grid-cols-3 gap-2 p-3 rounded-xl bg-muted/30 border border-border/50">
                   <div className="text-center space-y-1.5">
-                    <div className="w-10 h-10 mx-auto rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-                      <Smartphone className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                    <div className="w-10 h-10 mx-auto rounded-full bg-primary/10 flex items-center justify-center">
+                      <Smartphone className="w-5 h-5 text-primary" />
                     </div>
                     <p className="text-[11px] font-medium">您的设备</p>
                     <p className="text-[10px] text-muted-foreground">分片 A</p>
                   </div>
                   <div className="text-center space-y-1.5">
-                    <div className="w-10 h-10 mx-auto rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
-                      <Server className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                    <div className="w-10 h-10 mx-auto rounded-full bg-primary/10 flex items-center justify-center">
+                      <Server className="w-5 h-5 text-primary" />
                     </div>
                     <p className="text-[11px] font-medium">Cobo</p>
                     <p className="text-[10px] text-muted-foreground">分片 B</p>
                   </div>
                   <div className="text-center space-y-1.5">
-                    <div className="w-10 h-10 mx-auto rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
-                      <Bot className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                    <div className="w-10 h-10 mx-auto rounded-full bg-success/10 flex items-center justify-center">
+                      <Bot className="w-5 h-5 text-success" />
                     </div>
                     <p className="text-[11px] font-medium">Agent</p>
                     <p className="text-[10px] text-muted-foreground">使用备份分片</p>
@@ -136,8 +136,8 @@ export function AgentActivationDrawer({
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
-                    <div className="w-8 h-8 rounded-full bg-amber-500/10 flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <ClipboardList className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                    <div className="w-8 h-8 rounded-full bg-warning/80/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <ClipboardList className="w-4 h-4 text-warning" />
                     </div>
                     <div>
                       <p className="text-sm font-medium">风控策略约束</p>
@@ -145,8 +145,8 @@ export function AgentActivationDrawer({
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
-                    <div className="w-8 h-8 rounded-full bg-red-500/10 flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <PauseCircle className="w-4 h-4 text-red-600 dark:text-red-400" />
+                    <div className="w-8 h-8 rounded-full bg-destructive/80/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <PauseCircle className="w-4 h-4 text-destructive" />
                     </div>
                     <div>
                       <p className="text-sm font-medium">随时可撤销</p>
@@ -180,14 +180,14 @@ export function AgentActivationDrawer({
                   className={cn(
                     'w-full p-6 rounded-xl border-2 border-dashed transition-all text-center',
                     fileName
-                      ? 'border-emerald-500/50 bg-emerald-50/50 dark:bg-emerald-950/20'
+                      ? 'border-emerald-500/50 bg-success/8/50'
                       : 'border-border'
                   )}
                 >
                   {fileName ? (
                     <div className="space-y-1">
-                      <FileKey className="w-8 h-8 mx-auto text-emerald-600 dark:text-emerald-400" />
-                      <p className="text-sm font-medium text-emerald-700 dark:text-emerald-400">{fileName}</p>
+                      <FileKey className="w-8 h-8 mx-auto text-success" />
+                      <p className="text-sm font-medium text-success">{fileName}</p>
                       <p className="text-xs text-muted-foreground">点击重新选择</p>
                     </div>
                   ) : (
@@ -257,7 +257,7 @@ export function AgentActivationDrawer({
                         className="flex items-center gap-3"
                       >
                         {i < progressIndex ? (
-                          <CheckCircle2 className="w-5 h-5 text-emerald-500 flex-shrink-0" />
+                          <CheckCircle2 className="w-5 h-5 text-success flex-shrink-0" />
                         ) : i === progressIndex ? (
                           <Loader2 className="w-5 h-5 text-primary animate-spin flex-shrink-0" />
                         ) : (
@@ -280,8 +280,8 @@ export function AgentActivationDrawer({
                       animate={{ scale: 1 }}
                       transition={{ type: 'spring', stiffness: 200, damping: 15 }}
                     >
-                      <div className="w-16 h-16 mx-auto rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
-                        <CheckCircle2 className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
+                      <div className="w-16 h-16 mx-auto rounded-full bg-success/10 flex items-center justify-center">
+                        <CheckCircle2 className="w-8 h-8 text-success" />
                       </div>
                     </motion.div>
                     <p className="text-lg font-semibold">Agent 签名权已授权</p>

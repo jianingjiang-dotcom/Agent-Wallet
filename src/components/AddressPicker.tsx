@@ -67,28 +67,28 @@ export function AddressPicker({
       <button
         onClick={() => setOpen(true)}
         className={cn(
-          'w-full flex items-center gap-2.5 h-9 px-3 rounded-xl',
-          'bg-white/10 border border-white/15 backdrop-blur-sm',
-          'active:bg-white/20 transition-colors',
+          'flex items-center gap-2 h-8 px-3 rounded-lg',
+          'bg-muted',
+          'active:bg-muted/70 transition-colors',
           className,
         )}
       >
         {triggerIcon ? (
           <ChainIcon chainId={triggerIcon} size="sm" />
         ) : (
-          <LayoutGrid className="w-3.5 h-3.5 text-primary-foreground/70" />
+          <LayoutGrid className="w-3.5 h-3.5 text-muted-foreground" />
         )}
         <div className="flex-1 min-w-0 text-left">
-          <span className="text-sm font-medium text-primary-foreground/90 truncate block">
+          <span className="text-xs font-medium text-foreground truncate block">
             {triggerLabel}
           </span>
         </div>
         {triggerAddress && (
-          <span className="text-xs font-mono text-primary-foreground/50 shrink-0">
+          <span className="text-xs font-mono text-muted-foreground shrink-0">
             {triggerAddress}
           </span>
         )}
-        <ChevronDown className="w-3.5 h-3.5 text-primary-foreground/50 shrink-0" />
+        <ChevronDown className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
       </button>
 
       {/* Address picker drawer */}

@@ -60,9 +60,9 @@ function EmptyWalletState() {
           {/* 3-step marketing flow */}
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="space-y-4">
             {[
-              { icon: Bot, color: 'text-purple-600 dark:text-purple-400', bg: 'bg-purple-100 dark:bg-purple-900/30', title: '钱包创建', desc: '您的 Agent 在链上创建 MPC 钱包' },
-              { icon: Link2, color: 'text-accent', bg: 'bg-accent/10', title: '配对关联', desc: '输入口令，将钱包控制权转移到您手中' },
-              { icon: SlidersHorizontal, color: 'text-emerald-600', bg: 'bg-emerald-100 dark:bg-emerald-900/30', title: 'Pact 管控', desc: '设定规则，让 Agent 在边界内自主运行' },
+              { icon: Bot, color: 'text-primary', bg: 'bg-primary/8', title: '钱包创建', desc: '您的 Agent 在链上创建 MPC 钱包' },
+              { icon: Link2, color: 'text-primary', bg: 'bg-primary/8', title: '配对关联', desc: '输入口令，将钱包控制权转移到您手中' },
+              { icon: SlidersHorizontal, color: 'text-primary', bg: 'bg-primary/8', title: 'Pact 管控', desc: '设定规则，让 Agent 在边界内自主运行' },
             ].map((step, i) => (
               <motion.div
                 key={step.title}
@@ -118,7 +118,7 @@ export default function HomePage() {
 
   const [showProfileDrawer, setShowProfileDrawer] = useState(false);
   const [showAllAssets, setShowAllAssets] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading] = useState(false);
   const [showSetupDialog, setShowSetupDialog] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
@@ -140,11 +140,6 @@ export default function HomePage() {
   const needsBackup = currentWallet?.origin === 'claimed' && walletStatus === 'created_no_backup';
   const needsSetup = needsKeyGen || needsBackup;
 
-  // Simulate initial loading
-  useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 800);
-    return () => clearTimeout(timer);
-  }, []);
 
   // Number of assets to show initially
   const INITIAL_ASSETS_COUNT = 5;
@@ -295,19 +290,10 @@ export default function HomePage() {
             transition={{ type: 'spring', stiffness: 400, damping: 25 }}
           >
           <motion.div
-            className={cn(
-              "w-9 h-9 rounded-full flex items-center justify-center",
-              isAgentLinked(currentWallet)
-                ? "bg-purple-100 dark:bg-purple-900/40"
-                : "gradient-primary"
-            )}
+            className="w-9 h-9 rounded-full flex items-center justify-center bg-muted"
             whileTap={{ scale: 0.9 }}
           >
-            {isAgentLinked(currentWallet) ? (
-              <Bot className="w-5 h-5 text-purple-600 dark:text-purple-400" />
-            ) : (
-              <Wallet className="w-5 h-5 text-primary-foreground" />
-            )}
+            <Wallet className="w-5 h-5 text-muted-foreground" />
           </motion.div>
           <div className="text-left">
             <p className="text-xs text-muted-foreground">
@@ -318,17 +304,17 @@ export default function HomePage() {
                 {currentWallet?.name || '我的钱包'}
               </p>
               {isAgentLinked(currentWallet) && (
-                <span className="text-[10px] px-1.5 py-0.5 bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded ml-1">
+                <span className="text-[10px] px-1.5 py-0.5 bg-primary/8 text-primary rounded ml-1">
                   Agent
                 </span>
               )}
               {needsKeyGen && (
-                <span className="text-[10px] px-1.5 py-0.5 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded ml-1">
+                <span className="text-[10px] px-1.5 py-0.5 bg-destructive/8 text-destructive rounded ml-1">
                   MPC分片未生成
                 </span>
               )}
               {needsBackup && !needsKeyGen && (
-                <span className="text-[10px] px-1.5 py-0.5 bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded ml-1">
+                <span className="text-[10px] px-1.5 py-0.5 bg-warning/8 text-warning rounded ml-1">
                   未备份
                 </span>
               )}
@@ -341,7 +327,7 @@ export default function HomePage() {
             {/* TODO: 临时测试按钮，上线前删除 */}
             <button
               onClick={() => setSystemStatus(systemStatus === 'normal' ? 'service_down' : systemStatus === 'service_down' ? 'chain_congestion' : 'normal')}
-              className={cn('px-1.5 py-0.5 rounded text-[9px] font-medium border', systemStatus !== 'normal' ? 'bg-red-50 text-red-600 border-red-200' : 'bg-muted/50 text-muted-foreground border-border/60')}
+              className={cn('px-1.5 py-0.5 rounded text-[9px] font-medium border', systemStatus !== 'normal' ? 'bg-destructive/8 text-destructive border-destructive/20' : 'bg-muted/50 text-muted-foreground border-border/60')}
             >
               {systemStatus === 'normal' ? 'SYS' : systemStatus === 'service_down' ? '故障' : '拥堵'}
             </button>
@@ -351,7 +337,7 @@ export default function HomePage() {
                 const demos = [
                   { icon: <CryptoIcon symbol="ETH" size="sm" />, title: '收到转账', subtitle: '+1.5 ETH (≈$2,847)', route: '/messages' },
                   { icon: <Shield className="w-5 h-5 text-violet-500" />, title: '新 Pact 待审批', subtitle: 'ETH 定投策略', route: '/messages' },
-                  { icon: <Key className="w-5 h-5 text-blue-500" />, title: '交易签名请求', subtitle: '1inch Aggregation Router', route: '/messages' },
+                  { icon: <Key className="w-5 h-5 text-primary" />, title: '交易签名请求', subtitle: '1inch Aggregation Router', route: '/messages' },
                 ];
                 const demo = demos[Math.floor(Math.random() * demos.length)];
                 showInAppNotification(demo);
@@ -363,19 +349,11 @@ export default function HomePage() {
             {/* AI Assistant Entry */}
             <motion.button
               onClick={() => navigate('/assistant')}
-              className="relative flex items-center gap-1.5 pl-2 pr-2.5 py-1 rounded-full overflow-hidden active:scale-95 transition-transform"
-              style={{ background: 'linear-gradient(135deg, #7C3AED, #6366F1, #3B82F6)', boxShadow: '0 2px 8px rgba(99, 102, 241, 0.4)' }}
-              whileHover={{ scale: 1.05 }}
+              className="flex items-center gap-1.5 pl-2 pr-2.5 py-1 rounded-full bg-primary active:opacity-80 transition-opacity"
               whileTap={{ scale: 0.92 }}
             >
-              <motion.div
-                className="absolute inset-0 opacity-30"
-                style={{ background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.5) 50%, transparent 100%)' }}
-                animate={{ x: ['-100%', '200%'] }}
-                transition={{ duration: 2.5, repeat: Infinity, ease: 'linear' }}
-              />
-              <Sparkles className="w-3 h-3 text-white relative z-10" strokeWidth={2} />
-              <span className="text-[11px] font-semibold text-white relative z-10 tracking-wide">AI</span>
+              <Sparkles className="w-3 h-3 text-primary-foreground" strokeWidth={2} />
+              <span className="text-[11px] font-semibold text-primary-foreground tracking-wide">AI</span>
             </motion.button>
             {/* Message Center Entry */}
             <motion.button
@@ -405,32 +383,19 @@ export default function HomePage() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="card-premium p-5 mb-4 animate-gradient-shift"
+            className="bg-card rounded-2xl p-5 mb-4"
+            style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}
           >
-            {/* Decorative overlays */}
-            <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-white/5 pointer-events-none" />
-            <div className="absolute -right-6 -top-6 w-24 h-24 bg-white/10 rounded-full blur-2xl pointer-events-none" />
-            <div className="absolute -left-4 -bottom-4 w-20 h-20 bg-white/5 rounded-full blur-2xl pointer-events-none" />
-
-            <div className="relative z-10">
-              {/* Address Picker — top of balance card */}
-              <AddressPicker
-                selection={addressSelection}
-                onSelectionChange={handleAddressChange}
-                walletAddresses={currentWallet?.walletAddresses || []}
-                className="mb-3"
-              />
-
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-primary-foreground/70">
+                  <span className="text-sm text-muted-foreground">
                     总资产
                   </span>
                   <button onClick={() => setHideBalance(!hideBalance)}>
                     {hideBalance ? (
-                      <EyeOff className="w-4 h-4 text-primary-foreground/70" />
+                      <EyeOff className="w-4 h-4 text-muted-foreground" />
                     ) : (
-                      <Eye className="w-4 h-4 text-primary-foreground/70" />
+                      <Eye className="w-4 h-4 text-muted-foreground" />
                     )}
                   </button>
                 </div>
@@ -440,20 +405,20 @@ export default function HomePage() {
                 />
               </div>
 
-              <div className="mb-4">
+              <div className="mb-5">
                 <AnimatedBalance
                   integer={balanceParts.integer}
                   decimal={balanceParts.decimal}
                   hidden={hideBalance}
-                  integerClassName="text-3xl font-bold text-primary-foreground"
-                  decimalClassName="text-lg font-medium text-primary-foreground/80"
+                  integerClassName="text-[34px] font-bold text-foreground tracking-tight"
+                  decimalClassName="text-xl font-medium text-muted-foreground"
                 />
               </div>
 
-              {/* Quick Actions */}
+              {/* Quick Actions — Apple style pill buttons */}
               <div className="flex gap-3">
                 <Button
-                  className="flex-1 h-10 bg-white/20 backdrop-blur-sm text-white border border-white/20 transition-colors"
+                  className="flex-1 h-11 bg-primary text-primary-foreground rounded-xl text-[15px] font-semibold"
                   onClick={() => {
                     if (needsSetup) {
                       setShowSetupDialog(true);
@@ -470,14 +435,14 @@ export default function HomePage() {
                   {isAgentLinked(currentWallet) ? '请求Agent执行' : '转账'}
                 </Button>
                 <Button
-                  className="flex-1 h-10 bg-white/10 backdrop-blur-sm text-white/90 border border-white/15 transition-colors"
+                  variant="secondary"
+                  className="flex-1 h-11 rounded-xl text-[15px] font-semibold"
                   onClick={() => navigate('/receive')}
                 >
                   <QrCode className="w-4 h-4 mr-2" strokeWidth={1.5} />
                   收款
                 </Button>
               </div>
-            </div>
           </motion.div>
         )}
 
@@ -492,15 +457,11 @@ export default function HomePage() {
         >
           <div className="flex items-center justify-between mb-2">
             <h2 className="font-semibold text-foreground text-sm">资产</h2>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="text-accent text-xs h-7 gap-1"
-              onClick={() => setShowTokenSearch(true)}
-            >
-              <Plus className="w-3.5 h-3.5" />
-              添加代币
-            </Button>
+            <AddressPicker
+              selection={addressSelection}
+              onSelectionChange={handleAddressChange}
+              walletAddresses={currentWallet?.walletAddresses || []}
+            />
           </div>
 
           {isLoading ? (

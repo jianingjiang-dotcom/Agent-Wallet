@@ -43,12 +43,12 @@ export default function PactHub() {
   ];
 
   const statusConfig: Record<PactStatus, { label: string; color: string; bg: string }> = {
-    pending: { label: '待审批', color: 'text-amber-600', bg: 'bg-amber-50' },
-    active: { label: '生效中', color: 'text-blue-600', bg: 'bg-blue-50' },
-    completed: { label: '已完成', color: 'text-slate-600', bg: 'bg-slate-50' },
-    rejected: { label: '已拒绝', color: 'text-red-600', bg: 'bg-red-50' },
-    expired: { label: '已过期', color: 'text-muted-foreground', bg: 'bg-muted/50' },
-    revoked: { label: '已撤回', color: 'text-red-600', bg: 'bg-red-50' },
+    pending: { label: '待审批', color: 'text-warning', bg: 'bg-warning/8' },
+    active: { label: '生效中', color: 'text-primary', bg: 'bg-primary/8' },
+    completed: { label: '已完成', color: 'text-muted-foreground', bg: 'bg-muted' },
+    rejected: { label: '已拒绝', color: 'text-destructive', bg: 'bg-destructive/8' },
+    expired: { label: '已过期', color: 'text-muted-foreground', bg: 'bg-muted' },
+    revoked: { label: '已撤回', color: 'text-destructive', bg: 'bg-destructive/8' },
   };
 
   const filteredPacts = useMemo(() => {
@@ -67,7 +67,7 @@ export default function PactHub() {
         /* TODO: 临时测试按钮，上线前删除 */
         <button
           onClick={() => setForceEmpty(f => !f)}
-          className={cn('px-2 py-0.5 rounded text-[10px] font-medium border', forceEmpty ? 'bg-red-50 text-red-600 border-red-200' : 'bg-muted/50 text-muted-foreground border-border/60')}
+          className={cn('px-2 py-0.5 rounded text-[10px] font-medium border', forceEmpty ? 'bg-destructive/8 text-destructive border-destructive/20' : 'bg-muted/50 text-muted-foreground border-border/60')}
         >
           {forceEmpty ? '新用户' : '测试'}
         </button>
@@ -79,10 +79,10 @@ export default function PactHub() {
         <>
           {/* ===== Marketing Banner — sticky ===== */}
           <div className="sticky top-0 z-10 px-4 pt-2 pb-2 bg-page">
-            <div className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl bg-blue-50/60 dark:bg-blue-900/10">
-              <ShieldCheck className="w-4 h-4 text-blue-500/70 shrink-0" strokeWidth={1.5} />
-              <p className="text-[12px] text-blue-700/70 dark:text-blue-300/70 leading-relaxed">
-                Pact 已守护 <span className="font-semibold text-blue-700 dark:text-blue-300">{mockPacts.length}</span> 个策略，完成 <span className="font-semibold text-blue-700 dark:text-blue-300">{mockPacts.reduce((s, p) => s + (p.exitConditionList?.find(c => c.type === 'tx_count')?.current ?? 0), 0)}</span> 笔交易，累计 <span className="font-semibold text-blue-700 dark:text-blue-300">${mockPacts.reduce((s, p) => s + (p.exitConditionList?.find(c => c.type === 'tx_amount')?.current ?? 0), 0).toLocaleString()}</span>
+            <div className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl bg-primary/8/60">
+              <ShieldCheck className="w-4 h-4 text-primary/70 shrink-0" strokeWidth={1.5} />
+              <p className="text-[12px] text-primary/70/70 leading-relaxed">
+                Pact 已守护 <span className="font-semibold text-primary">{mockPacts.length}</span> 个策略，完成 <span className="font-semibold text-primary">{mockPacts.reduce((s, p) => s + (p.exitConditionList?.find(c => c.type === 'tx_count')?.current ?? 0), 0)}</span> 笔交易，累计 <span className="font-semibold text-primary">${mockPacts.reduce((s, p) => s + (p.exitConditionList?.find(c => c.type === 'tx_amount')?.current ?? 0), 0).toLocaleString()}</span>
               </p>
             </div>
           </div>

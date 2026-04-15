@@ -90,8 +90,8 @@ export default function TssSigningDetail() {
             >
               {isMessageSign && eip712 ? (
                 <>
-                  <div className="w-14 h-14 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-                    <FileText className="w-7 h-7 text-blue-600 dark:text-blue-400" strokeWidth={1.5} />
+                  <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center">
+                    <FileText className="w-7 h-7 text-primary" strokeWidth={1.5} />
                   </div>
                   <p className="text-xl font-bold text-foreground mt-3 text-center">{eip712.domain.name}</p>
                 </>
@@ -120,20 +120,20 @@ export default function TssSigningDetail() {
               transition={{ delay: 0.05 }}
               className={cn(
                 'rounded-xl px-4 py-3 mb-4',
-                isPending && 'bg-[#FEF3E7] dark:bg-amber-900/20',
-                todo.status === 'approved' && 'bg-[#ECFBF2] dark:bg-green-900/20',
-                todo.status === 'rejected' && 'bg-[#FBEFF6] dark:bg-red-900/20',
+                isPending && 'bg-[#FEF3E7]',
+                todo.status === 'approved' && 'bg-[#ECFBF2] dark:bg-success/900/20',
+                todo.status === 'rejected' && 'bg-[#FBEFF6]',
               )}
             >
               <div className="flex items-center gap-2">
-                {isPending && <Clock className="w-4 h-4 text-amber-600" strokeWidth={1.5} />}
-                {todo.status === 'approved' && <CheckCircle2 className="w-4 h-4 text-emerald-600" strokeWidth={1.5} />}
-                {todo.status === 'rejected' && <XCircle className="w-4 h-4 text-red-600" strokeWidth={1.5} />}
+                {isPending && <Clock className="w-4 h-4 text-warning" strokeWidth={1.5} />}
+                {todo.status === 'approved' && <CheckCircle2 className="w-4 h-4 text-success" strokeWidth={1.5} />}
+                {todo.status === 'rejected' && <XCircle className="w-4 h-4 text-destructive" strokeWidth={1.5} />}
                 <span className={cn(
                   'text-sm font-medium',
-                  isPending && 'text-amber-700',
-                  todo.status === 'approved' && 'text-emerald-700',
-                  todo.status === 'rejected' && 'text-red-700',
+                  isPending && 'text-warning',
+                  todo.status === 'approved' && 'text-success',
+                  todo.status === 'rejected' && 'text-destructive',
                 )}>
                   {isPending ? '等待签名确认' : todo.status === 'approved' ? '已签名' : '已拒绝签名'}
                 </span>

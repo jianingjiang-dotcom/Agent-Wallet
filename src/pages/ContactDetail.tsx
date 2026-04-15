@@ -140,25 +140,25 @@ export default function ContactDetailPage() {
               className={cn(
                 'w-full p-4 rounded-xl border flex items-center gap-3 transition-all active:scale-[0.98]',
                 contact.isWhitelisted
-                  ? 'bg-emerald-50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-800/40'
+                  ? 'bg-success/8 border-success/20'
                   : 'bg-card border-border/50'
               )}
             >
               <div className={cn(
                 'w-10 h-10 rounded-full flex items-center justify-center',
                 contact.isWhitelisted
-                  ? 'bg-emerald-100 dark:bg-emerald-900/40'
+                  ? 'bg-success/10'
                   : 'bg-muted'
               )}>
                 {contact.isWhitelisted
-                  ? <ShieldCheck className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                  ? <ShieldCheck className="w-5 h-5 text-success" />
                   : <ShieldOff className="w-5 h-5 text-muted-foreground" />
                 }
               </div>
               <div className="flex-1 text-left">
                 <p className={cn(
                   'text-sm font-medium',
-                  contact.isWhitelisted ? 'text-emerald-700 dark:text-emerald-400' : 'text-foreground'
+                  contact.isWhitelisted ? 'text-success' : 'text-foreground'
                 )}>
                   {contact.isWhitelisted ? '已在白名单中' : '未加入白名单'}
                 </p>

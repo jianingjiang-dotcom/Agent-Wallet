@@ -15,14 +15,14 @@ const effectConfig: Record<PolicyEffect, {
 }> = {
   allow: {
     label: '允许',
-    color: 'text-emerald-700 dark:text-emerald-400',
-    bg: 'bg-emerald-100 dark:bg-emerald-900/40',
+    color: 'text-success',
+    bg: 'bg-success/10',
     Icon: CheckCircle2,
   },
   deny: {
     label: '拒绝',
-    color: 'text-red-700 dark:text-red-400',
-    bg: 'bg-red-100 dark:bg-red-900/40',
+    color: 'text-destructive',
+    bg: 'bg-destructive/10',
     Icon: XCircle,
   },
 };

@@ -56,7 +56,7 @@ function deriveSteps(tx: AgentTransaction): TimelineStep[] {
         status: 'failed' as StepStatus,
         timestamp: failedAt ? new Date(failedAt) : undefined,
         detail: failureReason ? (
-          <span className="text-xs text-red-500 dark:text-red-400 mt-1 block">{failureReason}</span>
+          <span className="text-xs text-destructive mt-1 block">{failureReason}</span>
         ) : null,
       };
     }
@@ -104,11 +104,11 @@ function deriveSteps(tx: AgentTransaction): TimelineStep[] {
         detail: (
           <div className="mt-1.5 space-y-1.5">
             {failureReason && (
-              <span className="text-xs text-red-500 dark:text-red-400 block">{failureReason}</span>
+              <span className="text-xs text-destructive block">{failureReason}</span>
             )}
             <div className="flex items-center gap-2">
               <Progress value={(confirmations / requiredConfirmations) * 100} className="h-1.5 flex-1" />
-              <span className="text-[11px] text-red-500 dark:text-red-400 shrink-0 font-mono">
+              <span className="text-[11px] text-destructive shrink-0 font-mono">
                 {confirmations}/{requiredConfirmations} 确认
               </span>
             </div>
@@ -215,14 +215,14 @@ function CopyableHash({ hash }: { hash: string }) {
 function StepIcon({ status, activeVariant }: { status: StepStatus; activeVariant?: 'spinning' | 'waiting' }) {
   switch (status) {
     case 'completed':
-      return <CheckCircle2 className="w-5 h-5 text-emerald-500 dark:text-emerald-400 shrink-0" />;
+      return <CheckCircle2 className="w-5 h-5 text-success shrink-0" />;
     case 'active':
       if (activeVariant === 'waiting') {
-        return <Clock className="w-5 h-5 text-amber-500 dark:text-amber-400 shrink-0" />;
+        return <Clock className="w-5 h-5 text-warning shrink-0" />;
       }
-      return <Loader2 className="w-5 h-5 text-blue-500 dark:text-blue-400 shrink-0 animate-spin" />;
+      return <Loader2 className="w-5 h-5 text-primary shrink-0 animate-spin" />;
     case 'failed':
-      return <XCircle className="w-5 h-5 text-red-500 dark:text-red-400 shrink-0" />;
+      return <XCircle className="w-5 h-5 text-destructive shrink-0" />;
     case 'pending':
     default:
       return <Circle className="w-5 h-5 text-gray-300 dark:text-gray-600 shrink-0" />;
@@ -241,7 +241,7 @@ function ConnectorLine({ fromStatus, toStatus }: { fromStatus: StepStatus; toSta
     <div
       className={cn(
         'w-0.5 ml-[9px] min-h-[24px] flex-1',
-        isCompleted && 'bg-emerald-500 dark:bg-emerald-400',
+        isCompleted && 'bg-success/80',
         isActive && !isFailed && 'border-l-2 border-dashed border-blue-400 dark:border-blue-500 bg-transparent',
         isActive && isFailed && 'border-l-2 border-dashed border-red-400 dark:border-red-500 bg-transparent',
         !isCompleted && !isActive && 'bg-gray-200 dark:bg-gray-700',
@@ -288,8 +288,8 @@ export function SettlementTimeline({ tx }: SettlementTimelineProps) {
                   className={cn(
                     'text-sm font-medium',
                     step.status === 'completed' && 'text-foreground',
-                    step.status === 'active' && 'text-blue-600 dark:text-blue-400',
-                    step.status === 'failed' && 'text-red-600 dark:text-red-400',
+                    step.status === 'active' && 'text-primary',
+                    step.status === 'failed' && 'text-destructive',
                     step.status === 'pending' && 'text-muted-foreground',
                   )}
                 >
@@ -303,7 +303,7 @@ export function SettlementTimeline({ tx }: SettlementTimelineProps) {
                 )}
 
                 {step.timestamp && step.status === 'failed' && (
-                  <span className="text-xs text-red-500 dark:text-red-400 ml-2">
+                  <span className="text-xs text-destructive ml-2">
                     {formatTime(step.timestamp)}
                   </span>
                 )}

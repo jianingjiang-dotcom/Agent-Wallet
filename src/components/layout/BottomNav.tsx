@@ -5,8 +5,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useT } from '@/lib/i18n';
 
 const ACTIVE_COLOR = '#1F32D6';
-const LIGHT_INACTIVE = '#73798B';
-const DARK_INACTIVE = '#8E8E9A';
+const LIGHT_INACTIVE = '#8E8E93';
+const DARK_INACTIVE = '#8E8E93';
 
 // Ripple state
 interface Ripple {

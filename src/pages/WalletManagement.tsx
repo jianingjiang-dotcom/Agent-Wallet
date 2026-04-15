@@ -76,18 +76,15 @@ export default function WalletManagementPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               onClick={() => navigate('/wallet-backup/all')}
-              className={`p-3 mb-4 rounded-xl border flex items-center gap-3 cursor-pointer transition-colors ${
-                allBackedUp
-                  ? 'border-success/30 bg-success/5 hover:bg-success/10'
-                  : 'border-warning/30 bg-warning/5 hover:bg-warning/10'
-              }`}
+              className="p-3 mb-4 rounded-xl bg-card flex items-center gap-3 cursor-pointer active:bg-muted/60 transition-colors"
+              style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}
             >
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
-                allBackedUp ? 'bg-success/20' : 'bg-warning/20'
+              <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${
+                allBackedUp ? 'bg-success/10' : 'bg-warning/10'
               }`}>
                 {allBackedUp
-                  ? <Shield className="w-4 h-4 text-success" />
-                  : <AlertTriangle className="w-4 h-4 text-warning" />
+                  ? <Shield className="w-4.5 h-4.5 text-success" />
+                  : <AlertTriangle className="w-4.5 h-4.5 text-warning" />
                 }
               </div>
               <div className="flex-1 min-w-0">

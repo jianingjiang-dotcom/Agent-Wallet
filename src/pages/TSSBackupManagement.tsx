@@ -232,9 +232,9 @@ export default function TSSBackupManagement() {
 
           <div className="px-4 pb-8">
             {/* Cloud Backup Tips */}
-            <div className="p-3 rounded-xl bg-amber-500/5 border border-amber-500/20 mb-6">
+            <div className="p-3 rounded-xl bg-warning/80/5 border border-amber-500/20 mb-6">
               <div className="flex gap-3">
-                <AlertTriangle className="h-4 w-4 text-amber-500 flex-shrink-0 mt-0.5" />
+                <AlertTriangle className="h-4 w-4 text-warning flex-shrink-0 mt-0.5" />
                 <div className="space-y-1">
                   <h4 className="text-sm font-medium">重要提示</h4>
                   <ul className="text-xs text-muted-foreground space-y-1">
@@ -261,9 +261,9 @@ export default function TSSBackupManagement() {
           
           <div className="px-4 pb-8">
             {/* Local Backup Tips */}
-            <div className="p-3 rounded-xl bg-amber-500/5 border border-amber-500/20 mb-6">
+            <div className="p-3 rounded-xl bg-warning/80/5 border border-amber-500/20 mb-6">
               <div className="flex gap-3">
-                <AlertTriangle className="h-4 w-4 text-amber-500 flex-shrink-0 mt-0.5" />
+                <AlertTriangle className="h-4 w-4 text-warning flex-shrink-0 mt-0.5" />
                 <div className="space-y-1">
                   <h4 className="text-sm font-medium">重要提示</h4>
                   <ul className="text-xs text-muted-foreground space-y-1">

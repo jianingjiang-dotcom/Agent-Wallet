@@ -102,15 +102,23 @@ function ProtectedRoute({ children, bypassAuth = false }: { children: React.Reac
 const TAB_PATHS = ['/home', '/assistant', '/pact', '/mine', '/profile'];
 type NavMode = 'tab' | 'push' | 'pop';
 
-const slideTransition = { type: 'tween', duration: 0.28, ease: [0.25, 0.46, 0.45, 0.94] };
+const enterTransition = { type: 'tween', duration: 0.2, ease: [0.32, 0.72, 0, 1] };
+const exitTransition = { type: 'tween', duration: 0.12, ease: 'easeIn' };
 const instant = { duration: 0 };
 
 const pageVariants = {
-  initial: (mode: NavMode) => ({ x: mode === 'push' ? '100%' : 0 }),
-  animate: (mode: NavMode) => ({ x: 0, transition: mode === 'push' ? slideTransition : instant }),
+  initial: (mode: NavMode) => ({
+    x: mode === 'push' ? '25%' : 0,
+    opacity: mode === 'push' ? 0 : 1,
+  }),
+  animate: () => ({
+    x: 0,
+    opacity: 1,
+    transition: enterTransition,
+  }),
   exit: (mode: NavMode) => ({
-    x: mode === 'pop' ? '100%' : 0,
-    transition: mode === 'tab' ? instant : slideTransition,
+    opacity: 0,
+    transition: mode === 'tab' ? instant : exitTransition,
   }),
 };
 
@@ -124,7 +132,7 @@ function AppRoutes() {
 
   return (
     <div className="relative h-full overflow-hidden">
-      <AnimatePresence custom={mode} mode="sync" initial={false}>
+      <AnimatePresence custom={mode} mode="wait" initial={false}>
         <motion.div
           key={location.key}
           custom={mode}
@@ -132,7 +140,7 @@ function AppRoutes() {
           initial="initial"
           animate="animate"
           exit="exit"
-          style={{ zIndex: mode === 'pop' ? 0 : 1 }}
+          style={{ willChange: 'transform, opacity' }}
           className="absolute inset-0 overflow-y-auto overflow-x-hidden"
         >
           <Routes location={location}>

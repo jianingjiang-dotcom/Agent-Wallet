@@ -99,20 +99,20 @@ export default function PactApprovalDetail() {
               transition={{ delay: 0.05 }}
               className={cn(
                 'rounded-xl px-4 py-3 mb-4',
-                isPending && 'bg-[#FEF3E7] dark:bg-amber-900/20',
-                todo.status === 'approved' && 'bg-[#ECFBF2] dark:bg-green-900/20',
-                todo.status === 'rejected' && 'bg-[#FBEFF6] dark:bg-red-900/20',
+                isPending && 'bg-[#FEF3E7]',
+                todo.status === 'approved' && 'bg-[#ECFBF2] dark:bg-success/900/20',
+                todo.status === 'rejected' && 'bg-[#FBEFF6]',
               )}
             >
               <div className="flex items-center gap-2">
-                {isPending && <AlertTriangle className="w-4 h-4 text-amber-600" strokeWidth={1.5} />}
-                {todo.status === 'approved' && <CheckCircle2 className="w-4 h-4 text-emerald-600" strokeWidth={1.5} />}
-                {todo.status === 'rejected' && <XCircle className="w-4 h-4 text-red-600" strokeWidth={1.5} />}
+                {isPending && <AlertTriangle className="w-4 h-4 text-warning" strokeWidth={1.5} />}
+                {todo.status === 'approved' && <CheckCircle2 className="w-4 h-4 text-success" strokeWidth={1.5} />}
+                {todo.status === 'rejected' && <XCircle className="w-4 h-4 text-destructive" strokeWidth={1.5} />}
                 <span className={cn(
                   'text-sm font-medium',
-                  isPending && 'text-amber-700',
-                  todo.status === 'approved' && 'text-emerald-700',
-                  todo.status === 'rejected' && 'text-red-700',
+                  isPending && 'text-warning',
+                  todo.status === 'approved' && 'text-success',
+                  todo.status === 'rejected' && 'text-destructive',
                 )}>
                   {isPending ? '待审批 — Agent 请求创建新 Pact' : todo.status === 'approved' ? '已通过' : '已拒绝'}
                 </span>
@@ -220,9 +220,9 @@ export default function PactApprovalDetail() {
               transition={{ type: 'spring', stiffness: 300, damping: 20 }}
             >
               {resultAction === 'approved' ? (
-                <CheckCircle2 className="w-16 h-16 text-emerald-500" />
+                <CheckCircle2 className="w-16 h-16 text-success" />
               ) : (
-                <XCircle className="w-16 h-16 text-red-500" />
+                <XCircle className="w-16 h-16 text-destructive" />
               )}
             </motion.div>
             <motion.p

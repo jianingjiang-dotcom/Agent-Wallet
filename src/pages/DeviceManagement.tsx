@@ -14,7 +14,7 @@ import { useWallet } from '@/contexts/WalletContext';
 const statusBadgeVariants = cva('inline-flex items-center gap-1 rounded-full font-medium', {
   variants: {
     variant: {
-      success: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400',
+      success: 'bg-success/10 text-success',
     },
     size: {
       sm: 'text-[10px] px-1.5 py-0.5',
@@ -120,7 +120,7 @@ export default function DeviceManagementPage() {
                       <Icon className="w-4 h-4 text-muted-foreground" />
                     </div>
                     {isCurrent && (
-                      <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-emerald-700 border-2 border-white dark:border-gray-800" />
+                      <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-success border-2 border-white dark:border-gray-800" />
                     )}
                   </div>
                   {/* 设备信息 */}

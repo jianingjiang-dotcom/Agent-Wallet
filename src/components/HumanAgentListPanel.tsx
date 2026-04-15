@@ -19,11 +19,11 @@ interface HumanAgentListPanelProps {
 const statusConfig: Record<HumanAgentDelegationStatus, { label: string; color: string }> = {
   not_delegated: {
     label: '未授权',
-    color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400',
+    color: 'bg-primary/10 text-primary',
   },
   delegated: {
     label: '已授权',
-    color: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400',
+    color: 'bg-success/10 text-success',
   },
   paused: {
     label: '已暂停',
@@ -31,7 +31,7 @@ const statusConfig: Record<HumanAgentDelegationStatus, { label: string; color: s
   },
   revoked: {
     label: '已撤销',
-    color: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400',
+    color: 'bg-destructive/10 text-destructive',
   },
 };
 
@@ -156,7 +156,7 @@ export function HumanAgentListPanel({
               className="shrink-0 p-1 rounded transition-colors"
             >
               {copied ? (
-                <Check className="w-3.5 h-3.5 text-emerald-500" />
+                <Check className="w-3.5 h-3.5 text-success" />
               ) : (
                 <Copy className="w-3.5 h-3.5 text-muted-foreground" />
               )}
@@ -222,8 +222,8 @@ export function HumanAgentListPanel({
                     : 'active:bg-muted/50'
                 )}
               >
-                <div className="w-9 h-9 rounded-full bg-purple-100 dark:bg-purple-900/40 flex items-center justify-center shrink-0">
-                  <Bot className="w-4 h-4 text-purple-600 dark:text-purple-400" strokeWidth={1.5} />
+                <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                  <Bot className="w-4 h-4 text-primary" strokeWidth={1.5} />
                 </div>
 
                 <div className="flex-1 min-w-0">

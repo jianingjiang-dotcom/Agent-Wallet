@@ -100,9 +100,9 @@ export default function SecurityPage() {
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="p-3 rounded-xl bg-purple-50 dark:bg-purple-950/20 border border-purple-200 dark:border-purple-800/40"
+            className="p-3 rounded-xl bg-primary/8 border border-primary/20"
           >
-            <p className="text-xs text-purple-700 dark:text-purple-400">
+            <p className="text-xs text-primary">
               此钱包由 Agent 控制签名，安全设置用于审批验证和风控策略。
             </p>
           </motion.div>

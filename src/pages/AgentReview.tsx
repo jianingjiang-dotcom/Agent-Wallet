@@ -77,7 +77,7 @@ export default function AgentReview() {
                 {count > 0 && (tab.value === 'pending' || tab.value === 'processing' || tab.value === 'failed') && (
                   <span className={cn(
                     'ml-1 inline-flex items-center justify-center w-4 h-4 rounded-full text-white text-[10px] font-bold',
-                    tab.value === 'pending' ? 'bg-amber-500' : tab.value === 'failed' ? 'bg-red-500' : 'bg-blue-500'
+                    tab.value === 'pending' ? 'bg-warning/80' : tab.value === 'failed' ? 'bg-destructive/80' : 'bg-primary/80'
                   )}>
                     {count}
                   </span>
@@ -131,7 +131,7 @@ export default function AgentReview() {
                             {group.txs.length} 笔
                           </span>
                           {group.allSafe && (
-                            <span className="flex items-center gap-0.5 text-[10px] text-emerald-600 dark:text-emerald-400">
+                            <span className="flex items-center gap-0.5 text-[10px] text-success">
                               <ShieldCheck className="w-3 h-3" />
                               安全
                             </span>

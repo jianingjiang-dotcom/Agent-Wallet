@@ -21,7 +21,7 @@ export function EmergencyStopButton({ isPaused, onPause, onResume, label }: Emer
     return (
       <Button
         variant="outline"
-        className="w-full h-12 gap-2 border-emerald-300 text-emerald-700 dark:border-emerald-700 dark:text-emerald-400"
+        className="w-full h-12 gap-2 border-emerald-300 text-success dark:border-emerald-700"
         onClick={onResume}
       >
         <Play className="w-4 h-4" />

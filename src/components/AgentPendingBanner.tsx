@@ -45,20 +45,20 @@ export function AgentPendingBanner() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.05 }}
           onClick={() => navigate('/agent-review')}
-          className="w-full p-3 rounded-xl bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800/40 flex items-center gap-3 active:scale-[0.98] transition-transform"
+          className="w-full p-3 rounded-xl bg-destructive/8 border border-destructive/20 flex items-center gap-3 active:scale-[0.98] transition-transform"
         >
-          <div className="w-9 h-9 rounded-full bg-red-100 dark:bg-red-900/40 flex items-center justify-center shrink-0">
-            <AlertTriangle className="w-4.5 h-4.5 text-red-600 dark:text-red-400" strokeWidth={1.5} />
+          <div className="w-9 h-9 rounded-full bg-destructive/10 flex items-center justify-center shrink-0">
+            <AlertTriangle className="w-4.5 h-4.5 text-destructive" strokeWidth={1.5} />
           </div>
           <div className="flex-1 text-left min-w-0">
-            <p className="text-sm font-medium text-red-700 dark:text-red-400">
+            <p className="text-sm font-medium text-destructive">
               {failedCount} 笔交易执行失败
             </p>
-            <p className="text-xs text-red-500/70 dark:text-red-400/60">
+            <p className="text-xs text-destructive/70/60">
               需要处理：重试或作废
             </p>
           </div>
-          <ChevronRight className="w-4 h-4 text-red-400 shrink-0" />
+          <ChevronRight className="w-4 h-4 text-destructive shrink-0" />
         </motion.button>
       )}
     </div>

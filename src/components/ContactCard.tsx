@@ -39,7 +39,7 @@ export function ContactCard({
             {getChainLabel(contact.network as ChainId)}
           </span>
           {contact.isWhitelisted && (
-            <span className="flex items-center gap-0.5 text-[10px] text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 px-1.5 py-0.5 rounded-full flex-shrink-0">
+            <span className="flex items-center gap-0.5 text-[10px] text-success bg-success/8 px-1.5 py-0.5 rounded-full flex-shrink-0">
               <ShieldCheck className="w-3 h-3" />
               白名单
             </span>

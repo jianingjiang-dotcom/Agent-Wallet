@@ -148,15 +148,15 @@ export default function TransactionDetail() {
               <p className="text-sm text-muted-foreground">${transaction.usdValue.toLocaleString()}</p>
               <div className={cn(
                 "mt-6 mx-auto rounded-xl px-4 py-4 text-left",
-                transaction.status === 'pending' && "bg-[#FEF3E7] dark:bg-amber-900/20",
-                transaction.status === 'confirmed' && "bg-[#ECFBF2] dark:bg-green-900/20",
-                transaction.status === 'failed' && "bg-[#FBEFF6] dark:bg-red-900/20"
+                transaction.status === 'pending' && "bg-[#FEF3E7]",
+                transaction.status === 'confirmed' && "bg-[#ECFBF2] dark:bg-success/900/20",
+                transaction.status === 'failed' && "bg-[#FBEFF6]"
               )}>
                 <span className={cn(
                   "font-medium",
-                  transaction.status === 'pending' && "text-[#FA8C16] dark:text-amber-400",
+                  transaction.status === 'pending' && "text-[#FA8C16]",
                   transaction.status === 'confirmed' && "text-[#11C45A] dark:text-green-400",
-                  transaction.status === 'failed' && "text-[#E74E5A] dark:text-red-400"
+                  transaction.status === 'failed' && "text-[#E74E5A]"
                 )} style={{ fontSize: '16px', lineHeight: '24px' }}>
                   {typeLabel}{status.label}
                 </span>

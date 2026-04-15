@@ -161,7 +161,7 @@ export default function SettlementDashboard() {
               <p
                 className={cn(
                   'text-xl font-bold mt-1',
-                  summary.failedCount > 0 ? 'text-red-500' : 'text-foreground'
+                  summary.failedCount > 0 ? 'text-destructive' : 'text-foreground'
                 )}
               >
                 {summary.failedCount}
@@ -350,7 +350,7 @@ export default function SettlementDashboard() {
                       <AlertTriangle
                         className={cn(
                           'h-4 w-4 mt-0.5 shrink-0',
-                          anomaly.severity === 'critical' ? 'text-red-500' : 'text-amber-500'
+                          anomaly.severity === 'critical' ? 'text-destructive' : 'text-warning'
                         )}
                       />
                       <p className="text-sm text-foreground flex-1">{anomaly.description}</p>
@@ -358,8 +358,8 @@ export default function SettlementDashboard() {
                         className={cn(
                           'text-[10px] font-medium px-1.5 py-0.5 rounded-full shrink-0',
                           anomaly.severity === 'critical'
-                            ? 'bg-red-500/15 text-red-500'
-                            : 'bg-amber-500/15 text-amber-600'
+                            ? 'bg-destructive/80/15 text-destructive'
+                            : 'bg-warning/80/15 text-warning'
                         )}
                       >
                         {anomaly.severity === 'critical' ? '严重' : '警告'}
@@ -429,7 +429,7 @@ export default function SettlementDashboard() {
                             <span
                               className={cn(
                                 'text-[10px] px-1.5 py-0.5 rounded-full font-medium',
-                                'bg-blue-500/10 text-blue-600'
+                                'bg-primary/80/10 text-primary'
                               )}
                             >
                               {tx.network}
@@ -438,8 +438,8 @@ export default function SettlementDashboard() {
                               className={cn(
                                 'text-[10px] px-1.5 py-0.5 rounded-full font-medium',
                                 tx.status === 'settled'
-                                  ? 'bg-green-500/10 text-green-600'
-                                  : 'bg-red-500/10 text-red-500'
+                                  ? 'bg-success/500/10 text-green-600'
+                                  : 'bg-destructive/80/10 text-destructive'
                               )}
                             >
                               {STATUS_LABELS[tx.status] || tx.status}

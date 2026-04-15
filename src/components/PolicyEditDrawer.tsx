@@ -791,7 +791,7 @@ export default function PolicyEditDrawer({
                     className={cn(
                       'flex-1 flex items-center justify-center gap-1.5 rounded-lg border px-3 py-2.5 text-sm font-medium transition-colors',
                       effect === 'allow'
-                        ? 'bg-emerald-100 border-emerald-500 text-emerald-700'
+                        ? 'bg-success/10 border-emerald-500 text-success'
                         : 'bg-background border-input text-muted-foreground',
                     )}
                   >
@@ -804,7 +804,7 @@ export default function PolicyEditDrawer({
                     className={cn(
                       'flex-1 flex items-center justify-center gap-1.5 rounded-lg border px-3 py-2.5 text-sm font-medium transition-colors',
                       effect === 'deny'
-                        ? 'bg-red-100 border-red-500 text-red-700'
+                        ? 'bg-destructive/10 border-red-500 text-destructive'
                         : 'bg-background border-input text-muted-foreground',
                     )}
                   >

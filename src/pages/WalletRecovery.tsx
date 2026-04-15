@@ -40,8 +40,8 @@ const recoveryOptions: RecoveryOption[] = [
     title: 'iCloud 恢复',
     description: '从 iCloud 备份恢复钱包',
     icon: Cloud,
-    iconColor: 'text-blue-500',
-    bgColor: 'bg-blue-500/10',
+    iconColor: 'text-primary',
+    bgColor: 'bg-primary/80/10',
   },
   {
     id: 'cloud_google',

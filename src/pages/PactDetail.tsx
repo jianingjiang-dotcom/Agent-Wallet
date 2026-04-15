@@ -51,9 +51,9 @@ function CollapsibleSection({ title, icon: Icon, defaultOpen = false, children }
 
 // ─── Policy Card ───────────────────────────────────────────
 const policyTypeLabels: Record<string, { label: string; color: string; bg: string }> = {
-  transfer: { label: 'Transfer', color: 'text-blue-700', bg: 'bg-blue-100' },
-  contract_call: { label: 'Contract Call', color: 'text-purple-700', bg: 'bg-purple-100' },
-  message_sign: { label: 'Message Sign', color: 'text-amber-700', bg: 'bg-amber-100' },
+  transfer: { label: 'Transfer', color: 'text-primary', bg: 'bg-primary/10' },
+  contract_call: { label: 'Contract Call', color: 'text-primary', bg: 'bg-primary/10' },
+  message_sign: { label: 'Message Sign', color: 'text-warning', bg: 'bg-warning/10' },
 };
 
 const windowLabels: Record<string, string> = {
@@ -163,7 +163,7 @@ function PolicyCard({ policy }: { policy: PolicyRule }) {
             {reviewRows.map((r, i) => (
               <div key={i} className="flex items-center justify-between text-[12px]">
                 <span className="text-muted-foreground">{r.label}</span>
-                <span className="font-semibold text-amber-600 tabular-nums">{r.value}</span>
+                <span className="font-semibold text-warning tabular-nums">{r.value}</span>
               </div>
             ))}
           </div>
@@ -181,12 +181,12 @@ export default function PactDetail() {
   const [confirmAction, setConfirmAction] = useState<'approve' | 'reject' | 'revoke' | null>(null);
 
   const statusConfig: Record<PactStatus, { label: string; color: string; bg: string; icon: typeof CheckCircle2 }> = {
-    pending: { label: t.common.pending, color: 'text-amber-600', bg: 'bg-amber-50', icon: Clock },
-    active: { label: t.common.active, color: 'text-blue-600', bg: 'bg-blue-50', icon: Zap },
+    pending: { label: t.common.pending, color: 'text-warning', bg: 'bg-warning/8', icon: Clock },
+    active: { label: t.common.active, color: 'text-primary', bg: 'bg-primary/8', icon: Zap },
     completed: { label: t.common.completed, color: 'text-slate-600', bg: 'bg-slate-50', icon: CheckCircle2 },
-    rejected: { label: t.common.rejected, color: 'text-red-600', bg: 'bg-red-50', icon: XCircle },
+    rejected: { label: t.common.rejected, color: 'text-destructive', bg: 'bg-destructive/8', icon: XCircle },
     expired: { label: t.common.expired, color: 'text-muted-foreground', bg: 'bg-muted/50', icon: Clock },
-    revoked: { label: t.common.revoked, color: 'text-red-600', bg: 'bg-red-50', icon: ShieldOff },
+    revoked: { label: t.common.revoked, color: 'text-destructive', bg: 'bg-destructive/8', icon: ShieldOff },
   };
 
   if (!pact) {
@@ -224,13 +224,13 @@ export default function PactDetail() {
       title: t.pactDetail.confirmRejectTitle,
       description: t.pactDetail.confirmRejectDesc,
       confirmLabel: t.pactDetail.confirmRejectBtn,
-      confirmClass: 'bg-red-600 text-white hover:bg-red-700',
+      confirmClass: 'bg-destructive text-white hover:bg-destructive/90',
     },
     revoke: {
       title: t.pactDetail.confirmRevokeTitle,
       description: t.pactDetail.confirmRevokeDesc,
       confirmLabel: t.pactDetail.confirmRevokeBtn,
-      confirmClass: 'bg-red-600 text-white hover:bg-red-700',
+      confirmClass: 'bg-destructive text-white hover:bg-destructive/90',
     },
   };
 
@@ -425,7 +425,7 @@ export default function PactDetail() {
         <div className="fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-t border-border/50 px-4 pt-3 pb-8 flex gap-3" style={{ maxWidth: 430, margin: '0 auto' }}>
           <Button
             variant="outline"
-            className="flex-1 h-12 text-[15px] font-semibold border-red-200 text-red-600 hover:bg-red-50"
+            className="flex-1 h-12 text-[15px] font-semibold border-destructive/20 text-destructive hover:bg-destructive/8"
             onClick={() => setConfirmAction('reject')}
           >
             拒绝
@@ -442,7 +442,7 @@ export default function PactDetail() {
         <div className="fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-t border-border/50 px-4 pt-3 pb-8" style={{ maxWidth: 430, margin: '0 auto' }}>
           <Button
             variant="outline"
-            className="w-full h-12 text-[15px] font-semibold border-red-200 text-red-600 hover:bg-red-50"
+            className="w-full h-12 text-[15px] font-semibold border-destructive/20 text-destructive hover:bg-destructive/8"
             onClick={() => setConfirmAction('revoke')}
           >
             <ShieldOff className="w-4 h-4 mr-2" strokeWidth={1.5} />
@@ -459,7 +459,7 @@ export default function PactDetail() {
               <div className="w-12 h-12 rounded-full mx-auto flex items-center justify-center bg-muted/50 mb-2">
                 {confirmAction === 'approve'
                   ? <CheckCircle2 className="w-6 h-6 text-primary" strokeWidth={1.5} />
-                  : <AlertTriangle className="w-6 h-6 text-red-500" strokeWidth={1.5} />
+                  : <AlertTriangle className="w-6 h-6 text-destructive" strokeWidth={1.5} />
                 }
               </div>
               <h3 className="text-[17px] font-bold text-foreground text-center">

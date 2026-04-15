@@ -24,30 +24,30 @@ function getNotificationIcon(type: NotificationType) {
     case 'transaction_in':
       return { icon: ArrowDownLeft, color: 'text-success', bg: 'bg-success/10' };
     case 'transaction_out':
-      return { icon: ArrowUpRight, color: 'text-blue-500', bg: 'bg-blue-500/10' };
+      return { icon: ArrowUpRight, color: 'text-primary', bg: 'bg-primary/80/10' };
     case 'large_amount':
       return { icon: AlertTriangle, color: 'text-warning', bg: 'bg-warning/10' };
     case 'agent_tx_pending':
-      return { icon: ClipboardCheck, color: 'text-amber-500', bg: 'bg-amber-500/10' };
+      return { icon: ClipboardCheck, color: 'text-warning', bg: 'bg-warning/80/10' };
     case 'agent_tx_approved':
     case 'agent_tx_settled':
-      return { icon: CheckCircle2, color: 'text-emerald-500', bg: 'bg-emerald-500/10' };
+      return { icon: CheckCircle2, color: 'text-success', bg: 'bg-success/80/10' };
     case 'agent_tx_rejected':
     case 'agent_tx_expired':
-      return { icon: XCircle, color: 'text-red-500', bg: 'bg-red-500/10' };
+      return { icon: XCircle, color: 'text-destructive', bg: 'bg-destructive/80/10' };
     case 'agent_tx_failed':
-      return { icon: AlertTriangle, color: 'text-red-500', bg: 'bg-red-500/10' };
+      return { icon: AlertTriangle, color: 'text-destructive', bg: 'bg-destructive/80/10' };
     case 'agent_tx_broadcasting':
     case 'agent_paused':
     case 'api_key_created':
     case 'api_key_revoked':
-      return { icon: Bot, color: 'text-blue-500', bg: 'bg-blue-500/10' };
+      return { icon: Bot, color: 'text-primary', bg: 'bg-primary/80/10' };
     case 'system_update':
       return { icon: Bell, color: 'text-muted-foreground', bg: 'bg-muted' };
     case 'maintenance':
       return { icon: Wrench, color: 'text-muted-foreground', bg: 'bg-muted' };
     case 'promotion':
-      return { icon: Gift, color: 'text-purple-500', bg: 'bg-purple-500/10' };
+      return { icon: Gift, color: 'text-primary', bg: 'bg-primary/80/10' };
     default:
       return { icon: Info, color: 'text-muted-foreground', bg: 'bg-muted' };
   }

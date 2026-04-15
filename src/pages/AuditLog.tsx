@@ -35,17 +35,17 @@ interface AuditEntry {
 }
 
 const actionConfig: Record<AuditAction, { label: string; icon: typeof CheckCircle2; color: string }> = {
-  tx_approved: { label: '交易批准', icon: CheckCircle2, color: 'text-emerald-600 dark:text-emerald-400' },
-  tx_rejected: { label: '交易拒绝', icon: XCircle, color: 'text-red-600 dark:text-red-400' },
-  tx_modified: { label: '交易修改', icon: Pencil, color: 'text-blue-600 dark:text-blue-400' },
-  tx_auto_approved: { label: '自动放行', icon: CheckCircle2, color: 'text-emerald-600 dark:text-emerald-400' },
-  risk_config_changed: { label: '风控变更', icon: Shield, color: 'text-amber-600 dark:text-amber-400' },
-  api_key_created: { label: 'API Key 创建', icon: Key, color: 'text-blue-600 dark:text-blue-400' },
-  api_key_revoked: { label: 'API Key 撤销', icon: Key, color: 'text-red-600 dark:text-red-400' },
-  wallet_paused: { label: '钱包暂停', icon: PauseCircle, color: 'text-amber-600 dark:text-amber-400' },
-  wallet_resumed: { label: '钱包恢复', icon: PlayCircle, color: 'text-emerald-600 dark:text-emerald-400' },
-  whitelist_added: { label: '白名单添加', icon: Shield, color: 'text-emerald-600 dark:text-emerald-400' },
-  whitelist_removed: { label: '白名单移除', icon: AlertTriangle, color: 'text-amber-600 dark:text-amber-400' },
+  tx_approved: { label: '交易批准', icon: CheckCircle2, color: 'text-success' },
+  tx_rejected: { label: '交易拒绝', icon: XCircle, color: 'text-destructive' },
+  tx_modified: { label: '交易修改', icon: Pencil, color: 'text-primary' },
+  tx_auto_approved: { label: '自动放行', icon: CheckCircle2, color: 'text-success' },
+  risk_config_changed: { label: '风控变更', icon: Shield, color: 'text-warning' },
+  api_key_created: { label: 'API Key 创建', icon: Key, color: 'text-primary' },
+  api_key_revoked: { label: 'API Key 撤销', icon: Key, color: 'text-destructive' },
+  wallet_paused: { label: '钱包暂停', icon: PauseCircle, color: 'text-warning' },
+  wallet_resumed: { label: '钱包恢复', icon: PlayCircle, color: 'text-success' },
+  whitelist_added: { label: '白名单添加', icon: Shield, color: 'text-success' },
+  whitelist_removed: { label: '白名单移除', icon: AlertTriangle, color: 'text-warning' },
 };
 
 const filterTabs: { value: AuditFilterType; label: string }[] = [
