@@ -11,6 +11,7 @@ import { PhoneFrame } from "@/components/layout/PhoneFrame";
 import { AppLockScreen } from "@/components/AppLockScreen";
 import Splash from "./pages/Splash";
 import Welcome from "./pages/Welcome";
+import WelcomeBack from "./pages/WelcomeBack";
 import Login from "./pages/Login";
 import Onboarding from "./pages/Onboarding";
 import CreateWallet from "./pages/CreateWallet";
@@ -146,6 +147,7 @@ function AppRoutes() {
           <Routes location={location}>
       <Route path="/" element={<Splash />} />
       <Route path="/welcome" element={<Welcome />} />
+      <Route path="/welcome-back" element={<ProtectedRoute bypassAuth><WelcomeBack /></ProtectedRoute>} />
       <Route path="/login" element={<Login />} />
       <Route path="/onboarding" element={<Onboarding />} />
       <Route path="/create-wallet" element={<ProtectedRoute><CreateWallet /></ProtectedRoute>} />

@@ -4,26 +4,36 @@ import { motion } from "framer-motion";
 import { useWallet } from "@/contexts/WalletContext";
 import coboLogo from "@/assets/cobo-logo.svg";
 
+const DEVICE_SEEN_PREFIX = 'device_seen_';
+
 const Splash = () => {
   const navigate = useNavigate();
-  const { isAuthenticated } = useWallet();
+  const { isAuthenticated, wallets, userInfo } = useWallet();
   const [isExiting, setIsExiting] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsExiting(true);
-      
+
       setTimeout(() => {
-        if (isAuthenticated) {
-          navigate('/home', { replace: true });
-        } else {
+        if (!isAuthenticated) {
           navigate('/login', { replace: true });
+          return;
+        }
+        // Check if Welcome back is needed (first time on this device + has unrecovered wallets)
+        const userKey = userInfo?.uid || 'default';
+        const deviceSeen = localStorage.getItem(`${DEVICE_SEEN_PREFIX}${userKey}`);
+        const hasUnrecovered = wallets.some(w => !w.isKeyShareRecovered);
+        if (!deviceSeen && hasUnrecovered) {
+          navigate('/welcome-back', { replace: true });
+        } else {
+          navigate('/home', { replace: true });
         }
       }, 300);
     }, 1800);
 
     return () => clearTimeout(timer);
-  }, [navigate, isAuthenticated]);
+  }, [navigate, isAuthenticated, wallets, userInfo?.uid]);
 
   return (
     <motion.div 

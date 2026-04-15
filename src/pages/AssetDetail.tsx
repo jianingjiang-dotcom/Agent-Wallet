@@ -17,6 +17,8 @@ import { TransactionListSkeleton } from '@/components/skeletons';
 import { EmptyState } from '@/components/EmptyState';
 import { SwipeBack } from '@/components/SwipeBack';
 import { ChainId, SUPPORTED_CHAINS, Transaction, isAgentLinked } from '@/types/wallet';
+import { useRequireRecovery } from '@/hooks/useRequireRecovery';
+import { RecoveryRequiredDrawer } from '@/components/RecoveryRequiredDrawer';
 
 export default function AssetDetailPage() {
   const { symbol } = useParams<{ symbol: string }>();
@@ -30,6 +32,7 @@ export default function AssetDetailPage() {
   const [isLoading, setIsLoading] = useState(false);
   const { assets, transactions, currentWallet } = useWallet();
   const isAgent = isAgentLinked(currentWallet);
+  const { guard, drawerOpen, setDrawerOpen } = useRequireRecovery();
 
   // Get chain-aggregated asset data
   const chainAssets = useMemo(() => aggregateByChain(assets, currentWallet), [assets, currentWallet]);
@@ -220,8 +223,10 @@ export default function AssetDetailPage() {
             <Button
               className="flex-1 h-10 gradient-accent text-accent-foreground"
               onClick={() => {
-                const targetPath = isAgent ? '/request-agent' : '/send';
-                navigate(`${targetPath}?asset=${symbol}&chain=${assetData.network}`);
+                guard(() => {
+                  const targetPath = isAgent ? '/request-agent' : '/send';
+                  navigate(`${targetPath}?asset=${symbol}&chain=${assetData.network}`);
+                });
               }}
             >
               {isAgent ? <Bot className="w-4 h-4 mr-2" /> : <Send className="w-4 h-4 mr-2" />}
@@ -418,6 +423,12 @@ export default function AssetDetailPage() {
         </div>
       </div>
       </SwipeBack>
+
+      <RecoveryRequiredDrawer
+        open={drawerOpen}
+        onOpenChange={setDrawerOpen}
+        walletName={currentWallet?.name}
+      />
     </AppLayout>
   );
 }

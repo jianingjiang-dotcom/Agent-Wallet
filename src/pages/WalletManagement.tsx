@@ -7,7 +7,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import {
-  Wallet, Plus, CheckCircle2, AlertTriangle, MoreHorizontal,
+  Wallet, Plus, AlertTriangle, MoreHorizontal,
   Edit3, Key, MapPin, Shield, ChevronRight
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -163,17 +163,12 @@ export default function WalletManagementPage() {
                         <Wallet className="w-6 h-6 text-muted-foreground" />
                       </div>
                       <div className="flex-1 text-left min-w-0">
-                        <div className="flex items-center gap-1.5">
+                        <div className="flex items-center gap-1.5 flex-wrap">
                           <p className="font-semibold text-foreground truncate">{wallet.name}</p>
-                          {wallet.isBackedUp ? (
-                            <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[11px] font-medium bg-success/10 text-success shrink-0">
-                              <CheckCircle2 className="w-3 h-3" />
-                              已备份
-                            </span>
-                          ) : (
+                          {!wallet.isKeyShareRecovered && (
                             <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[11px] font-medium bg-warning/10 text-warning shrink-0">
                               <AlertTriangle className="w-3 h-3" />
-                              未备份
+                              未恢复
                             </span>
                           )}
                         </div>
@@ -181,6 +176,19 @@ export default function WalletManagementPage() {
                           ${balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </p>
                       </div>
+                      {!wallet.isKeyShareRecovered && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-8 px-3 text-xs font-medium shrink-0"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate('/wallet/recovery', { state: { returnTo: '/profile/wallets' } });
+                          }}
+                        >
+                          恢复
+                        </Button>
+                      )}
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" size="icon" className="shrink-0">

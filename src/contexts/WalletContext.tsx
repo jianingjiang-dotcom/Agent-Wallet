@@ -1271,6 +1271,11 @@ interface WalletContextType extends WalletState {
   backupWallet: (walletId: string, backupInfo: WalletBackupInfo, password?: string) => Promise<boolean>;
   verifyBackupPassword: (walletId: string, password: string) => boolean;
 
+  // Recovery actions (key share recovery on a new device)
+  recoverAllKeyShares: () => Promise<boolean>;
+  /** Dev only — simulate "new device" by marking all wallets as not recovered */
+  markAllUnrecovered: () => void;
+
   // Transaction actions
   sendTransaction: (to: string, amount: number, symbol: string, network: ChainId, memo?: string) => Promise<string>;
   scanAddressRisk: (address: string) => Promise<{ score: RiskColor; reasons: string[] }>;
@@ -1509,6 +1514,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         addresses: buildLegacyAddresses(MOCK_WALLET_ADDRESSES.wallet1),
         createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
         isBackedUp: true,
+        isKeyShareRecovered: true,
         isBiometricEnabled: true,
         controlMode: 'manual_review',
         origin: 'user_created',
@@ -1525,6 +1531,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         addresses: buildLegacyAddresses(MOCK_WALLET_ADDRESSES.wallet2),
         createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
         isBackedUp: true,
+        isKeyShareRecovered: true,
         isBiometricEnabled: false,
         controlMode: 'manual_review',
         origin: 'user_created',
@@ -1541,6 +1548,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         addresses: buildLegacyAddresses(MOCK_WALLET_ADDRESSES.wallet3),
         createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
         isBackedUp: false,
+        isKeyShareRecovered: true,
         isBiometricEnabled: true,
         controlMode: 'block',
         origin: 'user_created',
@@ -1552,6 +1560,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         addresses: buildLegacyAddresses(MOCK_WALLET_ADDRESSES.wallet4),
         createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
         isBackedUp: false,
+        isKeyShareRecovered: true,
         isBiometricEnabled: true,
         controlMode: 'manual_review',
         origin: 'agent_linked',
@@ -2231,6 +2240,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       addresses: buildLegacyAddresses(newAddresses),
       createdAt: new Date(),
       isBackedUp: false,
+      isKeyShareRecovered: true,
       isBiometricEnabled: hasBiometric,
       origin: 'user_created',
     };
@@ -2369,6 +2379,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       addresses: buildLegacyAddresses(agentAddresses),
       createdAt: new Date(),
       isBackedUp: false,
+      isKeyShareRecovered: true,
       isBiometricEnabled: hasBiometric,
       origin: 'agent_linked',
       controlMode: 'manual_review',
@@ -2437,6 +2448,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       addresses: buildLegacyAddresses(claimAddresses),
       createdAt: new Date(),
       isBackedUp: false,
+      isKeyShareRecovered: true,
       isBiometricEnabled: hasBiometric,
       origin: 'claimed',
       controlMode: 'manual_review',
@@ -2562,6 +2574,26 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const verifyBackupPassword = useCallback((walletId: string, password: string): boolean => {
     return backupPasswords[walletId] === password;
   }, [backupPasswords]);
+
+  // Recover all wallets' key shares on this device (one-shot, mirrors backup logic)
+  const recoverAllKeyShares = useCallback(async (): Promise<boolean> => {
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    setWallets(prev => prev.map(w => ({ ...w, isKeyShareRecovered: true })));
+    setCurrentWallet(prev => prev ? { ...prev, isKeyShareRecovered: true } : null);
+    return true;
+  }, []);
+
+  // Dev-only: simulate switching to a new device (clears recovery state for all wallets)
+  const markAllUnrecovered = useCallback(() => {
+    setWallets(prev => prev.map(w => ({ ...w, isKeyShareRecovered: false })));
+    setCurrentWallet(prev => prev ? { ...prev, isKeyShareRecovered: false } : null);
+    // Also reset device-seen marker so Welcome back triggers again
+    if (typeof window !== 'undefined') {
+      Object.keys(localStorage).forEach(k => {
+        if (k.startsWith('device_seen_')) localStorage.removeItem(k);
+      });
+    }
+  }, []);
 
   const sendTransaction = useCallback(async (to: string, amount: number, symbol: string, network: ChainId, memo?: string): Promise<string> => {
     await new Promise(resolve => setTimeout(resolve, 2000));
@@ -3235,6 +3267,8 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     completeFileBackup,
     backupWallet,
     verifyBackupPassword,
+    recoverAllKeyShares,
+    markAllUnrecovered,
     sendTransaction,
     scanAddressRisk,
     getLimitStatus,

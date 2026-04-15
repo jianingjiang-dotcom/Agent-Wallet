@@ -3,18 +3,25 @@ import { Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { formatAddressShort } from '@/lib/utils';
 import type { TransferCardData } from '@/types/chat';
+import { useRequireRecovery } from '@/hooks/useRequireRecovery';
+import { RecoveryRequiredDrawer } from '@/components/RecoveryRequiredDrawer';
+import { useWallet } from '@/contexts/WalletContext';
 
 export function TransferCard({ data }: { data: TransferCardData }) {
   const navigate = useNavigate();
+  const { currentWallet } = useWallet();
+  const { guard, drawerOpen, setDrawerOpen } = useRequireRecovery();
 
   const handleGo = () => {
-    const params = new URLSearchParams({
-      to: data.to,
-      amount: String(data.amount),
-      symbol: data.symbol,
-      ...(data.chain ? { chain: data.chain } : {}),
+    guard(() => {
+      const params = new URLSearchParams({
+        to: data.to,
+        amount: String(data.amount),
+        symbol: data.symbol,
+        ...(data.chain ? { chain: data.chain } : {}),
+      });
+      navigate(`/send?${params.toString()}`);
     });
-    navigate(`/send?${params.toString()}`);
   };
 
   return (
@@ -47,6 +54,12 @@ export function TransferCard({ data }: { data: TransferCardData }) {
           去转账
         </Button>
       </div>
+
+      <RecoveryRequiredDrawer
+        open={drawerOpen}
+        onOpenChange={setDrawerOpen}
+        walletName={currentWallet?.name}
+      />
     </div>
   );
 }

@@ -145,7 +145,7 @@ export default function LoginPage() {
   const [loginResult, setLoginResult] = useState<{ userType?: string; hasExistingWallets?: boolean } | null>(null);
   const [authMode, setAuthMode] = useState<AuthMode>('otp'); // Default to OTP mode
   const [otpSent, setOtpSent] = useState(false); // Track if OTP has been sent
-  const { login, sendVerificationCode, verifyCode, checkPasswordExists, loginWithPassword } = useWallet();
+  const { login, sendVerificationCode, verifyCode, checkPasswordExists, loginWithPassword, markAllUnrecovered } = useWallet();
   const navigate = useNavigate();
 
   const currentValue = loginMethod === 'email' ? email : phone;
@@ -296,23 +296,25 @@ export default function LoginPage() {
     try {
       const result = await login(provider);
       saveLastLogin(provider);
-      
-      // New user from social login: skip success state, go directly to set password
+
+      // For Apple login: always trigger key share recovery flow (simulates "new device" each time)
+      const triggerRecoveryFlow = provider === 'apple';
+      if (triggerRecoveryFlow) {
+        markAllUnrecovered();
+      }
+
+      // New user from social login: skip success state, go directly
       if (result.userType === 'new') {
-        navigate('/home');
+        navigate(triggerRecoveryFlow ? '/welcome-back' : '/home');
         return;
       }
-      
+
       // Existing user: show success state then navigate
       setLoginResult(result);
       setLoginStep('success');
-      
+
       setTimeout(() => {
-        if (result.hasExistingWallets) {
-          navigate('/home');
-        } else {
-          navigate('/home');
-        }
+        navigate(triggerRecoveryFlow ? '/welcome-back' : '/home');
       }, 1500);
     } catch (error) {
       console.error('Login failed:', error);

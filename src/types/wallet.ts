@@ -153,6 +153,12 @@ export interface Wallet {
   walletAddresses: WalletAddress[];  // Multi-address support per chain system
   createdAt: Date;
   isBackedUp: boolean;
+  /**
+   * Device-level flag: whether THIS device has the MPC key share for signing.
+   * Default: true. Set to false on a new device after login until recovery completes.
+   * When false, wallet is in "view-only" mode — can read but cannot sign.
+   */
+  isKeyShareRecovered: boolean;
   isBiometricEnabled: boolean;
   // Backup tracking
   backupInfo?: WalletBackupInfo;

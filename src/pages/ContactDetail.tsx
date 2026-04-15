@@ -22,11 +22,14 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { getChainName } from '@/lib/chain-utils';
+import { useRequireRecovery } from '@/hooks/useRequireRecovery';
+import { RecoveryRequiredDrawer } from '@/components/RecoveryRequiredDrawer';
 
 export default function ContactDetailPage() {
   const navigate = useNavigate();
   const { id } = useParams();
-  const { contacts, removeContact, updateContact, transactions } = useWallet();
+  const { contacts, removeContact, updateContact, transactions, currentWallet } = useWallet();
+  const { guard, drawerOpen, setDrawerOpen } = useRequireRecovery();
 
   const contact = contacts.find(c => c.id === id);
   const [copied, setCopied] = useState(false);
@@ -65,11 +68,13 @@ export default function ContactDetailPage() {
   };
 
   const handleTransfer = () => {
-    navigate('/send', { 
-      state: { 
-        prefilledAddress: contact.address,
-        prefilledNetwork: contact.network 
-      } 
+    guard(() => {
+      navigate('/send', {
+        state: {
+          prefilledAddress: contact.address,
+          prefilledNetwork: contact.network
+        }
+      });
     });
   };
 
@@ -264,6 +269,12 @@ export default function ContactDetailPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <RecoveryRequiredDrawer
+        open={drawerOpen}
+        onOpenChange={setDrawerOpen}
+        walletName={currentWallet?.name}
+      />
     </AppLayout>
   );
 }

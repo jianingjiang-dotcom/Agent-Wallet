@@ -12,8 +12,17 @@ import { useWallet } from '@/contexts/WalletContext';
 
 export default function Mine() {
   const navigate = useNavigate();
-  const { userInfo } = useWallet();
+  const { userInfo, markAllUnrecovered } = useWallet();
   const displayName = userInfo?.nickname || userInfo?.email?.split('@')[0] || '用户';
+
+  // TODO: 临时测试入口，上线前删除
+  const handleSimulateNewDevice = () => {
+    markAllUnrecovered();
+    // Reload to trigger Splash → Welcome back flow
+    setTimeout(() => {
+      window.location.href = '/';
+    }, 100);
+  };
 
   return (
     <AppLayout
@@ -21,13 +30,22 @@ export default function Mine() {
       pageBg="bg-page"
       title="我的"
       rightAction={
-        <motion.button
-          onClick={() => navigate('/profile/general')}
-          whileTap={{ scale: 0.9 }}
-          transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-        >
-          <Settings className="w-6 h-6" strokeWidth={1.5} style={{ color: '#000000' }} />
-        </motion.button>
+        <div className="flex items-center gap-2">
+          {/* TODO: 临时测试按钮，上线前删除 */}
+          <button
+            onClick={handleSimulateNewDevice}
+            className="px-1.5 py-0.5 rounded text-[9px] font-medium border bg-muted/50 text-muted-foreground border-border/60"
+          >
+            新设备
+          </button>
+          <motion.button
+            onClick={() => navigate('/profile/general')}
+            whileTap={{ scale: 0.9 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+          >
+            <Settings className="w-6 h-6" strokeWidth={1.5} style={{ color: '#000000' }} />
+          </motion.button>
+        </div>
       }
     >
       <div className="px-4 pt-2 no-card-shadow">

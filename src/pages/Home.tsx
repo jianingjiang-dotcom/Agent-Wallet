@@ -29,6 +29,9 @@ import { EmptyState } from '@/components/EmptyState';
 import { AnimatedBalance } from '@/components/AnimatedNumber';
 import { WalletModeBadge } from '@/components/WalletModeBadge';
 import { ProfileSidebar } from '@/components/ProfileSidebar';
+import { RecoveryBanner } from '@/components/RecoveryBanner';
+import { RecoveryRequiredDrawer } from '@/components/RecoveryRequiredDrawer';
+import { useRequireRecovery } from '@/hooks/useRequireRecovery';
 
 import { AddressPicker } from '@/components/AddressPicker';
 import { ChainId, SUPPORTED_CHAINS, Transaction, isAgentLinked, AddressSelection, ADDRESS_SYSTEMS } from '@/types/wallet';
@@ -134,6 +137,7 @@ export default function HomePage() {
     }
   }, [location.state]);
   const { assets, transactions, currentWallet, walletStatus, addToken, removeToken, unreadMessageCount, pendingTodoCount, getAgentTxByWallet, agentTransactions, systemStatus, setSystemStatus } = useWallet();
+  const { guard, drawerOpen, setDrawerOpen, needsRecovery } = useRequireRecovery();
 
   // Claimed wallet states
   const needsKeyGen = walletStatus === 'claimed_no_key';
@@ -318,6 +322,11 @@ export default function HomePage() {
                   未备份
                 </span>
               )}
+              {needsRecovery && (
+                <span className="text-[10px] px-1.5 py-0.5 bg-warning/10 text-warning rounded ml-1 font-medium">
+                  未恢复
+                </span>
+              )}
               <ChevronDown className="w-4 h-4 text-muted-foreground" />
             </div>
           </div>
@@ -376,6 +385,9 @@ export default function HomePage() {
           </div>
         </div>
 
+        {/* Recovery banner — only shown when current wallet's key share isn't on this device */}
+        {needsRecovery && <RecoveryBanner returnTo="/home" />}
+
         {/* Balance Card with Light Gradient Overlay */}
         {isLoading ? (
           <BalanceCardSkeleton />
@@ -423,7 +435,7 @@ export default function HomePage() {
                     if (needsSetup) {
                       setShowSetupDialog(true);
                     } else {
-                      navigate(isAgentLinked(currentWallet) ? '/request-agent' : '/send');
+                      guard(() => navigate(isAgentLinked(currentWallet) ? '/request-agent' : '/send'));
                     }
                   }}
                 >
@@ -703,6 +715,14 @@ export default function HomePage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Recovery required drawer */}
+      <RecoveryRequiredDrawer
+        open={drawerOpen}
+        onOpenChange={setDrawerOpen}
+        walletName={currentWallet?.name}
+        returnTo="/home"
+      />
 
     </AppLayout>
   );

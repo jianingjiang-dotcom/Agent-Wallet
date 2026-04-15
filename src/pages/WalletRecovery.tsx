@@ -1,17 +1,18 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  ArrowLeft, QrCode, Cloud, FileArchive, Key,
-  Smartphone, Check, Shield, AlertTriangle, Loader2,
+import {
+  ArrowLeft, QrCode, Cloud, FileArchive,
+  Smartphone, Check, Shield, Loader2,
   ChevronRight, Lock, RefreshCw, Eye, EyeOff, MessageCircle
 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { toast } from '@/lib/toast';
 import { RecoveryMethod } from '@/types/wallet';
+import { useWallet } from '@/contexts/WalletContext';
 import { QRCodeSVG } from 'qrcode.react';
 
 interface RecoveryOption {
@@ -59,19 +60,13 @@ const recoveryOptions: RecoveryOption[] = [
     iconColor: 'text-warning',
     bgColor: 'bg-warning/10',
   },
-  {
-    id: 'private_key',
-    title: '私钥文件导入',
-    description: '导入已有私钥（高级选项）',
-    icon: Key,
-    iconColor: 'text-destructive',
-    bgColor: 'bg-destructive/10',
-    warning: true,
-  },
 ];
 
 export default function WalletRecoveryPage() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { recoverAllKeyShares } = useWallet();
+  const returnTo = (location.state as { returnTo?: string })?.returnTo || '/home';
   const [selectedMethod, setSelectedMethod] = useState<RecoveryMethod | null>(null);
   const [step, setStep] = useState(0);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -99,7 +94,10 @@ export default function WalletRecoveryPage() {
         setSyncProgress(prev => {
           if (prev >= 100) {
             clearInterval(interval);
-            setTimeout(() => setStep(3), 500);
+            // Mark all wallets as recovered then advance to success
+            recoverAllKeyShares().then(() => {
+              setTimeout(() => setStep(3), 500);
+            });
             return 100;
           }
           return prev + 20;
@@ -122,6 +120,7 @@ export default function WalletRecoveryPage() {
     setIsProcessing(true);
     // Simulate cloud authorization + recovery (no password needed)
     await new Promise(resolve => setTimeout(resolve, 2000));
+    await recoverAllKeyShares();
     setIsProcessing(false);
     setStep(3); // Skip password step, go directly to success
   };
@@ -133,13 +132,14 @@ export default function WalletRecoveryPage() {
     }
     setIsProcessing(true);
     await new Promise(resolve => setTimeout(resolve, 1500));
+    await recoverAllKeyShares();
     setIsProcessing(false);
     setStep(3);
   };
 
   const handleComplete = () => {
     toast.success('钱包恢复成功');
-    navigate('/home');
+    navigate(returnTo, { replace: true });
   };
 
   // Render method selection
@@ -208,31 +208,6 @@ export default function WalletRecoveryPage() {
         </div>
       </div>
 
-      {/* Advanced option */}
-      <div className="pt-4 border-t border-border">
-        <p className="text-xs font-medium text-muted-foreground mb-2 px-1">高级选项</p>
-        {recoveryOptions.filter(o => o.warning).map(option => (
-          <motion.button
-            key={option.id}
-            whileTap={{ scale: 0.98 }}
-            onClick={() => handleSelectMethod(option.id)}
-            className="w-full p-4 rounded-xl border border-destructive/20 bg-destructive/5 flex items-center gap-4"
-          >
-            <div className={cn("w-10 h-10 rounded-full flex items-center justify-center", option.bgColor)}>
-              <option.icon className={cn("w-5 h-5", option.iconColor)} />
-            </div>
-            <div className="flex-1 text-left">
-              <div className="flex items-center gap-2">
-                <p className="font-medium text-foreground">{option.title}</p>
-                <AlertTriangle className="w-3.5 h-3.5 text-warning" />
-              </div>
-              <p className="text-xs text-muted-foreground">{option.description}</p>
-            </div>
-            <ChevronRight className="w-4 h-4 text-muted-foreground" />
-          </motion.button>
-        ))
-        }
-      </div>
     </motion.div>
   );
 
@@ -530,107 +505,6 @@ export default function WalletRecoveryPage() {
     return null;
   };
 
-  // Render private key import flow
-  const renderPrivateKeyFlow = () => {
-    if (step === 1) {
-      return (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="space-y-6"
-        >
-          <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-xl">
-            <div className="flex items-start gap-3">
-              <AlertTriangle className="w-5 h-5 text-destructive shrink-0 mt-0.5" />
-              <div>
-                <p className="font-medium text-destructive mb-1">重要提示</p>
-                <p className="text-sm text-muted-foreground">
-                  通过私钥导入的钱包将以自托管模式运行，无法享受 MPC 多签保护和 Cobo 安全服务。
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="text-center">
-            <div className="w-16 h-16 rounded-full bg-destructive/10 mx-auto mb-4 flex items-center justify-center">
-              <Key className="w-8 h-8 text-destructive" />
-            </div>
-            <h2 className="text-lg font-semibold text-foreground mb-2">选择私钥文件</h2>
-            <p className="text-sm text-muted-foreground">
-              选择您的 .key 私钥文件
-            </p>
-          </div>
-
-          <div className="border-2 border-dashed border-destructive/30 rounded-xl p-8 text-center">
-            <Key className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
-            <p className="text-sm text-muted-foreground mb-3">点击或拖拽私钥文件到此处</p>
-            <Button variant="outline" onClick={() => setStep(2)}>
-              选择文件
-            </Button>
-          </div>
-        </motion.div>
-      );
-    }
-
-    if (step === 2) {
-      return (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="space-y-6"
-        >
-          <div className="text-center">
-            <h2 className="text-lg font-semibold text-foreground mb-2">输入私钥密码</h2>
-            <p className="text-sm text-muted-foreground">
-              请输入私钥文件的加密密码
-            </p>
-          </div>
-
-          <div className="p-3 bg-destructive/5 rounded-lg flex items-center gap-3">
-            <Key className="w-5 h-5 text-destructive" />
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate">wallet_privatekey.key</p>
-              <p className="text-xs text-muted-foreground">加密私钥文件</p>
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            <div className="relative">
-              <Input
-                type={showPassword ? 'text' : 'password'}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="输入私钥密码"
-                className="pr-10"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-              >
-                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              </button>
-            </div>
-
-            <Button 
-              className="w-full bg-destructive" 
-              onClick={handlePasswordSubmit}
-              disabled={isProcessing || !password.trim()}
-            >
-              {isProcessing ? (
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              ) : (
-                <Key className="w-4 h-4 mr-2" />
-              )}
-              {isProcessing ? '导入中...' : '导入私钥'}
-            </Button>
-          </div>
-        </motion.div>
-      );
-    }
-
-    return null;
-  };
 
   // Mock recovered wallet data
   const recoveredWallet = {
@@ -663,32 +537,14 @@ export default function WalletRecoveryPage() {
 
       <h2 className="text-xl font-bold text-foreground mb-1 text-center">恢复成功</h2>
       <p className="text-sm text-muted-foreground text-center mb-6">
-        {selectedMethod === 'private_key' 
-          ? '钱包已导入，运行于自托管模式'
-          : '您的钱包已成功恢复'}
+        您的钱包已成功恢复
       </p>
-
-      {selectedMethod === 'private_key' && (
-        <div className="p-3 bg-warning/10 border border-warning/20 rounded-xl mb-4 w-full">
-          <div className="flex items-center gap-2 text-warning text-sm">
-            <AlertTriangle className="w-4 h-4" />
-            <span>此钱包为自托管模式，无 MPC 保护</span>
-          </div>
-        </div>
-      )}
 
       {/* Wallet Info Card */}
       <div className="card-elevated p-4 w-full mb-4">
         <div className="flex items-center gap-3 mb-3 pb-3 border-b border-border">
-          <div className={cn(
-            "w-12 h-12 rounded-full flex items-center justify-center",
-            selectedMethod === 'private_key' ? "bg-warning/10" : "bg-accent/10"
-          )}>
-            {selectedMethod === 'private_key' ? (
-              <Key className="w-6 h-6 text-warning" />
-            ) : (
-              <Shield className="w-6 h-6 text-accent" />
-            )}
+          <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center">
+            <Shield className="w-6 h-6 text-accent" />
           </div>
           <div className="flex-1">
             <p className="font-semibold text-foreground">{recoveredWallet.name}</p>
@@ -763,8 +619,6 @@ export default function WalletRecoveryPage() {
         return renderCloudFlow();
       case 'local_file':
         return renderLocalFileFlow();
-      case 'private_key':
-        return renderPrivateKeyFlow();
       default:
         return renderMethodSelection();
     }
