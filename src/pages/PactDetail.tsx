@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -16,20 +16,104 @@ import { useT } from '@/lib/i18n';
 import type { PactStatus, PolicyRule, AIInterpretation } from '@/types/pact';
 
 // ─── AI Interpretation Card ───────────────────────────────────
+const THINKING_PHRASES = [
+  '正在理解你的指令...',
+  '核查风险点...',
+  '梳理关键信息...',
+];
+const LOADING_DURATION_MS = 3000;
+const TYPE_CHAR_INTERVAL_MS = 30;
+const INTER_POINT_DELAY_MS = 180;
+
 function AIInterpretationCard({
   interpretation,
   onContinue,
+  inGroup = false,
 }: {
   interpretation: AIInterpretation;
   onContinue: () => void;
+  /** When true, renders as a row inside the larger grouped card (no outer border/shadow). */
+  inGroup?: boolean;
 }) {
+  const [phase, setPhase] = useState<'loading' | 'typing' | 'done'>('loading');
+  const [thinkingIdx, setThinkingIdx] = useState(0);
+  const [typedLines, setTypedLines] = useState<string[]>([]);
+
+  // Cycle through thinking phrases while loading
+  useEffect(() => {
+    if (phase !== 'loading') return;
+    const interval = setInterval(() => {
+      setThinkingIdx(i => (i + 1) % THINKING_PHRASES.length);
+    }, 1500);
+    return () => clearInterval(interval);
+  }, [phase]);
+
+  // Transition loading → typing after delay
+  useEffect(() => {
+    if (phase !== 'loading') return;
+    const timer = setTimeout(() => setPhase('typing'), LOADING_DURATION_MS);
+    return () => clearTimeout(timer);
+  }, [phase]);
+
+  // Typewriter: type each point's text sequentially
+  useEffect(() => {
+    if (phase !== 'typing') return;
+    let cancelled = false;
+
+    const points = interpretation.points;
+    let lineIdx = 0;
+    let charIdx = 0;
+
+    const typeNextChar = () => {
+      if (cancelled) return;
+      if (lineIdx >= points.length) {
+        setPhase('done');
+        return;
+      }
+      const fullLine = points[lineIdx].text;
+      if (charIdx <= fullLine.length) {
+        setTypedLines(prev => {
+          const next = [...prev];
+          next[lineIdx] = fullLine.slice(0, charIdx);
+          return next;
+        });
+        charIdx++;
+        setTimeout(typeNextChar, TYPE_CHAR_INTERVAL_MS);
+      } else {
+        // Line finished
+        lineIdx++;
+        charIdx = 0;
+        // Only push a new empty line if there's still another point to type
+        if (lineIdx < points.length) {
+          setTypedLines(prev => [...prev, '']);
+          setTimeout(typeNextChar, INTER_POINT_DELAY_MS);
+        } else {
+          // All done — transition to 'done' state (removes cursor)
+          setPhase('done');
+        }
+      }
+    };
+
+    setTypedLines(['']);
+    setTimeout(typeNextChar, 120);
+
+    return () => { cancelled = true; };
+  }, [phase, interpretation.points]);
+
+  const isLoading = phase === 'loading';
+  const isTyping = phase === 'typing';
+  const currentTypingLineIdx = typedLines.length - 1;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-      className="relative rounded-2xl overflow-hidden border border-indigo-200/50"
-      style={{ boxShadow: '0 4px 20px rgba(99, 102, 241, 0.12)' }}
+      className={cn(
+        'relative overflow-hidden',
+        inGroup ? '' : 'rounded-2xl border border-indigo-200/50'
+      )}
+      style={inGroup ? undefined : { boxShadow: '0 4px 20px rgba(99, 102, 241, 0.12)' }}
     >
       {/* Aurora animated background */}
       <style>{`
@@ -105,42 +189,87 @@ function AIInterpretationCard({
         {/* Label row */}
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-1.5">
-            <Sparkles className="w-3.5 h-3.5 text-indigo-600" strokeWidth={2} />
+            <Sparkles
+              className={cn(
+                'w-3.5 h-3.5 text-indigo-600',
+                isLoading && 'animate-pulse'
+              )}
+              strokeWidth={2}
+            />
             <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-indigo-600">
-              AI 解读
+              AI 洞察
             </span>
           </div>
-          <button
-            onClick={onContinue}
-            className="flex items-center gap-0.5 text-[12px] font-semibold text-indigo-600 active:opacity-60 transition-opacity"
-          >
-            继续对话
-            <ArrowRight className="w-3 h-3" strokeWidth={2} />
-          </button>
+          {!isLoading && (
+            <motion.button
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.2 }}
+              onClick={onContinue}
+              className="flex items-center gap-0.5 text-[12px] font-semibold text-indigo-600 active:opacity-60 transition-opacity"
+            >
+              继续对话
+              <ArrowRight className="w-3 h-3" strokeWidth={2} />
+            </motion.button>
+          )}
         </div>
 
-        {/* Points */}
-        <div className="space-y-2">
-          {interpretation.points.map((point, i) => (
-            <p key={i} className="text-[14px] text-foreground/85 leading-relaxed">
-              · {point.text}
-            </p>
-          ))}
-        </div>
+        {/* Body: loading / typing / done */}
+        {isLoading ? (
+          <div className="flex items-center gap-2 min-h-[60px]">
+            <AnimatePresence mode="wait">
+              <motion.span
+                key={thinkingIdx}
+                initial={{ opacity: 0, y: 4 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -4 }}
+                transition={{ duration: 0.25 }}
+                className="text-[14px] text-foreground/70 italic"
+              >
+                {THINKING_PHRASES[thinkingIdx]}
+              </motion.span>
+            </AnimatePresence>
+            <motion.span
+              animate={{ opacity: [1, 0] }}
+              transition={{ duration: 0.6, repeat: Infinity, repeatType: 'reverse' }}
+              className="inline-block w-[2px] h-4 bg-indigo-500 rounded-full"
+            />
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {(isTyping ? typedLines : interpretation.points.map(p => p.text)).map((line, i) => {
+              const isCurrentTypingLine = isTyping && i === currentTypingLineIdx;
+              return (
+                <p key={i} className="text-[14px] text-foreground/85 leading-relaxed">
+                  · {line}
+                  {isCurrentTypingLine && (
+                    <motion.span
+                      animate={{ opacity: [1, 0] }}
+                      transition={{ duration: 0.6, repeat: Infinity, repeatType: 'reverse' }}
+                      className="inline-block w-[2px] h-3.5 ml-0.5 align-middle bg-indigo-500 rounded-full"
+                    />
+                  )}
+                </p>
+              );
+            })}
+          </div>
+        )}
       </div>
     </motion.div>
   );
 }
 
-function CollapsibleSection({ title, icon: Icon, defaultOpen = false, children }: {
+function CollapsibleSection({ title, icon: Icon, defaultOpen = false, children, inGroup = false }: {
   title: string;
   icon: typeof Shield;
   defaultOpen?: boolean;
   children: React.ReactNode;
+  /** When true, renders as a row inside a larger grouped card (no outer border/shadow). */
+  inGroup?: boolean;
 }) {
   const [open, setOpen] = useState(defaultOpen);
-  return (
-    <div className="bg-white rounded-2xl overflow-hidden border border-border/60 shadow-sm">
+  const content = (
+    <>
       <button
         onClick={() => setOpen(!open)}
         className="w-full flex items-center gap-3 px-4 py-3.5 text-left"
@@ -162,6 +291,16 @@ function CollapsibleSection({ title, icon: Icon, defaultOpen = false, children }
           </motion.div>
         )}
       </AnimatePresence>
+    </>
+  );
+
+  if (inGroup) {
+    return <div>{content}</div>;
+  }
+
+  return (
+    <div className="bg-white rounded-2xl overflow-hidden border border-border/60 shadow-sm">
+      {content}
     </div>
   );
 }
@@ -426,32 +565,12 @@ export default function PactDetail() {
     >
       <div className="px-4 py-4 space-y-3" style={{ paddingBottom: isPending || showRevoke ? 90 : 24 }}>
 
-        {/* ===== AI Interpretation (hero) ===== */}
-        {pact.aiInterpretation && (
-          <AIInterpretationCard
-            interpretation={pact.aiInterpretation}
-            onContinue={() => {
-              navigate('/assistant', {
-                state: {
-                  initialContext: {
-                    type: 'pact',
-                    pactId: pact.id,
-                    pactTitle: pact.title,
-                    pactPrompt: pact.userPrompt,
-                  },
-                },
-              });
-            }}
-          />
-        )}
-
-        {/* ===== Header card: Status + Key info ===== */}
+        {/* ===== Intent card: Status + User prompt + AI-summarized intent ===== */}
         <motion.div
           className="bg-white rounded-2xl border border-border/60 shadow-sm overflow-hidden"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
         >
-          {/* Status bar */}
           <div className="px-4 pt-4 pb-3">
             <div className="flex items-center gap-2 mb-3">
               <StatusIcon className={cn('w-4 h-4', status.color)} strokeWidth={1.5} />
@@ -472,58 +591,60 @@ export default function PactDetail() {
           </div>
         </motion.div>
 
-        {/* ===== Collapsible sections ===== */}
+        {/* ===== Unified grouped card: AI summary + collapsible sections ===== */}
+        <motion.div
+          className="bg-white rounded-2xl border border-border/60 shadow-sm overflow-hidden"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.05 }}
+        >
+          {/* AI Summary — default open, Aurora background */}
+          {pact.aiInterpretation && (
+            <>
+              <AIInterpretationCard
+                interpretation={pact.aiInterpretation}
+                onContinue={() => {
+                  navigate('/assistant', {
+                    state: {
+                      initialContext: {
+                        type: 'pact',
+                        pactId: pact.id,
+                        pactTitle: pact.title,
+                        pactPrompt: pact.userPrompt,
+                      },
+                    },
+                  });
+                }}
+                inGroup
+              />
+              <div className="h-px bg-border/40" />
+            </>
+          )}
 
-        {/* Execution Plan */}
-        <CollapsibleSection title="执行计划" icon={FileText}>
-          <div className="space-y-4">
-            <div>
-              <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">概要</p>
-              <p className="text-[13px] text-foreground/80 leading-relaxed">{pact.executionSummary}</p>
-            </div>
-            <div>
-              <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">合约操作</p>
+          {/* Risk Controls / Policies */}
+          <CollapsibleSection title="风控限制" icon={Shield} inGroup>
+            {pact.policies && pact.policies.length > 0 ? (
+              <div className="space-y-3">
+                {pact.policies.map((policy, pi) => (
+                  <PolicyCard key={pi} policy={policy} />
+                ))}
+              </div>
+            ) : (
               <div className="space-y-2">
-                {pact.contractOps.map((op, i) => (
-                  <div key={i} className="flex items-start gap-2">
-                    <span className="text-[13px] text-foreground/60 mt-0.5">•</span>
-                    <div>
-                      <span className="text-[13px] font-medium text-foreground">{op.label}: </span>
-                      <span className="text-[13px] text-foreground/70">{op.description}</span>
-                    </div>
+                {pact.riskControls.map((rc, i) => (
+                  <div key={i} className="flex items-center justify-between py-1.5">
+                    <span className="text-[13px] text-muted-foreground">{rc.label}</span>
+                    <span className="text-[13px] font-medium text-foreground">{rc.value}</span>
                   </div>
                 ))}
               </div>
-            </div>
-            <div>
-              <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">执行计划</p>
-              <p className="text-[13px] text-foreground/80 leading-relaxed">{pact.schedule}</p>
-            </div>
-          </div>
-        </CollapsibleSection>
+            )}
+          </CollapsibleSection>
 
-        {/* Risk Controls / Policies */}
-        <CollapsibleSection title="风控限制" icon={Shield}>
-          {pact.policies && pact.policies.length > 0 ? (
-            <div className="space-y-3">
-              {pact.policies.map((policy, pi) => (
-                <PolicyCard key={pi} policy={policy} />
-              ))}
-            </div>
-          ) : (
-            <div className="space-y-2">
-              {pact.riskControls.map((rc, i) => (
-                <div key={i} className="flex items-center justify-between py-1.5">
-                  <span className="text-[13px] text-muted-foreground">{rc.label}</span>
-                  <span className="text-[13px] font-medium text-foreground">{rc.value}</span>
-                </div>
-              ))}
-            </div>
-          )}
-        </CollapsibleSection>
+          <div className="h-px bg-border/40" />
 
-        {/* Exit Conditions */}
-        <CollapsibleSection title="退出条件" icon={LogOut}>
+          {/* Exit Conditions */}
+          <CollapsibleSection title="退出条件" icon={LogOut} inGroup>
           {pact.exitConditionList && pact.exitConditionList.length > 0 ? (
             isRunning ? (
               <div className="space-y-4">
@@ -574,12 +695,45 @@ export default function PactDetail() {
           ) : (
             <p className="text-[13px] text-foreground/80 leading-relaxed">{pact.exitConditions}</p>
           )}
-        </CollapsibleSection>
+          </CollapsibleSection>
 
-        {/* Details */}
-        <CollapsibleSection title="详细信息" icon={Info}>
-          <DetailsContent pact={pact} />
-        </CollapsibleSection>
+          <div className="h-px bg-border/40" />
+
+          {/* Execution Plan */}
+          <CollapsibleSection title="执行计划" icon={FileText} inGroup>
+            <div className="space-y-4">
+              <div>
+                <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">概要</p>
+                <p className="text-[13px] text-foreground/80 leading-relaxed">{pact.executionSummary}</p>
+              </div>
+              <div>
+                <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">合约操作</p>
+                <div className="space-y-2">
+                  {pact.contractOps.map((op, i) => (
+                    <div key={i} className="flex items-start gap-2">
+                      <span className="text-[13px] text-foreground/60 mt-0.5">•</span>
+                      <div>
+                        <span className="text-[13px] font-medium text-foreground">{op.label}: </span>
+                        <span className="text-[13px] text-foreground/70">{op.description}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">执行计划</p>
+                <p className="text-[13px] text-foreground/80 leading-relaxed">{pact.schedule}</p>
+              </div>
+            </div>
+          </CollapsibleSection>
+
+          <div className="h-px bg-border/40" />
+
+          {/* Details */}
+          <CollapsibleSection title="详细信息" icon={Info} inGroup>
+            <DetailsContent pact={pact} />
+          </CollapsibleSection>
+        </motion.div>
       </div>
 
       {/* ===== Fixed bottom action bar ===== */}

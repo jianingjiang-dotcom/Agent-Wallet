@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Eye, Wrench, ArrowRight } from 'lucide-react';
+import { Search, Eye, Wrench, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { mockRecipes, categoryLabels, formatChain, type Recipe, type RecipeCategory } from '@/lib/mock-recipes';
 import { RecipeIcon } from '@/components/RecipeIcon';
@@ -227,25 +227,29 @@ export default function RecipeMarketplace() {
         </AnimatePresence>
 
         {/* Pagination */}
-        {totalPages > 0 && (
-          <div className="flex items-center justify-between mt-10 p-4 border border-gray-100 rounded-xl bg-white">
-            <p className="text-sm text-gray-500">Page {page} of {totalPages}</p>
-            <div className="flex gap-2">
-              <button
-                onClick={() => setPage(p => Math.max(1, p - 1))}
-                disabled={page === 1}
-                className="px-4 py-2 rounded-lg border border-gray-200 text-sm text-gray-600 disabled:opacity-30 hover:bg-gray-50 transition-colors"
-              >
-                Previous
-              </button>
-              <button
-                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                disabled={page === totalPages}
-                className="px-4 py-2 rounded-lg border border-gray-200 text-sm text-gray-600 disabled:opacity-30 hover:bg-gray-50 transition-colors"
-              >
-                Next
-              </button>
-            </div>
+        {totalPages > 1 && (
+          <div className="flex items-center justify-center gap-4 mt-10">
+            <button
+              onClick={() => setPage(p => Math.max(1, p - 1))}
+              disabled={page === 1}
+              aria-label="Previous page"
+              className="w-9 h-9 flex items-center justify-center rounded-full text-gray-500 disabled:opacity-30 disabled:cursor-not-allowed hover:text-gray-900 hover:bg-gray-100 transition-colors"
+            >
+              <ChevronLeft className="w-4 h-4" strokeWidth={2} />
+            </button>
+            <span className="text-sm tabular-nums text-gray-600">
+              <span className="font-semibold text-gray-900">{page}</span>
+              <span className="mx-1 text-gray-400">/</span>
+              <span>{totalPages}</span>
+            </span>
+            <button
+              onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+              disabled={page === totalPages}
+              aria-label="Next page"
+              className="w-9 h-9 flex items-center justify-center rounded-full text-gray-500 disabled:opacity-30 disabled:cursor-not-allowed hover:text-gray-900 hover:bg-gray-100 transition-colors"
+            >
+              <ChevronRight className="w-4 h-4" strokeWidth={2} />
+            </button>
           </div>
         )}
       </div>
