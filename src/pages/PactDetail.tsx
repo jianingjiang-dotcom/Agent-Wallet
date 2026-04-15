@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Bot, Clock, ChevronDown, Shield, FileText, AlertTriangle,
   CheckCircle2, XCircle, Zap, Calendar, LogOut, ShieldOff,
-  Pencil, Eye, Sparkles, Wallet,
+  Pencil, Eye, Wallet, Info, Copy, Sparkles, ArrowRight,
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
@@ -13,7 +13,124 @@ import { cn } from '@/lib/utils';
 import { mockPacts } from '@/lib/mock-pacts';
 import { toast } from '@/lib/toast';
 import { useT } from '@/lib/i18n';
-import type { PactStatus, PolicyRule } from '@/types/pact';
+import type { PactStatus, PolicyRule, AIInterpretation } from '@/types/pact';
+
+// ─── AI Interpretation Card ───────────────────────────────────
+function AIInterpretationCard({
+  interpretation,
+  onContinue,
+}: {
+  interpretation: AIInterpretation;
+  onContinue: () => void;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+      className="relative rounded-2xl overflow-hidden border border-indigo-200/50"
+      style={{ boxShadow: '0 4px 20px rgba(99, 102, 241, 0.12)' }}
+    >
+      {/* Aurora animated background */}
+      <style>{`
+        @keyframes ai-aurora-1 {
+          0%   { transform: translate3d(0, 0, 0) scale(1); opacity: 0.7; }
+          50%  { transform: translate3d(140px, 80px, 0) scale(1.15); opacity: 0.95; }
+          100% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.7; }
+        }
+        @keyframes ai-aurora-2 {
+          0%   { transform: translate3d(0, 0, 0) scale(1); opacity: 0.55; }
+          50%  { transform: translate3d(-120px, 90px, 0) scale(1.2); opacity: 0.85; }
+          100% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.55; }
+        }
+        @keyframes ai-aurora-3 {
+          0%   { transform: translate3d(0, 0, 0) scale(1); opacity: 0.5; }
+          50%  { transform: translate3d(80px, -60px, 0) scale(1.15); opacity: 0.75; }
+          100% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.5; }
+        }
+        .ai-blob {
+          position: absolute;
+          border-radius: 9999px;
+          filter: blur(60px);
+          will-change: transform, opacity;
+          pointer-events: none;
+          mix-blend-mode: multiply;
+        }
+        .ai-blob-1 {
+          top: -20%; left: -10%;
+          width: 280px; height: 240px;
+          background: radial-gradient(circle, rgba(100, 130, 255, 0.85) 0%, rgba(100, 130, 255, 0) 65%);
+          animation: ai-aurora-1 14s ease-in-out infinite;
+        }
+        .ai-blob-2 {
+          bottom: -30%; right: -10%;
+          width: 300px; height: 250px;
+          background: radial-gradient(circle, rgba(181, 159, 255, 0.8) 0%, rgba(181, 159, 255, 0) 65%);
+          animation: ai-aurora-2 18s ease-in-out infinite;
+        }
+        .ai-blob-3 {
+          top: 30%; left: 35%;
+          width: 220px; height: 180px;
+          background: radial-gradient(circle, rgba(130, 200, 255, 0.6) 0%, rgba(130, 200, 255, 0) 65%);
+          animation: ai-aurora-3 16s ease-in-out infinite;
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .ai-blob-1, .ai-blob-2, .ai-blob-3 { animation: none; }
+        }
+      `}</style>
+
+      {/* Base gradient */}
+      <div
+        className="absolute inset-0"
+        style={{ background: 'linear-gradient(135deg, #f4f1ff 0%, #eef0ff 50%, #f0f7fb 100%)' }}
+      />
+
+      {/* Aurora blobs */}
+      <div className="ai-blob ai-blob-1" />
+      <div className="ai-blob ai-blob-2" />
+      <div className="ai-blob ai-blob-3" />
+
+      {/* White glass overlay — keeps text readable */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background: 'rgba(255, 255, 255, 0.42)',
+          backdropFilter: 'blur(8px)',
+          WebkitBackdropFilter: 'blur(8px)',
+        }}
+      />
+
+      {/* Content */}
+      <div className="relative z-10 p-5">
+        {/* Label row */}
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-1.5">
+            <Sparkles className="w-3.5 h-3.5 text-indigo-600" strokeWidth={2} />
+            <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-indigo-600">
+              AI 解读
+            </span>
+          </div>
+          <button
+            onClick={onContinue}
+            className="flex items-center gap-0.5 text-[12px] font-semibold text-indigo-600 active:opacity-60 transition-opacity"
+          >
+            继续对话
+            <ArrowRight className="w-3 h-3" strokeWidth={2} />
+          </button>
+        </div>
+
+        {/* Points */}
+        <div className="space-y-2">
+          {interpretation.points.map((point, i) => (
+            <p key={i} className="text-[14px] text-foreground/85 leading-relaxed">
+              · {point.text}
+            </p>
+          ))}
+        </div>
+      </div>
+    </motion.div>
+  );
+}
 
 function CollapsibleSection({ title, icon: Icon, defaultOpen = false, children }: {
   title: string;
@@ -66,6 +183,71 @@ const windowLabels: Record<string, string> = {
 function shortenAddr(addr: string) {
   if (addr.length <= 14) return addr;
   return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
+}
+
+function shortenId(id: string) {
+  if (id.length <= 16) return id;
+  return `${id.slice(0, 8)}...${id.slice(-6)}`;
+}
+
+// ─── Details (Apple Settings grouped list style) ────────────
+function DetailsContent({ pact }: { pact: any }) {
+  const pactId = pact.id || 'pact-001';
+  const agentId = `agent-${pactId.slice(-3)}`;
+  const walletId = 'wallet-1';
+  const walletName = '主钱包';
+
+  const handleCopy = async (value: string, label: string) => {
+    try {
+      await navigator.clipboard.writeText(value);
+      toast.success(`${label} 已复制`);
+    } catch {
+      toast.error('复制失败');
+    }
+  };
+
+  const rows: Array<{ label: string; value: string; copyable?: boolean; mono?: boolean }> = [
+    { label: 'Agent', value: pact.agentName },
+    { label: 'Wallet', value: walletName },
+    { label: 'Pact ID', value: pactId, copyable: true, mono: true },
+    { label: 'Agent ID', value: agentId, copyable: true, mono: true },
+    { label: 'Wallet ID', value: walletId, copyable: true, mono: true },
+  ];
+
+  return (
+    <div className="-mx-4 -mb-4">
+      <div className="divide-y divide-border/40">
+        {rows.map((row) => (
+          <div
+            key={row.label}
+            className="flex items-center justify-between px-4 py-3 min-h-[44px]"
+          >
+            <span className="text-[13px] text-muted-foreground shrink-0">{row.label}</span>
+            <button
+              onClick={row.copyable ? () => handleCopy(row.value, row.label) : undefined}
+              className={cn(
+                'flex items-center gap-1.5 min-w-0 ml-3',
+                row.copyable && 'active:opacity-60 transition-opacity'
+              )}
+              disabled={!row.copyable}
+            >
+              <span
+                className={cn(
+                  'text-[13px] font-medium text-foreground truncate',
+                  row.mono && 'font-mono'
+                )}
+              >
+                {row.mono ? shortenId(row.value) : row.value}
+              </span>
+              {row.copyable && (
+                <Copy className="w-3.5 h-3.5 text-muted-foreground/60 shrink-0" strokeWidth={1.5} />
+              )}
+            </button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 }
 
 function PolicyCard({ policy }: { policy: PolicyRule }) {
@@ -241,30 +423,27 @@ export default function PactDetail() {
       showNav={false}
       showSecurityBanner={false}
       pageBg="bg-page"
-      rightAction={
-        <motion.button
-          onClick={() => navigate('/assistant')}
-          className="relative flex items-center gap-1.5 pl-2 pr-2.5 py-1 rounded-full overflow-hidden active:scale-95 transition-transform"
-          style={{
-            background: 'linear-gradient(135deg, #7C3AED, #6366F1, #3B82F6)',
-            boxShadow: '0 2px 8px rgba(99, 102, 241, 0.4)',
-          }}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.92 }}
-        >
-          {/* Shimmer overlay */}
-          <motion.div
-            className="absolute inset-0 opacity-30"
-            style={{ background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.5) 50%, transparent 100%)' }}
-            animate={{ x: ['-100%', '200%'] }}
-            transition={{ duration: 2.5, repeat: Infinity, ease: 'linear' }}
-          />
-          <Sparkles className="w-3 h-3 text-white relative z-10" strokeWidth={2} />
-          <span className="text-[11px] font-semibold text-white relative z-10 tracking-wide">Ask AI</span>
-        </motion.button>
-      }
     >
       <div className="px-4 py-4 space-y-3" style={{ paddingBottom: isPending || showRevoke ? 90 : 24 }}>
+
+        {/* ===== AI Interpretation (hero) ===== */}
+        {pact.aiInterpretation && (
+          <AIInterpretationCard
+            interpretation={pact.aiInterpretation}
+            onContinue={() => {
+              navigate('/assistant', {
+                state: {
+                  initialContext: {
+                    type: 'pact',
+                    pactId: pact.id,
+                    pactTitle: pact.title,
+                    pactPrompt: pact.userPrompt,
+                  },
+                },
+              });
+            }}
+          />
+        )}
 
         {/* ===== Header card: Status + Key info ===== */}
         <motion.div
@@ -281,10 +460,8 @@ export default function PactDetail() {
               </span>
             </div>
 
-            <h2 className="text-[17px] font-bold text-foreground leading-snug mb-2">{pact.title}</h2>
-
             {/* Original prompt — quote style */}
-            <div className="flex gap-3 mt-3">
+            <div className="flex gap-3">
               <div className="w-[3px] rounded-full bg-[#1F32D6] shrink-0" />
               <p className="text-[16px] font-semibold text-foreground leading-relaxed">
                 "{pact.userPrompt}"
@@ -292,26 +469,6 @@ export default function PactDetail() {
             </div>
 
             <p className="text-[13px] text-muted-foreground leading-relaxed mt-3">{pact.description}</p>
-          </div>
-
-          <div className="h-px bg-border/40 mx-4" />
-
-          {/* Key meta: Agent, Wallet */}
-          <div className="px-4 py-3.5 space-y-2.5">
-            <div className="flex items-center justify-between text-[12px]">
-              <span className="text-muted-foreground flex items-center gap-1.5">
-                <Bot className="w-3.5 h-3.5" strokeWidth={1.5} />
-                Agent
-              </span>
-              <span className="font-medium text-foreground">{pact.agentName}</span>
-            </div>
-            <div className="flex items-center justify-between text-[12px]">
-              <span className="text-muted-foreground flex items-center gap-1.5">
-                <Wallet className="w-3.5 h-3.5" strokeWidth={1.5} />
-                Wallet
-              </span>
-              <span className="font-medium text-foreground">主钱包</span>
-            </div>
           </div>
         </motion.div>
 
@@ -417,6 +574,11 @@ export default function PactDetail() {
           ) : (
             <p className="text-[13px] text-foreground/80 leading-relaxed">{pact.exitConditions}</p>
           )}
+        </CollapsibleSection>
+
+        {/* Details */}
+        <CollapsibleSection title="详细信息" icon={Info}>
+          <DetailsContent pact={pact} />
         </CollapsibleSection>
       </div>
 

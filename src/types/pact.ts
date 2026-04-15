@@ -35,6 +35,22 @@ export interface Pact {
   exitConditionList?: ExitCondition[];
   riskRules: PactRiskRule[];
   policies?: PolicyRule[];
+  /** AI-generated plain-language interpretation of this Pact */
+  aiInterpretation?: AIInterpretation;
+}
+
+export type AIPointIcon = 'money' | 'time' | 'warning' | 'shield' | 'chart';
+
+export interface AIInterpretationPoint {
+  icon: AIPointIcon;
+  text: string;
+}
+
+export interface AIInterpretation {
+  /** One-sentence summary of what this Pact does */
+  summary: string;
+  /** 2-3 key points (risks, costs, constraints) */
+  points: AIInterpretationPoint[];
 }
 
 export type ExitConditionType = 'tx_count' | 'tx_amount' | 'duration';

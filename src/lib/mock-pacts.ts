@@ -58,6 +58,14 @@ export const mockPacts: Pact[] = [
         is_active: true,
       },
     ],
+    aiInterpretation: {
+      summary: '基于价格信号管理 SushiSwap V3 流动性：ETH 低于 $2050 时建仓，高于 $2060 时撤仓。',
+      points: [
+        { icon: 'chart', text: '每次建仓约 0.0001 ETH + 等值 USDC，窄幅 ±5% 区间' },
+        { icon: 'shield', text: '仅与 SushiSwap V3 合约交互，其他地址一律拒绝' },
+        { icon: 'warning', text: '窄区间意味着价格偏离会频繁触发 rebalance' },
+      ],
+    },
   },
   {
     id: 'pact-002',
@@ -134,6 +142,14 @@ export const mockPacts: Pact[] = [
         is_active: true,
       },
     ],
+    aiInterpretation: {
+      summary: '这是一个 ETH 定投策略，每周一自动用 Uniswap V3 买入 $500 ETH，持续 3 个月。',
+      points: [
+        { icon: 'money', text: '累计投入约 $6,000，分 12 次执行' },
+        { icon: 'time', text: '执行窗口仅限周一 UTC 9:00，偏离会被拒绝' },
+        { icon: 'warning', text: '价格波动由你承担，无止损保护' },
+      ],
+    },
   },
   {
     id: 'pact-002b',
@@ -187,6 +203,14 @@ export const mockPacts: Pact[] = [
         is_active: true,
       },
     ],
+    aiInterpretation: {
+      summary: '每日自动领取 AAVE V3 Base 上的 USDC 收益并重新存入，实现复利增长。',
+      points: [
+        { icon: 'chart', text: '预期年化约 3-5%，随市场利率浮动' },
+        { icon: 'shield', text: '仅限 Base 链 AAVE 合约，其他操作被拒绝' },
+        { icon: 'warning', text: '无强制撤出机制，长期委托存在智能合约风险' },
+      ],
+    },
   },
   {
     id: 'pact-002c',
