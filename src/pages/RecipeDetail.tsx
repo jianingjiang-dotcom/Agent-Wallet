@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Eye, Wrench, Copy, CheckCircle2, Link2, Sparkles } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Eye, Wrench, Copy, CheckCircle2, Link2, Sparkles, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from '@/lib/toast';
 import { mockRecipes, categoryLabels, formatChain } from '@/lib/mock-recipes';
@@ -168,7 +168,12 @@ export default function RecipeDetail() {
           <div className="flex items-start gap-4 mb-5">
             <RecipeIcon recipe={recipe} size="lg" />
             <div className="flex-1 min-w-0">
-              <h1 className="text-2xl font-bold text-gray-900">{recipe.title}</h1>
+              <div className="flex items-center gap-2">
+                <h1 className="text-2xl font-bold text-gray-900">{recipe.title}</h1>
+                {recipe.featured && (
+                  <Star className="w-4.5 h-4.5 text-amber-500 fill-amber-500 shrink-0" strokeWidth={1.5} title="Featured" />
+                )}
+              </div>
               <p className="text-gray-500 mt-1">{recipe.description}</p>
             </div>
           </div>

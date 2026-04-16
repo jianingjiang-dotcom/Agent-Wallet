@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Eye, Wrench, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, Eye, Wrench, ArrowRight, ChevronLeft, ChevronRight, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { mockRecipes, categoryLabels, formatChain, type Recipe, type RecipeCategory } from '@/lib/mock-recipes';
 import { RecipeIcon } from '@/components/RecipeIcon';
@@ -32,10 +32,12 @@ export default function RecipeMarketplace() {
   const [chainFilter, setChainFilter] = useState('');
   const [category, setCategory] = useState<FilterCategory>('all');
   const [sortBy, setSortBy] = useState<SortBy>('popular');
+  const [featuredOnly, setFeaturedOnly] = useState(false);
   const [page, setPage] = useState(1);
 
   const filtered = useMemo(() => {
     let list = mockRecipes;
+    if (featuredOnly) list = list.filter(r => r.featured);
     if (category !== 'all') list = list.filter(r => r.category === category);
     if (search.trim()) {
       const q = search.toLowerCase();
@@ -54,7 +56,7 @@ export default function RecipeMarketplace() {
       return b.view_count - a.view_count;
     });
     return list;
-  }, [category, search, chainFilter, sortBy]);
+  }, [category, search, chainFilter, sortBy, featuredOnly]);
 
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
   const paginated = filtered.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
@@ -186,18 +188,33 @@ export default function RecipeMarketplace() {
       {/* ══ Results ══ */}
       <div className="max-w-6xl mx-auto px-6 py-10">
 
-        {/* Count + Sort */}
+        {/* Count + Sort + Featured toggle */}
         <div className="flex items-center justify-between mb-6">
           <p className="text-sm text-gray-400">
             {filtered.length} recipe{filtered.length !== 1 ? 's' : ''} found
           </p>
           <div className="flex items-center gap-2">
-            <label htmlFor="recipe-sort" className="text-sm text-gray-400">Sort by</label>
+            {/* Featured toggle */}
+            <button
+              onClick={() => { setFeaturedOnly(f => !f); setPage(1); }}
+              className={cn(
+                'flex items-center gap-1.5 h-[34px] px-3 rounded-lg text-[13px] font-medium transition-all border',
+                featuredOnly
+                  ? 'bg-amber-50 text-amber-700 border-amber-300'
+                  : 'bg-white text-gray-500 border-gray-200 hover:border-gray-300'
+              )}
+            >
+              <Star className={cn('w-3.5 h-3.5', featuredOnly ? 'text-amber-500 fill-amber-500' : 'text-gray-400')} strokeWidth={1.5} />
+              Featured
+            </button>
+            {/* Divider */}
+            <div className="w-px h-4 bg-gray-200" />
+            {/* Sort dropdown */}
             <select
               id="recipe-sort"
               value={sortBy}
               onChange={(e) => { setSortBy(e.target.value as SortBy); setPage(1); }}
-              className="text-sm text-gray-700 bg-white border border-gray-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 transition-all hover:border-gray-300 cursor-pointer"
+              className="h-[34px] text-[13px] text-gray-700 bg-white border border-gray-200 rounded-lg px-3 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 transition-all hover:border-gray-300 cursor-pointer"
             >
               {SORT_OPTIONS.map(opt => (
                 <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -290,7 +307,12 @@ function RecipeCard({ recipe, delay, sortBy, onClick }: { recipe: Recipe; delay:
         <div className="flex items-center gap-3">
           <RecipeIcon recipe={recipe} size="md" />
           <div className="min-w-0">
-            <h3 className="text-[15px] font-semibold text-gray-900 group-hover:text-indigo-600 transition-colors leading-snug">{recipe.title}</h3>
+            <h3 className="text-[15px] font-semibold text-gray-900 group-hover:text-indigo-600 transition-colors leading-snug">
+              {recipe.title}
+              {recipe.featured && (
+                <Star className="inline-block w-3.5 h-3.5 text-amber-500 fill-amber-500 ml-1 align-middle relative -top-px" strokeWidth={1.5} title="Featured" />
+              )}
+            </h3>
             <div className="flex items-center gap-1.5 mt-1">
               <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-600">
                 {categoryLabels[recipe.category]}
