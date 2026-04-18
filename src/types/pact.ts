@@ -40,6 +40,8 @@ export interface Pact {
 }
 
 export type AIPointIcon = 'money' | 'time' | 'warning' | 'shield' | 'chart';
+export type AIRiskLevel = 'low' | 'medium' | 'high';
+export type AIRecommendation = 'approve' | 'reject' | 'revise';
 
 export interface AIInterpretationPoint {
   icon: AIPointIcon;
@@ -47,6 +49,10 @@ export interface AIInterpretationPoint {
 }
 
 export interface AIInterpretation {
+  /** Risk assessment */
+  riskLevel: AIRiskLevel;
+  /** Action recommendation */
+  recommendation: AIRecommendation;
   /** One-sentence summary of what this Pact does */
   summary: string;
   /** 2-3 key points (risks, costs, constraints) */

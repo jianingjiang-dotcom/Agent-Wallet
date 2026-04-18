@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Bot, Clock, ChevronDown, Shield, FileText, AlertTriangle,
   CheckCircle2, XCircle, Zap, Calendar, LogOut, ShieldOff,
-  Pencil, Eye, Wallet, Info, Copy, Sparkles, ArrowRight,
+  Pencil, Eye, Wallet, Info, Copy, Sparkles, ArrowRight, MessageSquare, Code,
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
@@ -13,7 +13,19 @@ import { cn } from '@/lib/utils';
 import { mockPacts } from '@/lib/mock-pacts';
 import { toast } from '@/lib/toast';
 import { useT } from '@/lib/i18n';
-import type { PactStatus, PolicyRule, AIInterpretation } from '@/types/pact';
+import type { PactStatus, PolicyRule, AIInterpretation, AIRiskLevel, AIRecommendation } from '@/types/pact';
+
+// ─── Risk display config ──────────────────────────────────────
+const RISK_CONFIG: Record<AIRiskLevel, { label: string; emoji: string; color: string }> = {
+  low:    { label: '低风险', emoji: '🟢', color: 'text-success' },
+  medium: { label: '中风险', emoji: '🟡', color: 'text-warning' },
+  high:   { label: '高风险', emoji: '🔴', color: 'text-destructive' },
+};
+const REC_CONFIG: Record<AIRecommendation, string> = {
+  approve: '建议通过',
+  reject: '建议拒绝',
+  revise: '建议修改',
+};
 
 // ─── AI Interpretation Card ───────────────────────────────────
 const THINKING_PHRASES = [
@@ -214,6 +226,24 @@ function AIInterpretationCard({
           )}
         </div>
 
+        {/* Risk badge — appears after loading */}
+        {!isLoading && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="flex items-center gap-1.5 mb-3"
+          >
+            <span className="text-[13px]">{RISK_CONFIG[interpretation.riskLevel].emoji}</span>
+            <span className={cn('text-[13px] font-semibold', RISK_CONFIG[interpretation.riskLevel].color)}>
+              {RISK_CONFIG[interpretation.riskLevel].label}
+            </span>
+            <span className="text-[13px] text-foreground/40 mx-0.5">·</span>
+            <span className="text-[13px] font-medium text-foreground/70">
+              {REC_CONFIG[interpretation.recommendation]}
+            </span>
+          </motion.div>
+        )}
+
         {/* Body: loading / typing / done */}
         {isLoading ? (
           <div className="flex items-center gap-2 min-h-[60px]">
@@ -389,6 +419,73 @@ function DetailsContent({ pact }: { pact: any }) {
   );
 }
 
+// ─── Raw Policy Fields (structured key-value display) ────────
+function RawPolicyFields({ policies }: { policies?: PolicyRule[] }) {
+  if (!policies || policies.length === 0) {
+    return <p className="text-[13px] text-muted-foreground">暂无原始字段</p>;
+  }
+
+  const rules = policies[0].rules;
+  const { when, deny_if, review_if } = rules;
+
+  // Render a flat key-value row
+  const Row = ({ label, value }: { label: string; value: string }) => (
+    <div className="flex items-center justify-between py-1.5 min-h-[32px]">
+      <span className="text-[12px] text-muted-foreground">{label}</span>
+      <span className="text-[12px] font-medium text-foreground font-mono truncate ml-4 max-w-[55%] text-right">{value}</span>
+    </div>
+  );
+
+  // Render a nested group with indent
+  const renderObject = (obj: Record<string, any>, prefix = ''): JSX.Element[] => {
+    const elements: JSX.Element[] = [];
+    for (const [key, val] of Object.entries(obj)) {
+      if (val === null || val === undefined) continue;
+      if (Array.isArray(val)) {
+        // Array of objects or primitives
+        const display = val.map(item => {
+          if (typeof item === 'object') {
+            return Object.values(item).filter(Boolean).join(':');
+          }
+          return String(item);
+        }).join(', ');
+        elements.push(<Row key={prefix + key} label={key} value={display} />);
+      } else if (typeof val === 'object') {
+        // Nested object — render as sub-section
+        elements.push(
+          <div key={prefix + key} className="mt-2">
+            <p className="text-[10px] font-semibold text-muted-foreground/70 uppercase tracking-wider mb-1">{key}</p>
+            <div className="pl-3 border-l-2 border-border/30">
+              {renderObject(val, prefix + key + '.')}
+            </div>
+          </div>
+        );
+      } else {
+        elements.push(<Row key={prefix + key} label={key} value={String(val)} />);
+      }
+    }
+    return elements;
+  };
+
+  const sections: { label: string; data: any }[] = [];
+  if (when) sections.push({ label: 'when', data: when });
+  if (deny_if) sections.push({ label: 'deny_if', data: deny_if });
+  if (review_if) sections.push({ label: 'review_if', data: review_if });
+
+  return (
+    <div className="space-y-4">
+      {sections.map(({ label, data }) => (
+        <div key={label}>
+          <p className="text-[11px] font-bold text-primary/70 uppercase tracking-wider mb-1">{label}</p>
+          <div className="bg-muted/30 rounded-xl px-3 py-1">
+            {renderObject(data)}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function PolicyCard({ policy }: { policy: PolicyRule }) {
   const typeInfo = policyTypeLabels[policy.type] || policyTypeLabels.transfer;
   const { when, deny_if, review_if } = policy.rules;
@@ -500,6 +597,7 @@ export default function PactDetail() {
   const t = useT();
   const pact = mockPacts.find(p => p.id === id);
   const [confirmAction, setConfirmAction] = useState<'approve' | 'reject' | 'revoke' | null>(null);
+  const [activeTab, setActiveTab] = useState<'review' | 'execution' | 'more'>('review');
 
   const statusConfig: Record<PactStatus, { label: string; color: string; bg: string; icon: typeof CheckCircle2 }> = {
     pending: { label: t.common.pending, color: 'text-warning', bg: 'bg-warning/8', icon: Clock },
@@ -565,29 +663,19 @@ export default function PactDetail() {
     >
       <div className="px-4 py-4 space-y-3" style={{ paddingBottom: isPending || showRevoke ? 90 : 24 }}>
 
-        {/* ===== Intent card: Status + User prompt + AI-summarized intent ===== */}
+        {/* ===== Intent card — compact ===== */}
         <motion.div
-          className="bg-white rounded-2xl border border-border/60 shadow-sm overflow-hidden"
+          className="bg-white rounded-2xl border border-border/60 shadow-sm px-4 py-3.5"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
         >
-          <div className="px-4 pt-4 pb-3">
-            <div className="flex items-center gap-2 mb-3">
-              <StatusIcon className={cn('w-4 h-4', status.color)} strokeWidth={1.5} />
-              <span className={cn('text-[12px] font-medium px-2 py-0.5 rounded-full', status.color, status.bg)}>
-                {status.label}
-              </span>
-            </div>
-
-            {/* Original prompt — quote style */}
-            <div className="flex gap-3">
-              <div className="w-[3px] rounded-full bg-[#1F32D6] shrink-0" />
-              <p className="text-[16px] font-semibold text-foreground leading-relaxed">
-                "{pact.userPrompt}"
-              </p>
-            </div>
-
-            <p className="text-[13px] text-muted-foreground leading-relaxed mt-3">{pact.description}</p>
+          <div className="flex items-start gap-2.5">
+            <span className={cn('text-[12px] font-medium px-2.5 py-0.5 rounded-full shrink-0 mt-0.5', status.color, status.bg)}>
+              {status.label}
+            </span>
+            <p className="text-[15px] font-semibold text-foreground leading-snug">
+              {pact.description}
+            </p>
           </div>
         </motion.div>
 
@@ -617,152 +705,264 @@ export default function PactDetail() {
                 }}
                 inGroup
               />
-              <div className="h-px bg-border/40" />
             </>
           )}
 
-          {/* Risk Controls / Policies */}
-          <CollapsibleSection title="风控限制" icon={Shield} inGroup>
-            {pact.policies && pact.policies.length > 0 ? (
-              <div className="space-y-3">
-                {pact.policies.map((policy, pi) => (
-                  <PolicyCard key={pi} policy={policy} />
-                ))}
-              </div>
-            ) : (
-              <div className="space-y-2">
-                {pact.riskControls.map((rc, i) => (
-                  <div key={i} className="flex items-center justify-between py-1.5">
-                    <span className="text-[13px] text-muted-foreground">{rc.label}</span>
-                    <span className="text-[13px] font-medium text-foreground">{rc.value}</span>
+          {/* Tab pills */}
+          <div className="flex gap-1.5 px-4 py-3">
+            {(['review', 'execution', 'more'] as const).map(tab => {
+              const labels = { review: '审核', execution: '执行', more: '更多' };
+              const isActive = activeTab === tab;
+              return (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  className={cn(
+                    'px-3.5 py-1.5 rounded-full text-[13px] font-medium transition-all',
+                    isActive
+                      ? 'bg-primary text-white shadow-sm'
+                      : 'text-muted-foreground hover:bg-muted/50'
+                  )}
+                >
+                  {labels[tab]}
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="h-px bg-border/40" />
+
+          {/* Tab content */}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeTab}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.15 }}
+              className="px-4 py-4"
+            >
+              {/* ─── Review tab ─── */}
+              {activeTab === 'review' && (
+                <div className="space-y-5">
+
+                  {/* Exit Conditions */}
+                  <div>
+                    <div className="flex items-center gap-2 pl-3 border-l-[3px] border-primary/60 mb-3">
+                      <LogOut className="w-3.5 h-3.5 text-muted-foreground" strokeWidth={1.5} />
+                      <span className="text-[13px] font-semibold text-foreground">退出条件</span>
+                    </div>
+                    {pact.exitConditionList && pact.exitConditionList.length > 0 ? (
+                      isRunning ? (
+                        <div className="space-y-4">
+                          {pact.exitConditionList.map((cond, idx) => {
+                            const pct = Math.min((cond.current / cond.target) * 100, 100);
+                            const currentDisplay = cond.unit === '$'
+                              ? `$${cond.current.toLocaleString()}`
+                              : `${cond.current.toLocaleString()}`;
+                            const targetDisplay = cond.unit === '$'
+                              ? `$${cond.target.toLocaleString()}`
+                              : `${cond.target.toLocaleString()}`;
+                            return (
+                              <div key={idx}>
+                                <div className="flex items-baseline justify-between mb-1.5">
+                                  <span className="text-[13px] text-muted-foreground">{cond.label}</span>
+                                  <span className="text-[14px] font-semibold text-foreground tabular-nums">
+                                    {currentDisplay} / {targetDisplay}
+                                  </span>
+                                </div>
+                                <div className="h-[6px] rounded-full bg-muted/60 overflow-hidden">
+                                  <div
+                                    className="h-full rounded-full transition-all duration-500"
+                                    style={{ width: `${pct}%`, background: 'hsl(var(--primary))' }}
+                                  />
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      ) : (
+                        <div className="space-y-2.5">
+                          {pact.exitConditionList.map((cond, idx) => {
+                            const targetDisplay = cond.unit === '$'
+                              ? `$${cond.target.toLocaleString()}`
+                              : `${cond.target.toLocaleString()}${cond.unit ? ` ${cond.unit}` : ''}`;
+                            return (
+                              <div key={idx} className="flex items-center justify-between text-[13px]">
+                                <span className="text-muted-foreground">{cond.label}</span>
+                                <span className="font-semibold text-foreground tabular-nums">{targetDisplay}</span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )
+                    ) : (
+                      <p className="text-[13px] text-foreground/80 leading-relaxed">{pact.exitConditions}</p>
+                    )}
                   </div>
-                ))}
-              </div>
-            )}
-          </CollapsibleSection>
 
-          <div className="h-px bg-border/40" />
+                  <div className="h-px bg-border/30" />
 
-          {/* Exit Conditions */}
-          <CollapsibleSection title="退出条件" icon={LogOut} inGroup>
-          {pact.exitConditionList && pact.exitConditionList.length > 0 ? (
-            isRunning ? (
-              <div className="space-y-4">
-                {pact.exitConditionList.map((cond, idx) => {
-                  const pct = Math.min((cond.current / cond.target) * 100, 100);
-                  const currentDisplay = cond.unit === '$'
-                    ? `$${cond.current.toLocaleString()}`
-                    : `${cond.current.toLocaleString()}`;
-                  const targetDisplay = cond.unit === '$'
-                    ? `$${cond.target.toLocaleString()}`
-                    : `${cond.target.toLocaleString()}`;
-                  return (
-                    <div key={idx}>
-                      <div className="flex items-baseline justify-between mb-1.5">
-                        <span className="text-[13px] text-muted-foreground">{cond.label}</span>
-                        <span className="text-[14px] font-semibold text-foreground tabular-nums">
-                          {currentDisplay} / {targetDisplay}
-                        </span>
-                      </div>
-                      <div className="h-[6px] rounded-full bg-muted/60 overflow-hidden">
-                        <div
-                          className="h-full rounded-full transition-all duration-500"
-                          style={{
-                            width: `${pct}%`,
-                            background: 'linear-gradient(90deg, #1F32D6, #6366F1)',
-                          }}
-                        />
-                      </div>
+                  {/* Risk Controls */}
+                  <div>
+                    <div className="flex items-center gap-2 pl-3 border-l-[3px] border-primary/60 mb-3">
+                      <Shield className="w-3.5 h-3.5 text-muted-foreground" strokeWidth={1.5} />
+                      <span className="text-[13px] font-semibold text-foreground">风控限制</span>
                     </div>
-                  );
-                })}
-              </div>
-            ) : (
-              <div className="space-y-2.5">
-                {pact.exitConditionList.map((cond, idx) => {
-                  const targetDisplay = cond.unit === '$'
-                    ? `$${cond.target.toLocaleString()}`
-                    : `${cond.target.toLocaleString()}${cond.unit ? ` ${cond.unit}` : ''}`;
-                  return (
-                    <div key={idx} className="flex items-center justify-between text-[13px]">
-                      <span className="text-muted-foreground">{cond.label}</span>
-                      <span className="font-semibold text-foreground tabular-nums">{targetDisplay}</span>
-                    </div>
-                  );
-                })}
-              </div>
-            )
-          ) : (
-            <p className="text-[13px] text-foreground/80 leading-relaxed">{pact.exitConditions}</p>
-          )}
-          </CollapsibleSection>
-
-          <div className="h-px bg-border/40" />
-
-          {/* Execution Plan */}
-          <CollapsibleSection title="执行计划" icon={FileText} inGroup>
-            <div className="space-y-4">
-              <div>
-                <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">概要</p>
-                <p className="text-[13px] text-foreground/80 leading-relaxed">{pact.executionSummary}</p>
-              </div>
-              <div>
-                <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">合约操作</p>
-                <div className="space-y-2">
-                  {pact.contractOps.map((op, i) => (
-                    <div key={i} className="flex items-start gap-2">
-                      <span className="text-[13px] text-foreground/60 mt-0.5">•</span>
-                      <div>
-                        <span className="text-[13px] font-medium text-foreground">{op.label}: </span>
-                        <span className="text-[13px] text-foreground/70">{op.description}</span>
+                    {pact.policies && pact.policies.length > 0 ? (
+                      <div className="space-y-3">
+                        {pact.policies.map((policy, pi) => (
+                          <PolicyCard key={pi} policy={policy} />
+                        ))}
                       </div>
-                    </div>
-                  ))}
+                    ) : (
+                      <div className="space-y-2">
+                        {pact.riskControls.map((rc, i) => (
+                          <div key={i} className="flex items-center justify-between py-1.5">
+                            <span className="text-[13px] text-muted-foreground">{rc.label}</span>
+                            <span className="text-[13px] font-medium text-foreground">{rc.value}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-              <div>
-                <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">执行计划</p>
-                <p className="text-[13px] text-foreground/80 leading-relaxed">{pact.schedule}</p>
-              </div>
-            </div>
-          </CollapsibleSection>
+              )}
 
-          <div className="h-px bg-border/40" />
+              {/* ─── Execution tab ─── */}
+              {activeTab === 'execution' && (
+                <div className="space-y-5">
+                  {/* User Intent */}
+                  <div>
+                    <div className="flex items-center gap-2 pl-3 border-l-[3px] border-primary/60 mb-3">
+                      <MessageSquare className="w-3.5 h-3.5 text-muted-foreground" strokeWidth={1.5} />
+                      <span className="text-[13px] font-semibold text-foreground">用户意图</span>
+                    </div>
+                    <div className="space-y-3">
+                      <div>
+                        <p className="text-[10px] text-muted-foreground mb-1">原始指令</p>
+                        <div className="flex gap-3">
+                          <div className="w-[3px] rounded-full bg-primary shrink-0" />
+                          <p className="text-[13px] text-foreground leading-relaxed">"{pact.userPrompt}"</p>
+                        </div>
+                      </div>
+                      <div>
+                        <p className="text-[10px] text-muted-foreground mb-1">AI 理解</p>
+                        <p className="text-[13px] text-foreground/80 leading-relaxed">{pact.description}</p>
+                      </div>
+                    </div>
+                  </div>
 
-          {/* Details */}
-          <CollapsibleSection title="详细信息" icon={Info} inGroup>
-            <DetailsContent pact={pact} />
-          </CollapsibleSection>
+                  <div className="h-px bg-border/30" />
+
+                  {/* Execution Plan */}
+                  <div>
+                    <div className="flex items-center gap-2 pl-3 border-l-[3px] border-primary/60 mb-3">
+                      <FileText className="w-3.5 h-3.5 text-muted-foreground" strokeWidth={1.5} />
+                      <span className="text-[13px] font-semibold text-foreground">执行计划</span>
+                    </div>
+                    <div className="space-y-4">
+                      <div>
+                        <p className="text-[10px] text-muted-foreground mb-1">概要</p>
+                        <p className="text-[13px] text-foreground/80 leading-relaxed">{pact.executionSummary}</p>
+                      </div>
+                      <div>
+                        <p className="text-[10px] text-muted-foreground mb-1">合约操作</p>
+                        <div className="space-y-2">
+                          {pact.contractOps.map((op, i) => (
+                            <div key={i} className="flex items-start gap-2">
+                              <span className="text-[13px] text-foreground/60 mt-0.5">•</span>
+                              <div>
+                                <span className="text-[13px] font-medium text-foreground">{op.label}: </span>
+                                <span className="text-[13px] text-foreground/70">{op.description}</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                      <div>
+                        <p className="text-[10px] text-muted-foreground mb-1">时间安排</p>
+                        <p className="text-[13px] text-foreground/80 leading-relaxed">{pact.schedule}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* ─── More tab ─── */}
+              {activeTab === 'more' && (
+                <div className="space-y-5">
+                  {/* Details */}
+                  <div>
+                    <div className="flex items-center gap-2 pl-3 border-l-[3px] border-primary/60 mb-3">
+                      <Info className="w-3.5 h-3.5 text-muted-foreground" strokeWidth={1.5} />
+                      <span className="text-[13px] font-semibold text-foreground">详细信息</span>
+                    </div>
+                    <DetailsContent pact={pact} />
+                  </div>
+
+                  <div className="h-px bg-border/30" />
+
+                  {/* Raw Policy Fields */}
+                  <div>
+                    <div className="flex items-center gap-2 pl-3 border-l-[3px] border-primary/60 mb-3">
+                      <Code className="w-3.5 h-3.5 text-muted-foreground" strokeWidth={1.5} />
+                      <span className="text-[13px] font-semibold text-foreground">原始字段</span>
+                    </div>
+                    <RawPolicyFields policies={pact.policies} />
+                  </div>
+                </div>
+              )}
+            </motion.div>
+          </AnimatePresence>
         </motion.div>
       </div>
 
       {/* ===== Fixed bottom action bar ===== */}
       {isPending && (
-        <div className="fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-t border-border/50 px-4 pt-3 pb-8 flex gap-3" style={{ maxWidth: 430, margin: '0 auto' }}>
+        <div className="fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-t border-border/50 px-4 pt-3 pb-8 flex items-center gap-2.5" style={{ maxWidth: 430, margin: '0 auto' }}>
           <Button
             variant="outline"
-            className="flex-1 h-12 text-[15px] font-semibold border-destructive/20 text-destructive hover:bg-destructive/8"
+            className="flex-1 h-12 text-[13px] font-semibold rounded-xl border-destructive/20 text-destructive hover:bg-destructive/8"
             onClick={() => setConfirmAction('reject')}
           >
+            <XCircle className="w-3.5 h-3.5 mr-1" strokeWidth={1.5} />
             拒绝
           </Button>
           <Button
-            className="flex-1 h-12 text-[15px] font-semibold"
+            variant="outline"
+            className="flex-1 h-12 text-[13px] font-semibold rounded-xl"
+            onClick={() => navigate('/assistant', { state: { initialContext: { type: 'pact_edit', pactId: pact.id, pactTitle: pact.title, pactPrompt: pact.userPrompt } } })}
+          >
+            <Pencil className="w-3.5 h-3.5 mr-1" strokeWidth={1.5} />
+            修改
+          </Button>
+          <Button
+            className="flex-[2] h-12 text-[15px] font-semibold rounded-xl"
             onClick={() => setConfirmAction('approve')}
           >
+            <CheckCircle2 className="w-4 h-4 mr-1.5" strokeWidth={1.5} />
             通过
           </Button>
         </div>
       )}
       {showRevoke && (
-        <div className="fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-t border-border/50 px-4 pt-3 pb-8" style={{ maxWidth: 430, margin: '0 auto' }}>
+        <div className="fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-t border-border/50 px-4 pt-3 pb-8 flex gap-3" style={{ maxWidth: 430, margin: '0 auto' }}>
           <Button
             variant="outline"
-            className="w-full h-12 text-[15px] font-semibold border-destructive/20 text-destructive hover:bg-destructive/8"
+            className="flex-1 h-12 text-[15px] font-semibold"
+            onClick={() => navigate('/assistant', { state: { initialContext: { type: 'pact_edit', pactId: pact.id, pactTitle: pact.title, pactPrompt: pact.userPrompt } } })}
+          >
+            <Pencil className="w-4 h-4 mr-1.5" strokeWidth={1.5} />
+            修改意图
+          </Button>
+          <Button
+            variant="outline"
+            className="flex-1 h-12 text-[15px] font-semibold border-destructive/20 text-destructive hover:bg-destructive/8"
             onClick={() => setConfirmAction('revoke')}
           >
-            <ShieldOff className="w-4 h-4 mr-2" strokeWidth={1.5} />
-            撤销 Pact
+            <ShieldOff className="w-4 h-4 mr-1.5" strokeWidth={1.5} />
+            撤销
           </Button>
         </div>
       )}
