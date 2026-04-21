@@ -68,13 +68,6 @@ export function SpeedUpDrawer({ open, onOpenChange, transaction, onConfirm }: Sp
           </DrawerClose>
         </DrawerHeader>
 
-        {/* Description */}
-        <div className="mx-4 p-3 rounded-lg bg-muted/50 border border-border">
-          <p className="text-sm text-muted-foreground">
-            提高手续费可加快交易确认速度
-          </p>
-        </div>
-
         {/* Speed Up Fee */}
         <div className="px-4 py-3">
           <div className="flex items-center justify-between text-sm">

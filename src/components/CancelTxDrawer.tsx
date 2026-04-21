@@ -49,13 +49,6 @@ export function CancelTxDrawer({ open, onOpenChange, transaction, onConfirm }: C
           </DrawerClose>
         </DrawerHeader>
 
-        {/* Description */}
-        <div className="mx-4 p-3 rounded-lg bg-muted/50 border border-border">
-          <p className="text-sm text-muted-foreground">
-            发送一笔替换交易以取消当前交易
-          </p>
-        </div>
-
         {/* Cancel Fee */}
         <div className="px-4 py-3">
           <div className="flex items-center justify-between text-sm">

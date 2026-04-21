@@ -129,7 +129,7 @@ export default function TransactionDetail() {
         </motion.button>
       }>
         <div className="flex-1 overflow-y-auto">
-          <div className="px-4 pt-6 space-y-4" style={{ paddingBottom: '64px' }}>
+          <div className="px-4 pt-6 space-y-4" style={{ paddingBottom: transaction.status === 'pending' && transaction.type === 'send' ? '96px' : '64px' }}>
 
             {/* Amount Section */}
             <div className="text-center">
@@ -248,6 +248,12 @@ export default function TransactionDetail() {
           </div>
         </div>
 
+        {/* RBF Actions — fixed bottom bar for pending send txs */}
+        <RbfActionSection
+          transaction={transaction}
+          onSpeedUp={() => setSpeedUpDrawerOpen(true)}
+          onCancel={() => setCancelDrawerOpen(true)}
+        />
 
         {/* RBF Drawers */}
         <SpeedUpDrawer
