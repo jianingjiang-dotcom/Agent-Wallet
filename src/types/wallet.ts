@@ -115,17 +115,25 @@ export interface WalletBackupInfo {
 }
 
 // Recovery method types
-export type RecoveryMethod = 
+export type RecoveryMethod =
   | 'scan_device'     // Scan old device (recommended)
-  | 'cloud_icloud'    // iCloud recovery
-  | 'cloud_google'    // Google Drive recovery
+  | 'cloud_icloud'    // Cloud recovery (iCloud / Google Drive)
+  | 'cloud_google'    // Google Drive recovery (legacy)
   | 'local_file'      // Local backup file recovery
-  | 'private_key';    // Private key import (advanced)
+  | 'private_key'     // Private key import (advanced)
+  | 'reshare';        // Re-pair with Agent to regenerate key shares
 
 // Wallet origin - how this wallet was created/linked
 export type WalletOrigin = 'user_created' | 'agent_linked' | 'claimed';
 
 // Info returned when validating a claim code
+export interface ClaimWalletItem {
+  walletId: string;
+  walletName: string;
+  balance: number;
+  chains: string[];
+}
+
 export interface ClaimWalletInfo {
   walletId: string;
   walletName: string;
@@ -135,6 +143,8 @@ export interface ClaimWalletInfo {
   agentId: string;
   chains: string[];
   addresses: { chain: string; address: string }[];
+  /** Multiple wallets associated with this TSS node (for reshare scenarios) */
+  wallets?: ClaimWalletItem[];
 }
 
 // Info for wallets linked from an external agent

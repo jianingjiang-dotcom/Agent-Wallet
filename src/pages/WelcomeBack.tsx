@@ -18,7 +18,7 @@ const DEVICE_SEEN_PREFIX = 'device_seen_';
  */
 export default function WelcomeBackPage() {
   const navigate = useNavigate();
-  const { wallets, userInfo } = useWallet();
+  const { wallets, userInfo, markAllUnrecovered } = useWallet();
   const [skipDrawerOpen, setSkipDrawerOpen] = useState(false);
 
   // Mark this device as "seen" the moment user lands here, so reload won't loop
@@ -55,7 +55,7 @@ export default function WelcomeBackPage() {
 
   const handleConfirmSkip = () => {
     setSkipDrawerOpen(false);
-    navigate('/home', { replace: true });
+    navigate('/home/norecovery', { replace: true });
   };
 
   if (unrecoveredWallets.length === 0) return null;
@@ -161,7 +161,7 @@ export default function WelcomeBackPage() {
           transition={{ delay: 0.3 }}
           className="text-[12px] text-muted-foreground text-center leading-relaxed mb-4 max-w-[300px] mx-auto"
         >
-          未恢复的钱包仅可浏览资产，无法发起转账或签名
+          未激活的钱包仅可浏览资产，无法发起转账或签名
         </motion.p>
 
         {/* CTAs */}
@@ -211,7 +211,7 @@ export default function WelcomeBackPage() {
             </h2>
 
             <p className="text-[15px] text-muted-foreground leading-relaxed max-w-[300px] mb-6">
-              未恢复的钱包仅可查看资产，<span className="text-foreground font-medium">无法发起转账或签名</span>。你可以随时从"钱包管理"重新发起恢复。
+              未激活的钱包仅可查看资产，<span className="text-foreground font-medium">无法发起转账或签名</span>。你可以随时从"钱包管理"重新发起恢复。
             </p>
 
             <div className="w-full space-y-2.5">

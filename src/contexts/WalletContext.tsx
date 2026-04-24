@@ -1548,7 +1548,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         addresses: buildLegacyAddresses(MOCK_WALLET_ADDRESSES.wallet3),
         createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
         isBackedUp: false,
-        isKeyShareRecovered: true,
+        isKeyShareRecovered: false,
         isBiometricEnabled: true,
         controlMode: 'block',
         origin: 'user_created',
@@ -2418,7 +2418,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     if (!/^\d{6}$/.test(normalized)) {
       throw new Error('配对口令格式无效，请输入 6 位数字');
     }
-    // Return mock wallet info
+    // Return mock wallet info (with multiple wallets for reshare scenarios)
     return {
       walletId: `wallet-claim-${normalized.slice(4)}`,
       walletName: 'Trading Wallet',
@@ -2431,6 +2431,11 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         { chain: 'Base', address: '0x7a25...3f8d' },
         { chain: 'Ethereum', address: '0x7a25...3f8d' },
         { chain: 'Solana', address: '4kNp...xR2m' },
+      ],
+      wallets: [
+        { walletId: 'wallet-1', walletName: 'Trading Wallet', balance: 2847.53, chains: ['Base', 'Ethereum', 'Solana'] },
+        { walletId: 'wallet-2', walletName: '商务钱包', balance: 15200.00, chains: ['Ethereum'] },
+        { walletId: 'wallet-3', walletName: '备用钱包', balance: 430.25, chains: ['Base', 'Solana'] },
       ],
     };
   }, []);

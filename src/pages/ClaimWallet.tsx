@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   CheckCircle2, AlertTriangle,
   ChevronLeft, Shield, Key, CloudUpload,
-  Bot, Wallet, Eye, EyeOff, Info,
+  Bot, Wallet, Eye, EyeOff, Info, RefreshCw,
 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -25,6 +25,9 @@ import {
 } from '@/components/ui/alert-dialog';
 import { BiometricVerifyDrawer } from '@/components/BiometricVerifyDrawer';
 import { Switch } from '@/components/ui/switch';
+import {
+  Drawer, DrawerContent, DrawerHeader, DrawerTitle,
+} from '@/components/ui/drawer';
 
 const steps = [
   { id: 1, title: '确认钱包', icon: Shield, component: 'confirm' },
@@ -41,13 +44,18 @@ export default function ClaimWallet() {
   const [currentStep, setCurrentStep] = useState(initialStep);
   const [claimInfo, setClaimInfo] = useState<ClaimWalletInfo | null>(passedClaimInfo);
 
+  // Reshare mode — driven from recovery page
+  const stateData = location.state as { mode?: string; returnTo?: string } | null;
+  const isReshare = stateData?.mode === 'reshare';
+  const returnTo = stateData?.returnTo || '/home';
+
   const currentComponent = steps[currentStep - 1]?.component;
 
   const handleStepComplete = () => {
     if (currentStep < steps.length) {
       setCurrentStep(currentStep + 1);
     } else {
-      navigate('/home');
+      navigate(isReshare ? returnTo : '/home', { replace: true });
     }
   };
 
@@ -82,9 +90,20 @@ export default function ClaimWallet() {
             </span>
           </div>
           <span className="text-sm font-medium text-foreground">
-            {steps[currentStep - 1].title}
+            {isReshare
+              ? { '确认钱包': '恢复配对', '密钥生成': '重新生成分片', '备份': '更新备份' }[steps[currentStep - 1].title] || steps[currentStep - 1].title
+              : steps[currentStep - 1].title
+            }
           </span>
         </div>
+
+        {/* Reshare banner */}
+        {isReshare && (
+          <div className="mb-3 px-3 py-2 rounded-xl bg-primary/8 flex items-center gap-2">
+            <RefreshCw className="w-3.5 h-3.5 text-primary" strokeWidth={1.5} />
+            <span className="text-[12px] text-primary font-medium">分片激活 — 重新配对以激活签名能力</span>
+          </div>
+        )}
 
         {/* Step indicators */}
         <div className="flex items-center mt-6">
@@ -128,6 +147,7 @@ export default function ClaimWallet() {
               claimInfo={claimInfo}
               onClaimInfoReady={setClaimInfo}
               onComplete={handleStepComplete}
+              isReshare={isReshare}
             />
           )}
           {currentComponent === 'keygen' && (
@@ -140,6 +160,7 @@ export default function ClaimWallet() {
             <BackupStep
               key="backup"
               onComplete={handleStepComplete}
+              isReshare={isReshare}
             />
           )}
         </AnimatePresence>
@@ -154,10 +175,12 @@ function ConfirmClaimStep({
   claimInfo,
   onClaimInfoReady,
   onComplete,
+  isReshare = false,
 }: {
   claimInfo: ClaimWalletInfo | null;
   onClaimInfoReady: (info: ClaimWalletInfo) => void;
   onComplete: () => void;
+  isReshare?: boolean;
 }) {
   const { validateClaimCode, confirmClaim } = useWallet();
   const [code, setCode] = useState('');
@@ -165,16 +188,17 @@ function ConfirmClaimStep({
   const [codeError, setCodeError] = useState('');
   const [showBiometric, setShowBiometric] = useState(false);
   const [verified, setVerified] = useState(false);
+  const [reshareConfirmed, setReshareConfirmed] = useState(false);
 
   const handleValidate = async () => {
-    if (code.length !== 6) { setCodeError('请输入完整的 6 位配对口令'); return; }
+    if (code.length !== 6) { setCodeError(isReshare ? '请输入完整的 6 位恢复配对码' : '请输入完整的 6 位配对口令'); return; }
     setIsValidating(true);
     setCodeError('');
     try {
       const info = await validateClaimCode(code);
       onClaimInfoReady(info);
     } catch (e: any) {
-      setCodeError(e.message || '配对口令验证失败');
+      setCodeError(e.message || '配对码验证失败');
     } finally {
       setIsValidating(false);
     }
@@ -183,37 +207,8 @@ function ConfirmClaimStep({
   const handleVerified = async () => {
     if (!claimInfo) return;
     await confirmClaim(claimInfo.walletId);
-    setVerified(true);
+    onComplete();
   };
-
-  // Success state after biometric verification
-  if (verified) {
-    return (
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="flex flex-col h-full"
-      >
-        <div className="flex-1 flex flex-col items-center justify-center text-center">
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: [0, 1.2, 1] }}
-            transition={{ duration: 0.5, ease: 'easeOut' }}
-            className="w-20 h-20 rounded-full bg-success/10 flex items-center justify-center mb-6"
-          >
-            <CheckCircle2 className="w-10 h-10 text-success" strokeWidth={1.5} />
-          </motion.div>
-          <h2 className="text-xl font-bold text-foreground mb-2">认领确认成功</h2>
-          <p className="text-muted-foreground text-sm">身份验证通过，接下来为您生成安全密钥</p>
-        </div>
-        <div className="pb-8 px-4">
-          <Button size="lg" className="w-full h-12 text-base font-medium" onClick={onComplete}>
-            继续
-          </Button>
-        </div>
-      </motion.div>
-    );
-  }
 
   // Phase 1: Code input (no claimInfo yet)
   if (!claimInfo) {
@@ -228,9 +223,17 @@ function ConfirmClaimStep({
           <Key className="w-8 h-8 text-primary" strokeWidth={1.5} />
         </div>
         <div className="text-center">
-          <h3 className="font-semibold text-lg">输入配对口令</h3>
-          <p className="text-sm text-muted-foreground mt-1">请输入 Agent 提供的 6 位配对口令</p>
+          <h3 className="font-semibold text-lg">{isReshare ? '输入恢复配对码' : '输入配对口令'}</h3>
+          <p className="text-sm text-muted-foreground mt-1">{isReshare ? '请输入 Agent 提供的 6 位恢复配对码' : '请输入 Agent 提供的 6 位配对口令'}</p>
         </div>
+
+        {isReshare && (
+          <div className="w-full bg-muted rounded-xl px-3.5 py-2.5">
+            <p className="text-[11px] text-muted-foreground leading-relaxed text-center">
+              重新配对后，旧设备上的密钥分片将失效，仅当前设备可用于签名
+            </p>
+          </div>
+        )}
 
         <InputOTP maxLength={6} value={code} onChange={(v) => { setCode(v); setCodeError(''); }} disabled={isValidating}>
           <InputOTPGroup className="gap-2.5">
@@ -267,12 +270,12 @@ function ConfirmClaimStep({
       className="space-y-5 pt-6"
     >
       <div className="flex flex-col items-center mb-2">
-        <div className="w-20 h-20 rounded-full bg-success/10 flex items-center justify-center mb-4">
-          <Wallet className="w-10 h-10 text-success" />
+        <div className={cn("w-20 h-20 rounded-full flex items-center justify-center mb-4", isReshare ? "bg-primary/10" : "bg-success/10")}>
+          {isReshare ? <RefreshCw className="w-10 h-10 text-primary" /> : <Wallet className="w-10 h-10 text-success" />}
         </div>
-        <h3 className="font-semibold text-lg text-center">确认钱包信息</h3>
+        <h3 className="font-semibold text-lg text-center">{isReshare ? '确认恢复钱包' : '确认钱包信息'}</h3>
         <p className="text-sm text-muted-foreground text-center mt-1">
-          请确认您要认领的钱包
+          {isReshare ? '以下钱包将重新生成密钥分片' : '请确认您要认领的钱包'}
         </p>
       </div>
 
@@ -304,29 +307,63 @@ function ConfirmClaimStep({
         </div>
       </div>
 
-      <div className="bg-accent/5 border border-accent/20 rounded-xl p-3">
-        <div className="flex items-start gap-2">
-          <Info className="w-4 h-4 text-accent shrink-0 mt-0.5" />
-          <div className="text-xs text-muted-foreground space-y-1">
-            <p className="font-medium text-foreground">认领后：</p>
-            <p>- 您将拥有这个钱包的 <span className="text-foreground font-medium">最终控制权</span></p>
-            <p>- AI 助手将在您设定的 <span className="text-foreground font-medium">规则内</span> 操作钱包</p>
-            <p>- 手机会生成专属安全密钥，保护您的资产</p>
+      {isReshare ? (
+        <div className="bg-primary/5 border border-primary/20 rounded-xl p-3">
+          <div className="flex items-start gap-2">
+            <Info className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+            <div className="text-xs text-muted-foreground space-y-1">
+              <p className="font-medium text-foreground">恢复后：</p>
+              <p>- 此设备将重新获得 <span className="text-foreground font-medium">签名能力</span></p>
+              <p>- 您可以正常发起转账和审批 Pact</p>
+              <p>- 需要完成密钥分片生成和备份更新</p>
+            </div>
           </div>
         </div>
-      </div>
+      ) : (
+        <div className="bg-accent/5 border border-accent/20 rounded-xl p-3">
+          <div className="flex items-start gap-2">
+            <Info className="w-4 h-4 text-accent shrink-0 mt-0.5" />
+            <div className="text-xs text-muted-foreground space-y-1">
+              <p className="font-medium text-foreground">认领后：</p>
+              <p>- 您将拥有这个钱包的 <span className="text-foreground font-medium">最终控制权</span></p>
+              <p>- AI 助手将在您设定的 <span className="text-foreground font-medium">规则内</span> 操作钱包</p>
+              <p>- 手机会生成专属安全密钥，保护您的资产</p>
+            </div>
+          </div>
+        </div>
+      )}
 
-      <Button onClick={() => setShowBiometric(true)} className="w-full gradient-primary" size="lg">
-        确认认领
-      </Button>
-
-      <BiometricVerifyDrawer
-        open={showBiometric}
-        onOpenChange={setShowBiometric}
-        title="确认认领钱包"
-        description="请验证身份以完成钱包认领"
-        onVerified={handleVerified}
-      />
+      {isReshare ? (
+        <>
+          <label className="flex items-start gap-2 cursor-pointer pt-1">
+            <input
+              type="checkbox"
+              checked={reshareConfirmed}
+              onChange={(e) => setReshareConfirmed(e.target.checked)}
+              className="mt-0.5 rounded border-border"
+            />
+            <span className="text-[11px] text-muted-foreground leading-relaxed">
+              我已知晓：完成后，当前钱包在旧设备上的密钥分片将失效，仅此设备可用于签名。
+            </span>
+          </label>
+          <Button onClick={handleVerified} className="w-full" size="lg" disabled={!reshareConfirmed}>
+            确认恢复
+          </Button>
+        </>
+      ) : (
+        <>
+          <Button onClick={() => setShowBiometric(true)} className="w-full gradient-primary" size="lg">
+            确认认领
+          </Button>
+          <BiometricVerifyDrawer
+            open={showBiometric}
+            onOpenChange={setShowBiometric}
+            title="确认认领钱包"
+            description="请验证身份以完成钱包认领"
+            onVerified={handleVerified}
+          />
+        </>
+      )}
     </motion.div>
   );
 }
@@ -611,7 +648,7 @@ function KeyShareGenStep({
 }
 
 // ─── Step 4: Backup ────────────────────────────────────────
-function BackupStep({ onComplete }: { onComplete: () => void }) {
+function BackupStep({ onComplete, isReshare = false }: { onComplete: () => void; isReshare?: boolean }) {
   const [showSuccess, setShowSuccess] = useState(false);
   const [showSkipWarning, setShowSkipWarning] = useState(false);
   const [password, setPassword] = useState('');
@@ -622,6 +659,8 @@ function BackupStep({ onComplete }: { onComplete: () => void }) {
   const [confirmed, setConfirmed] = useState(false);
   const [passkeySetup, setPasskeySetup] = useState(false);
   const [showPasskeyDrawer, setShowPasskeyDrawer] = useState(false);
+  const [showNodeMismatchWarning, setShowNodeMismatchWarning] = useState(false);
+  const [showMismatchBiometric, setShowMismatchBiometric] = useState(false);
   const { completeCloudBackup } = useWallet();
 
   const getPasswordStrength = (pwd: string): { level: 0 | 1 | 2 | 3; label: string; color: string } => {
@@ -646,11 +685,7 @@ function BackupStep({ onComplete }: { onComplete: () => void }) {
     return null;
   };
 
-  const handleBackup = async () => {
-    const validationError = validatePassword();
-    if (validationError) { setError(validationError); return; }
-    if (!confirmed) { setError('请勾选确认已牢记密码'); return; }
-
+  const executeBackup = async () => {
     setIsLoading(true);
     try {
       await completeCloudBackup('icloud', passkeySetup);
@@ -660,6 +695,20 @@ function BackupStep({ onComplete }: { onComplete: () => void }) {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleBackup = async () => {
+    const validationError = validatePassword();
+    if (validationError) { setError(validationError); return; }
+    if (!confirmed) { setError('请勾选确认已牢记密码'); return; }
+
+    // In reshare mode, warn about TSS node ID mismatch before overwriting backup
+    if (isReshare) {
+      setShowNodeMismatchWarning(true);
+      return;
+    }
+
+    executeBackup();
   };
 
   // ── Success screen ──
@@ -882,6 +931,61 @@ function BackupStep({ onComplete }: { onComplete: () => void }) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* TSS Node ID mismatch warning drawer — reshare mode only */}
+      <Drawer open={showNodeMismatchWarning} onOpenChange={setShowNodeMismatchWarning}>
+        <DrawerContent>
+          <DrawerHeader className="sr-only">
+            <DrawerTitle>备份文件将被覆盖</DrawerTitle>
+          </DrawerHeader>
+
+          <div className="px-6 pt-2 pb-6 flex flex-col items-center text-center">
+            <motion.div
+              initial={{ scale: 0.85, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ type: 'spring', duration: 0.5 }}
+              className="w-[68px] h-[68px] rounded-[20px] bg-warning/10 flex items-center justify-center mb-5"
+            >
+              <AlertTriangle className="w-8 h-8 text-warning" strokeWidth={1.75} />
+            </motion.div>
+
+            <h2 className="text-[22px] font-bold text-foreground tracking-tight mb-2">
+              备份文件将被覆盖
+            </h2>
+
+            <p className="text-[14px] text-muted-foreground leading-relaxed max-w-[300px] mb-6">
+              检测到云端备份的钱包与本地钱包的 <span className="text-foreground font-medium">TSS Node ID 不一致</span>。继续备份将覆盖原备份文件，<span className="text-foreground font-medium">原备份将不可用</span>。
+            </p>
+
+            <div className="w-full space-y-2.5">
+              <Button
+                size="lg"
+                className="w-full h-12 text-[15px] font-semibold rounded-xl bg-warning text-white hover:bg-warning/90"
+                onClick={() => { setShowNodeMismatchWarning(false); setShowMismatchBiometric(true); }}
+              >
+                继续备份
+              </Button>
+              <Button
+                size="lg"
+                variant="ghost"
+                className="w-full h-12 text-[15px] text-muted-foreground rounded-xl"
+                onClick={() => setShowNodeMismatchWarning(false)}
+              >
+                取消
+              </Button>
+            </div>
+          </div>
+        </DrawerContent>
+      </Drawer>
+
+      {/* Biometric verification after mismatch confirmation */}
+      <BiometricVerifyDrawer
+        open={showMismatchBiometric}
+        onOpenChange={setShowMismatchBiometric}
+        title="验证身份"
+        description="覆盖备份需要验证生物识别"
+        onVerified={() => { setShowMismatchBiometric(false); executeBackup(); }}
+      />
     </motion.div>
   );
 }

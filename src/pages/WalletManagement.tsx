@@ -168,7 +168,7 @@ export default function WalletManagementPage() {
                           {!wallet.isKeyShareRecovered && (
                             <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[11px] font-medium bg-warning/10 text-warning shrink-0">
                               <AlertTriangle className="w-3 h-3" />
-                              未恢复
+                              未激活
                             </span>
                           )}
                         </div>
@@ -183,10 +183,10 @@ export default function WalletManagementPage() {
                           className="h-8 px-3 text-xs font-medium shrink-0"
                           onClick={(e) => {
                             e.stopPropagation();
-                            navigate('/wallet/recovery', { state: { returnTo: '/profile/wallets' } });
+                            navigate('/claim-wallet', { state: { mode: 'reshare', returnTo: '/profile/wallets' } });
                           }}
                         >
-                          恢复
+                          激活
                         </Button>
                       )}
                       <DropdownMenu>

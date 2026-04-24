@@ -324,7 +324,7 @@ export default function HomePage() {
               )}
               {needsRecovery && (
                 <span className="text-[10px] px-1.5 py-0.5 bg-warning/10 text-warning rounded ml-1 font-medium">
-                  未恢复
+                  未激活
                 </span>
               )}
               <ChevronDown className="w-4 h-4 text-muted-foreground" />

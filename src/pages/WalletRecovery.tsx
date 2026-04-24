@@ -1,18 +1,21 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  ArrowLeft, QrCode, Cloud, FileArchive,
+  ArrowLeft, QrCode, Cloud, FileArchive, Wallet, Info,
   Smartphone, Check, Shield, Loader2,
   ChevronRight, Lock, RefreshCw, Eye, EyeOff, MessageCircle
 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
+import {
+  Drawer, DrawerContent, DrawerHeader, DrawerTitle,
+} from '@/components/ui/drawer';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { toast } from '@/lib/toast';
 import { RecoveryMethod } from '@/types/wallet';
-import { useWallet } from '@/contexts/WalletContext';
+import { useWallet, getWalletTotalBalance } from '@/contexts/WalletContext';
 import { QRCodeSVG } from 'qrcode.react';
 
 interface RecoveryOption {
@@ -28,46 +31,31 @@ interface RecoveryOption {
 
 const recoveryOptions: RecoveryOption[] = [
   {
-    id: 'scan_device',
-    title: '扫描旧设备',
-    description: '使用旧设备扫码授权，最快最安全',
-    icon: QrCode,
-    iconColor: 'text-success',
-    bgColor: 'bg-success/10',
-    recommended: true,
-  },
-  {
     id: 'cloud_icloud',
-    title: 'iCloud 恢复',
-    description: '从 iCloud 备份恢复钱包',
+    title: '云端恢复',
+    description: '从 iCloud 或 Google Drive 备份恢复',
     icon: Cloud,
     iconColor: 'text-primary',
-    bgColor: 'bg-primary/80/10',
-  },
-  {
-    id: 'cloud_google',
-    title: 'Google Drive 恢复',
-    description: '从 Google Drive 备份恢复',
-    icon: Cloud,
-    iconColor: 'text-success',
-    bgColor: 'bg-success/10',
+    bgColor: 'bg-primary/10',
   },
   {
     id: 'local_file',
     title: '本地文件恢复',
     description: '导入 .backup 备份文件',
     icon: FileArchive,
-    iconColor: 'text-warning',
-    bgColor: 'bg-warning/10',
+    iconColor: 'text-primary',
+    bgColor: 'bg-primary/10',
   },
 ];
 
 export default function WalletRecoveryPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { recoverAllKeyShares } = useWallet();
+  const { recoverAllKeyShares, markAllUnrecovered, wallets } = useWallet();
   const returnTo = (location.state as { returnTo?: string })?.returnTo || '/home';
   const [selectedMethod, setSelectedMethod] = useState<RecoveryMethod | null>(null);
+  const [skipDrawerOpen, setSkipDrawerOpen] = useState(false);
+  const [showWalletList, setShowWalletList] = useState(false);
   const [step, setStep] = useState(0);
   const [isProcessing, setIsProcessing] = useState(false);
   const [password, setPassword] = useState('');
@@ -108,6 +96,7 @@ export default function WalletRecoveryPage() {
   }, [step, selectedMethod]);
 
   const handleSelectMethod = (method: RecoveryMethod) => {
+    // Reshare navigates away immediately — don't enter internal flow
     setSelectedMethod(method);
     setStep(1);
   };
@@ -118,11 +107,10 @@ export default function WalletRecoveryPage() {
 
   const handleCloudAuth = async () => {
     setIsProcessing(true);
-    // Simulate cloud authorization + recovery (no password needed)
+    // Simulate cloud authorization
     await new Promise(resolve => setTimeout(resolve, 2000));
-    await recoverAllKeyShares();
     setIsProcessing(false);
-    setStep(3); // Skip password step, go directly to success
+    setShowWalletList(true); // Show discovered wallets before password
   };
 
   const handlePasswordSubmit = async () => {
@@ -149,45 +137,12 @@ export default function WalletRecoveryPage() {
       animate={{ opacity: 1, y: 0 }}
       className="space-y-4"
     >
-      <div className="text-center mb-6">
-        <h1 className="text-xl font-bold text-foreground mb-2">恢复钱包</h1>
-        <p className="text-sm text-muted-foreground">选择一种方式恢复您的钱包</p>
-      </div>
 
-      {/* Recommended option */}
-      <div className="mb-4">
-        <p className="text-xs font-medium text-muted-foreground mb-2 px-1">推荐方式</p>
-        {recoveryOptions.filter(o => o.recommended).map(option => (
-          <motion.button
-            key={option.id}
-            whileTap={{ scale: 0.98 }}
-            onClick={() => handleSelectMethod(option.id)}
-            className={cn(
-              "w-full p-4 rounded-xl border-2 border-success/30 bg-success/5 flex items-center gap-4",
-              "transition-colors"
-            )}
-          >
-            <div className={cn("w-12 h-12 rounded-full flex items-center justify-center", option.bgColor)}>
-              <option.icon className={cn("w-6 h-6", option.iconColor)} />
-            </div>
-            <div className="flex-1 text-left">
-              <div className="flex items-center gap-2">
-                <p className="font-semibold text-foreground">{option.title}</p>
-                <span className="text-[10px] px-1.5 py-0.5 bg-success text-white rounded">推荐</span>
-              </div>
-              <p className="text-sm text-muted-foreground">{option.description}</p>
-            </div>
-            <ChevronRight className="w-5 h-5 text-muted-foreground" />
-          </motion.button>
-        ))
-        }
-      </div>
-
-      {/* Other options */}
+      {/* Recovery options */}
       <div>
-        <p className="text-xs font-medium text-foreground mb-2 px-1">其他方式</p>
+        <p className="text-xs font-medium text-muted-foreground mb-2 px-1">恢复方式</p>
         <div className="space-y-2">
-          {recoveryOptions.filter(o => !o.recommended && !o.warning).map(option => (
+          {recoveryOptions.map(option => (
             <motion.button
               key={option.id}
               whileTap={{ scale: 0.98 }}
@@ -323,6 +278,92 @@ export default function WalletRecoveryPage() {
   // Render cloud recovery flow
   const renderCloudFlow = () => {
     if (step === 1) {
+      // Wallet list after auth — data from cloud backup (mock)
+      if (showWalletList) {
+        // In production this comes from the cloud backup file, not local context.
+        // Mock: simulate discovering wallets from backup.
+        const discoveredWallets = wallets.length > 0
+          ? wallets.map(w => ({ id: w.id, name: w.name, balance: getWalletTotalBalance(w.id), backedUp: w.isBackedUp }))
+          : [
+              { id: 'w1', name: '我的钱包', balance: 50010.50, backedUp: true },
+              { id: 'w2', name: '商务钱包', balance: 74540.00, backedUp: true },
+              { id: 'w3', name: '备用钱包', balance: 15155.00, backedUp: false },
+              { id: 'w4', name: 'Agent 交易钱包', balance: 49200.00, backedUp: false },
+            ];
+        const recoverable = discoveredWallets.filter(w => w.backedUp);
+        const unrecoverable = discoveredWallets.filter(w => !w.backedUp);
+
+        return (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="space-y-5"
+          >
+            <div className="text-center">
+              <h2 className="text-lg font-semibold text-foreground mb-1">发现以下钱包</h2>
+              <p className="text-sm text-muted-foreground">已从云端备份中读取钱包信息</p>
+            </div>
+
+            {/* Recoverable wallets */}
+            {recoverable.length > 0 && (
+              <div>
+                <p className="text-[12px] text-muted-foreground mb-2 px-1">可恢复（{recoverable.length}）</p>
+                <div className="bg-card border border-border rounded-xl overflow-hidden">
+                  {recoverable.map((w, idx) => (
+                    <div key={w.id} className={cn(idx > 0 && 'border-t border-border')}>
+                      <div className="flex items-center gap-3 px-4 py-3">
+                        <div className="w-9 h-9 rounded-full bg-muted flex items-center justify-center shrink-0">
+                          <Wallet className="w-4 h-4 text-muted-foreground" strokeWidth={1.5} />
+                        </div>
+                        <p className="flex-1 text-[14px] font-semibold text-foreground truncate">{w.name}</p>
+                        <span className="text-[14px] font-semibold text-foreground tabular-nums shrink-0">
+                          ${w.balance.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Unrecoverable wallets */}
+            {unrecoverable.length > 0 && (
+              <div>
+                <p className="text-[12px] text-muted-foreground mb-2 px-1">不在本次备份范围（{unrecoverable.length}）</p>
+                <div className="bg-card border border-border/50 rounded-xl overflow-hidden opacity-60">
+                  {unrecoverable.map((w, idx) => (
+                    <div key={w.id} className={cn(idx > 0 && 'border-t border-border/50')}>
+                      <div className="flex items-center gap-3 px-4 py-3">
+                        <div className="w-9 h-9 rounded-full bg-muted flex items-center justify-center shrink-0">
+                          <Wallet className="w-4 h-4 text-muted-foreground" strokeWidth={1.5} />
+                        </div>
+                        <p className="flex-1 text-[14px] font-medium text-muted-foreground truncate">{w.name}</p>
+                        <span className="text-[14px] font-medium text-muted-foreground tabular-nums shrink-0">
+                          ${w.balance.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="flex items-center gap-1.5 px-1 pt-2">
+                  <Info className="w-3.5 h-3.5 text-muted-foreground shrink-0" strokeWidth={1.5} />
+                  <p className="text-[11px] text-muted-foreground">以上钱包可尝试其他方式恢复</p>
+                </div>
+              </div>
+            )}
+
+            <Button
+              className="w-full"
+              size="lg"
+              onClick={() => { setShowWalletList(false); setStep(2); }}
+            >
+              继续恢复
+            </Button>
+          </motion.div>
+        );
+      }
+
+      // Auth screen
       return (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -330,25 +371,19 @@ export default function WalletRecoveryPage() {
           className="space-y-6"
         >
           <div className="text-center">
-            <div className={cn(
-              "w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center",
-              selectedMethod === 'cloud_icloud' ? "bg-trust/10" : "bg-success/10"
-            )}>
-              <Cloud className={cn(
-                "w-8 h-8",
-                selectedMethod === 'cloud_icloud' ? "text-trust" : "text-success"
-              )} />
+            <div className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center bg-primary/10">
+              <Cloud className="w-8 h-8 text-primary" />
             </div>
             <h2 className="text-lg font-semibold text-foreground mb-2">
-              {selectedMethod === 'cloud_icloud' ? 'iCloud' : 'Google Drive'} 授权
+              云端授权
             </h2>
             <p className="text-sm text-muted-foreground">
-              授权访问您的云存储以恢复备份
+              授权访问 iCloud 或 Google Drive 以恢复备份
             </p>
           </div>
 
-          <Button 
-            className="w-full" 
+          <Button
+            className="w-full"
             onClick={handleCloudAuth}
             disabled={isProcessing}
           >
@@ -371,9 +406,9 @@ export default function WalletRecoveryPage() {
           className="space-y-6"
         >
           <div className="text-center">
-            <h2 className="text-lg font-semibold text-foreground mb-2">输入保险箱密码</h2>
+            <h2 className="text-lg font-semibold text-foreground mb-2">输入恢复密码</h2>
             <p className="text-sm text-muted-foreground">
-              请输入您设置的备份密码以解密钱包
+              请输入备份时设置的密码以解密密钥分片
             </p>
           </div>
 
@@ -417,7 +452,7 @@ export default function WalletRecoveryPage() {
 
   // Render local file flow
   const renderLocalFileFlow = () => {
-    if (step === 1) {
+    if (step === 1 && !showWalletList) {
       return (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -437,10 +472,91 @@ export default function WalletRecoveryPage() {
           <div className="border-2 border-dashed border-border rounded-xl p-8 text-center">
             <FileArchive className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
             <p className="text-sm text-muted-foreground mb-3">点击或拖拽文件到此处</p>
-            <Button variant="outline" onClick={() => setStep(2)}>
+            <Button variant="outline" onClick={() => setShowWalletList(true)}>
               选择文件
             </Button>
           </div>
+        </motion.div>
+      );
+    }
+
+    // Wallet list after file selected (same pattern as cloud)
+    if (step === 1 && showWalletList) {
+      const discoveredWallets = wallets.length > 0
+        ? wallets.map(w => ({ id: w.id, name: w.name, balance: getWalletTotalBalance(w.id), backedUp: w.isBackedUp }))
+        : [
+            { id: 'w1', name: '我的钱包', balance: 50010.50, backedUp: true },
+            { id: 'w2', name: '商务钱包', balance: 74540.00, backedUp: true },
+            { id: 'w3', name: '备用钱包', balance: 15155.00, backedUp: false },
+            { id: 'w4', name: 'Agent 交易钱包', balance: 49200.00, backedUp: false },
+          ];
+      const recoverable = discoveredWallets.filter(w => w.backedUp);
+      const unrecoverable = discoveredWallets.filter(w => !w.backedUp);
+
+      return (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="space-y-5"
+        >
+          <div className="text-center">
+            <h2 className="text-lg font-semibold text-foreground mb-1">发现以下钱包</h2>
+            <p className="text-sm text-muted-foreground">已从备份文件中读取钱包信息</p>
+          </div>
+
+          {recoverable.length > 0 && (
+            <div>
+              <p className="text-[12px] text-muted-foreground mb-2 px-1">可恢复（{recoverable.length}）</p>
+              <div className="bg-card border border-border rounded-xl overflow-hidden">
+                {recoverable.map((w, idx) => (
+                  <div key={w.id} className={cn(idx > 0 && 'border-t border-border')}>
+                    <div className="flex items-center gap-3 px-4 py-3">
+                      <div className="w-9 h-9 rounded-full bg-muted flex items-center justify-center shrink-0">
+                        <Wallet className="w-4 h-4 text-muted-foreground" strokeWidth={1.5} />
+                      </div>
+                      <p className="flex-1 text-[14px] font-semibold text-foreground truncate">{w.name}</p>
+                      <span className="text-[14px] font-semibold text-foreground tabular-nums shrink-0">
+                        ${w.balance.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {unrecoverable.length > 0 && (
+            <div>
+              <p className="text-[12px] text-muted-foreground mb-2 px-1">不在本次备份范围（{unrecoverable.length}）</p>
+              <div className="bg-card border border-border/50 rounded-xl overflow-hidden opacity-60">
+                {unrecoverable.map((w, idx) => (
+                  <div key={w.id} className={cn(idx > 0 && 'border-t border-border/50')}>
+                    <div className="flex items-center gap-3 px-4 py-3">
+                      <div className="w-9 h-9 rounded-full bg-muted flex items-center justify-center shrink-0">
+                        <Wallet className="w-4 h-4 text-muted-foreground" strokeWidth={1.5} />
+                      </div>
+                      <p className="flex-1 text-[14px] font-medium text-muted-foreground truncate">{w.name}</p>
+                      <span className="text-[14px] font-medium text-muted-foreground tabular-nums shrink-0">
+                        ${w.balance.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="flex items-center gap-1.5 px-1 pt-2">
+                <Info className="w-3.5 h-3.5 text-muted-foreground shrink-0" strokeWidth={1.5} />
+                <p className="text-[11px] text-muted-foreground">以上钱包可尝试其他方式恢复</p>
+              </div>
+            </div>
+          )}
+
+          <Button
+            className="w-full"
+            size="lg"
+            onClick={() => { setShowWalletList(false); setStep(2); }}
+          >
+            继续恢复
+          </Button>
         </motion.div>
       );
     }
@@ -609,66 +725,120 @@ export default function WalletRecoveryPage() {
   const renderContent = () => {
     if (step === 3) return renderComplete();
 
-    if (!selectedMethod) return renderMethodSelection();
+    if (!selectedMethod) return <motion.div key="method-selection" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>{renderMethodSelection()}</motion.div>;
 
     switch (selectedMethod) {
       case 'scan_device':
-        return renderScanDeviceFlow();
+        return <motion.div key="scan-device" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>{renderScanDeviceFlow()}</motion.div>;
       case 'cloud_icloud':
-      case 'cloud_google':
-        return renderCloudFlow();
+        return <motion.div key={`cloud-${step}-${showWalletList}`} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>{renderCloudFlow()}</motion.div>;
       case 'local_file':
-        return renderLocalFileFlow();
+        return <motion.div key={`local-${step}-${showWalletList}`} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>{renderLocalFileFlow()}</motion.div>;
       default:
         return renderMethodSelection();
     }
   };
 
   return (
-    <AppLayout showNav={false}>
+    <AppLayout
+      showNav={false}
+      showBack
+      title="恢复钱包"
+      onBack={() => {
+        if (step > 0 && selectedMethod) {
+          if (step === 1) {
+            setSelectedMethod(null);
+            setShowWalletList(false);
+            setStep(0);
+          } else {
+            setStep(step - 1);
+          }
+        } else {
+          navigate(-1);
+        }
+      }}
+    >
       <div className="h-full flex flex-col">
-        {/* Header */}
-        <div className="px-4 py-3 border-b border-border flex items-center gap-3">
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            onClick={() => {
-              if (step > 0 && selectedMethod) {
-                if (step === 1) {
-                  setSelectedMethod(null);
-                  setStep(0);
-                } else {
-                  setStep(step - 1);
-                }
-              } else {
-                navigate(-1);
-              }
-            }}
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-          <h1 className="text-lg font-bold text-foreground">恢复钱包</h1>
-        </div>
-
         <div className="flex-1 overflow-auto px-4 py-6">
           <AnimatePresence mode="wait">
             {renderContent()}
           </AnimatePresence>
         </div>
 
-        {/* Contact Support */}
-        {step !== 3 && (
-          <div className="px-4 pb-6 pt-2">
+        {/* Skip + Support */}
+        {step !== 3 && !selectedMethod && (
+          <div className="px-4 pb-6 pt-2 space-y-1">
+            <button
+              onClick={() => setSkipDrawerOpen(true)}
+              className="w-full text-center text-sm text-muted-foreground font-medium py-3 active:opacity-60 transition-opacity"
+            >
+              跳过恢复
+            </button>
             <button
               onClick={() => navigate('/help')}
-              className="w-full flex items-center justify-center gap-2 text-sm text-muted-foreground transition-colors py-3"
+              className="w-full flex items-center justify-center gap-2 text-xs text-muted-foreground/60 transition-colors py-2"
             >
-              <MessageCircle className="w-4 h-4" />
+              <MessageCircle className="w-3.5 h-3.5" />
               <span>遇到问题？联系客服</span>
             </button>
           </div>
         )}
       </div>
+
+      {/* Skip confirmation drawer */}
+      <Drawer open={skipDrawerOpen} onOpenChange={setSkipDrawerOpen}>
+        <DrawerContent>
+          <DrawerHeader className="sr-only">
+            <DrawerTitle>跳过恢复</DrawerTitle>
+          </DrawerHeader>
+
+          <div className="px-6 pt-2 pb-6 flex flex-col items-center text-center">
+            <motion.div
+              initial={{ scale: 0.85, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ type: 'spring', duration: 0.5 }}
+              className="w-[68px] h-[68px] rounded-[20px] bg-warning/10 flex items-center justify-center mb-5"
+            >
+              <EyeOff className="w-8 h-8 text-warning" strokeWidth={1.75} />
+            </motion.div>
+
+            <h2 className="text-[22px] font-bold text-foreground tracking-tight mb-2">
+              确认跳过恢复？
+            </h2>
+
+            <div className="text-[14px] text-muted-foreground leading-relaxed max-w-[300px] mb-6 space-y-3 text-left">
+              <p>
+                跳过后，钱包仅支持通过<span className="text-foreground font-medium">重新配对</span>完成恢复。
+              </p>
+              <p>
+                未激活的钱包<span className="text-foreground font-medium">无法发起转账或签名</span>。
+              </p>
+            </div>
+
+            <div className="w-full space-y-2.5">
+              <Button
+                size="lg"
+                className="w-full h-12 text-[15px] font-semibold rounded-xl"
+                onClick={() => setSkipDrawerOpen(false)}
+              >
+                返回恢复
+              </Button>
+              <Button
+                size="lg"
+                variant="ghost"
+                className="w-full h-12 text-[15px] text-muted-foreground rounded-xl"
+                onClick={() => {
+                  setSkipDrawerOpen(false);
+                  navigate('/home/norecovery', { replace: true });
+                }}
+              >
+                确认跳过
+              </Button>
+            </div>
+          </div>
+        </DrawerContent>
+      </Drawer>
+
     </AppLayout>
   );
 }

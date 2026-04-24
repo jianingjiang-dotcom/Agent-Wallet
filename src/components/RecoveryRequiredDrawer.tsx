@@ -34,7 +34,7 @@ export function RecoveryRequiredDrawer({
     <Drawer open={open} onOpenChange={onOpenChange}>
       <DrawerContent>
         <DrawerHeader className="sr-only">
-          <DrawerTitle>钱包未恢复</DrawerTitle>
+          <DrawerTitle>钱包未激活</DrawerTitle>
         </DrawerHeader>
 
         <div className="px-6 pt-2 pb-6 flex flex-col items-center text-center">
@@ -49,12 +49,12 @@ export function RecoveryRequiredDrawer({
           </motion.div>
 
           <h2 className="text-[22px] font-bold text-foreground tracking-tight mb-2">
-            钱包未恢复
+            钱包未激活
           </h2>
 
           <p className="text-[15px] text-muted-foreground leading-relaxed max-w-[280px] mb-6">
             {walletName ? `「${walletName}」` : '当前钱包'}
-            的签名分片未在此设备恢复，无法发起交易。完成恢复后即可正常使用。
+            的签名分片未在此设备激活，无法发起交易。完成激活后即可正常使用。
           </p>
 
           <div className="w-full space-y-2.5">

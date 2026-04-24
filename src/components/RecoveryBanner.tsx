@@ -29,10 +29,10 @@ export function RecoveryBanner({ returnTo }: RecoveryBannerProps) {
     >
       <AlertTriangle className="w-4 h-4 text-warning shrink-0" strokeWidth={2} />
       <span className="flex-1 text-[13px] font-medium text-foreground">
-        钱包未恢复，无法发起转账
+        钱包未激活，无法发起转账
       </span>
       <span className="flex items-center gap-0.5 text-[13px] font-semibold text-warning shrink-0">
-        恢复
+        激活
         <ChevronRight className="w-3.5 h-3.5" />
       </span>
     </motion.button>

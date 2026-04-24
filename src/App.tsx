@@ -16,6 +16,7 @@ import Login from "./pages/Login";
 import Onboarding from "./pages/Onboarding";
 import CreateWallet from "./pages/CreateWallet";
 import Home from "./pages/Home";
+import HomeNoRecovery from "./pages/HomeNoRecovery";
 import Send from "./pages/Send";
 import Receive from "./pages/Receive";
 import History from "./pages/History";
@@ -152,6 +153,7 @@ function AppRoutes() {
       <Route path="/onboarding" element={<Onboarding />} />
       <Route path="/create-wallet" element={<ProtectedRoute><CreateWallet /></ProtectedRoute>} />
       <Route path="/home" element={<ProtectedRoute bypassAuth><Home /></ProtectedRoute>} />
+      <Route path="/home/norecovery" element={<ProtectedRoute bypassAuth><HomeNoRecovery /></ProtectedRoute>} />
       <Route path="/send" element={<ProtectedRoute><Send /></ProtectedRoute>} />
       <Route path="/receive" element={<ProtectedRoute><Receive /></ProtectedRoute>} />
       <Route path="/asset/:symbol" element={<ProtectedRoute><AssetDetail /></ProtectedRoute>} />
@@ -212,7 +214,7 @@ function AppRoutes() {
       <Route path="/security-required" element={<SecurityRequired />} />
       <Route path="/set-password" element={<ProtectedRoute><SetPassword /></ProtectedRoute>} />
       <Route path="/claim-intro" element={<ProtectedRoute><ClaimIntro /></ProtectedRoute>} />
-      <Route path="/claim-wallet" element={<ProtectedRoute><ClaimWallet /></ProtectedRoute>} />
+      <Route path="/claim-wallet" element={<ProtectedRoute bypassAuth><ClaimWallet /></ProtectedRoute>} />
       <Route path="/mode-selection" element={<Navigate to="/claim-intro" replace />} />
       <Route path="/link-agent-wallet" element={<ProtectedRoute><LinkAgentWallet /></ProtectedRoute>} />
       <Route path="/request-agent" element={<ProtectedRoute><RequestAgent /></ProtectedRoute>} />
