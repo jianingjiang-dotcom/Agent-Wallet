@@ -8,7 +8,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   Wallet, Plus, AlertTriangle, MoreHorizontal,
-  Edit3, Key, MapPin, Shield, ChevronRight
+  Edit3, Key, MapPin, Shield, ChevronRight, RefreshCw
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -31,16 +31,22 @@ import {
 } from '@/components/ui/drawer';
 import { Input } from '@/components/ui/input';
 import { EmptyState } from '@/components/EmptyState';
+import { BiometricVerifyDrawer } from '@/components/BiometricVerifyDrawer';
 import { formatTimeAgo } from '@/lib/tss-node';
 import { getWalletTotalBalance } from '@/contexts/WalletContext';
 
 export default function WalletManagementPage() {
   const navigate = useNavigate();
-  const { renameWallet, wallets } = useWallet();
+  const { renameWallet, wallets, delegatedAgents } = useWallet();
 
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
   const [selectedWalletForRename, setSelectedWalletForRename] = useState<string | null>(null);
   const [newWalletName, setNewWalletName] = useState('');
+
+  // Reshare flow state
+  const [reshareWarningOpen, setReshareWarningOpen] = useState(false);
+  const [reshareTargetWalletId, setReshareTargetWalletId] = useState<string | null>(null);
+  const [bioDrawerOpen, setBioDrawerOpen] = useState(false);
 
   // Global backup status
   const backedUpWallets = wallets.filter(w => w.isBackedUp);
@@ -48,6 +54,10 @@ export default function WalletManagementPage() {
   const globalBackupInfo = backedUpWallets.length > 0 ? backedUpWallets[0].backupInfo : null;
   const allBackedUp = wallets.length > 0 && unbackedWalletCount === 0;
   const hasAnyBackup = backedUpWallets.length > 0;
+
+  // Check if a wallet has any non-revoked delegated agent
+  const hasActiveAgent = (walletId: string) =>
+    delegatedAgents.some(a => a.walletId === walletId && a.status !== 'revoked');
 
   const handleRenameWallet = (walletId: string, currentName: string) => {
     setSelectedWalletForRename(walletId);
@@ -62,6 +72,22 @@ export default function WalletManagementPage() {
       setRenameDialogOpen(false);
       setSelectedWalletForRename(null);
       setNewWalletName('');
+    }
+  };
+
+  const handleReshareClick = (walletId: string) => {
+    setReshareTargetWalletId(walletId);
+    setReshareWarningOpen(true);
+  };
+
+  const handleReshareConfirm = () => {
+    setReshareWarningOpen(false);
+    setBioDrawerOpen(true);
+  };
+
+  const handleBioVerified = () => {
+    if (reshareTargetWalletId) {
+      navigate(`/agent-reshare/${reshareTargetWalletId}`);
     }
   };
 
@@ -151,6 +177,7 @@ export default function WalletManagementPage() {
               <div className="space-y-2">
                 {wallets.map((wallet, index) => {
                   const balance = getWalletTotalBalance(wallet.id);
+                  const walletHasAgent = hasActiveAgent(wallet.id);
                   return (
                     <motion.div
                       key={wallet.id}
@@ -204,6 +231,15 @@ export default function WalletManagementPage() {
                             <MapPin className="w-4 h-4 mr-2" />
                             管理地址
                           </DropdownMenuItem>
+                          {walletHasAgent && (
+                            <>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem onClick={() => handleReshareClick(wallet.id)}>
+                                <RefreshCw className="w-4 h-4 mr-2" />
+                                重新授权 Agent
+                              </DropdownMenuItem>
+                            </>
+                          )}
                           <DropdownMenuSeparator />
                           <DropdownMenuItem
                             onClick={() => navigate(`/wallet/export-key/${wallet.id}`)}
@@ -246,6 +282,61 @@ export default function WalletManagementPage() {
           </DrawerFooter>
         </DrawerContent>
       </Drawer>
+
+      {/* Reshare Warning Drawer */}
+      <Drawer open={reshareWarningOpen} onOpenChange={setReshareWarningOpen}>
+        <DrawerContent>
+          <DrawerHeader className="sr-only">
+            <DrawerTitle>确认重新授权 Agent</DrawerTitle>
+          </DrawerHeader>
+
+          <div className="px-6 pt-2 pb-6 flex flex-col items-center text-center">
+            <motion.div
+              initial={{ scale: 0.85, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ type: 'spring', duration: 0.5 }}
+              className="w-[68px] h-[68px] rounded-[20px] bg-warning/10 flex items-center justify-center mb-5"
+            >
+              <AlertTriangle className="w-8 h-8 text-warning" strokeWidth={1.75} />
+            </motion.div>
+
+            <h2 className="text-[22px] font-bold text-foreground tracking-tight mb-2">
+              确认重新授权 Agent？
+            </h2>
+
+            <p className="text-[15px] text-muted-foreground leading-relaxed max-w-[300px] mb-6">
+              重新授权后，当前 Agent 的旧分片将永久失效，无法再用于签名操作。请确认你正在为合法的新 Agent Node 授权。你的分片不受影响。
+            </p>
+
+            <div className="w-full space-y-2.5">
+              <Button
+                size="lg"
+                className="w-full h-12 text-[15px] font-semibold rounded-xl"
+                onClick={handleReshareConfirm}
+              >
+                确认，生成授权码
+              </Button>
+              <Button
+                size="lg"
+                variant="ghost"
+                className="w-full h-12 text-[15px] text-muted-foreground rounded-xl"
+                onClick={() => setReshareWarningOpen(false)}
+              >
+                取消
+              </Button>
+            </div>
+          </div>
+        </DrawerContent>
+      </Drawer>
+
+      {/* Biometric Verify (after reshare warning confirmed) */}
+      <BiometricVerifyDrawer
+        open={bioDrawerOpen}
+        onOpenChange={setBioDrawerOpen}
+        title="验证身份"
+        description="重新授权涉及密钥安全操作，需要验证你的身份"
+        onVerified={handleBioVerified}
+      />
     </AppLayout>
   );
 }

@@ -57,6 +57,7 @@ import DelegateAgent from "./pages/DelegateAgent";
 import AgentReview from "./pages/AgentReview";
 import AgentReviewDetail from "./pages/AgentReviewDetail";
 import AgentSettings from "./pages/AgentSettings";
+import AgentReshare from "./pages/AgentReshare";
 import SettlementDashboard from "./pages/SettlementDashboard";
 import AuditLog from "./pages/AuditLog";
 import ModeSelection from "./pages/ModeSelection";
@@ -188,6 +189,7 @@ function AppRoutes() {
       <Route path="/agent-review" element={<ProtectedRoute bypassAuth><AgentReview /></ProtectedRoute>} />
       <Route path="/agent-review/:id" element={<ProtectedRoute><AgentReviewDetail /></ProtectedRoute>} />
       <Route path="/agent-settings" element={<ProtectedRoute><AgentSettings /></ProtectedRoute>} />
+      <Route path="/agent-reshare/:walletId" element={<ProtectedRoute><AgentReshare /></ProtectedRoute>} />
       <Route path="/settlement-dashboard" element={<ProtectedRoute bypassAuth><SettlementDashboard /></ProtectedRoute>} />
       <Route path="/audit-log" element={<ProtectedRoute><AuditLog /></ProtectedRoute>} />
       <Route path="/pact-approval" element={<ProtectedRoute bypassAuth><PactApproval /></ProtectedRoute>} />

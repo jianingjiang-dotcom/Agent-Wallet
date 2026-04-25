@@ -1383,6 +1383,10 @@ interface WalletContextType extends WalletState {
   generateSetupToken: () => Promise<SetupToken>;
   addMockHumanAgent: (agent: HumanAgent) => void;
 
+  // Agent reshare (reverse reshare — user helps Agent rebuild key share)
+  generateReshareCode: (agentId: string) => { code: string; expiresAt: Date };
+  reshareAgentNode: (agentId: string) => void;
+
   // Agent-linked wallet (Mode 2)
   linkAgentWallet: (token: string) => Promise<Wallet>;
 
@@ -2861,6 +2865,25 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     setDelegatedAgents(prev => prev.map(a => a.id === agentId ? { ...a, status: 'active' as DelegatedAgentStatus, pausedAt: undefined, pausedReason: undefined } : a));
   }, []);
 
+  // Generate a reshare code for Agent to input (mock)
+  const generateReshareCode = useCallback((agentId: string) => {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    const segments = Array.from({ length: 4 }, () =>
+      Array.from({ length: 4 }, () => chars[Math.floor(Math.random() * chars.length)]).join('')
+    );
+    return {
+      code: segments.join('-'),
+      expiresAt: new Date(Date.now() + 15 * 60 * 1000), // 15 min
+    };
+  }, []);
+
+  // Complete the reshare: set Agent's tssNodeStatus back to 'active'
+  const reshareAgentNode = useCallback((agentId: string) => {
+    setDelegatedAgents(prev => prev.map(a =>
+      a.id === agentId ? { ...a, tssNodeStatus: 'active' as const } : a
+    ));
+  }, []);
+
   const updateDelegatedAgentRiskConfig = useCallback((agentId: string, config: Partial<DelegatedAgentRiskConfig>) => {
     setDelegatedAgents(prev => prev.map(a => a.id === agentId ? { ...a, riskConfig: { ...a.riskConfig, ...config } } : a));
   }, []);
@@ -3355,6 +3378,9 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     fetchHumanAgents,
     generateSetupToken,
     addMockHumanAgent,
+    // Agent reshare
+    generateReshareCode,
+    reshareAgentNode,
     // Agent-linked wallet (Mode 2)
     linkAgentWallet,
     // Claim wallet
